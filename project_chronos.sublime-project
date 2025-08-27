@@ -1,0 +1,57 @@
+{
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	],
+	"build_systems":
+	[
+		{
+			"name": "Build & Run (Debug)",
+			"working_dir": "$project_path",
+			"cmd": [
+				"odin",
+				"run",
+				"src",
+				"-out:builds\\debug\\Chronos.exe",
+				"-show-timings",
+				"-subsystem:console",
+				"-strict-style",
+				"-vet-unused",
+				"-vet-style",
+				"-vet-semicolon",
+				"-debug"
+			],
+			"file_regex": "^(.+)\\(([0-9]+):([0-9]+)\\) (.+)$"
+		},
+		{
+			"name": "Build & Run (Release)",
+			"working_dir": "$project_path",
+			"cmd": [
+				"odin",
+				"run",
+				"src",
+				"-out:builds\\release\\Chronos.exe",
+				"-show-timings",
+				"-subsystem:window",
+				"-strict-style",
+				"-vet-unused",
+				"-vet-style",
+				"-vet-semicolon"
+			],
+			"file_regex": "^(.+)\\(([0-9]+):([0-9]+)\\) (.+)$"
+		}
+	],
+	"settings":
+	{
+		"auto_complete": true,
+		"LSP":
+		{
+			"odin":
+			{
+				"enabled": true
+			}
+		}
+	}
+}

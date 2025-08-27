@@ -1,0 +1,857 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"call",
+				"caller_location"
+			],
+			[
+				"IsKey",
+				"IsKeyPressedRepeat(key: KeyboardKey) -> bool"
+			],
+			[
+				"NUL",
+				"KEY_NULL"
+			],
+			[
+				"move",
+				"move_right"
+			],
+			[
+				"Move",
+				"Move_Right"
+			],
+			[
+				"write",
+				"write_entire_file(name: string, data: []byte, truncate := true) -> success: bool"
+			],
+			[
+				"inp",
+				"input_map"
+			],
+			[
+				"unma",
+				"unmarshal(data: []byte, ptr: ^$T, spec := DEFAULT_SPECIFICATION, allocator := context.allocator) -> Unmarshal_Error"
+			],
+			[
+				"NU",
+				"KEY_NULL"
+			],
+			[
+				"Blue",
+				"Blue_dirt"
+			],
+			[
+				"t",
+				"type"
+			],
+			[
+				"_crr",
+				"_current_frame_time"
+			],
+			[
+				"Animat",
+				"Animation_State"
+			],
+			[
+				"shee",
+				"sheet_width"
+			],
+			[
+				"Sprite",
+				"Sprite_Sheet"
+			],
+			[
+				"Vec",
+				"Vector2Zero() -> Vector2"
+			],
+			[
+				"DrawTexture",
+				"DrawTexturePro(texture: Texture2D, source, dest: Rectangle, origin: Vector2, rotation: f32, tint: Color)"
+			],
+			[
+				"deinit",
+				"deinit_actor_context(ctx: ^Actor_Context, allocator := context.allocator, loc := #caller_location)"
+			],
+			[
+				"caller",
+				"caller_location"
+			],
+			[
+				"Config",
+				"ConfigFlags"
+			],
+			[
+				"has_com",
+				"has_component_type(handle: Entity_Handle, type: Component_Type) -> bool"
+			],
+			[
+				"comp",
+				"component_type_maps"
+			],
+			[
+				"Componen",
+				"Component_Type"
+			],
+			[
+				"is_en",
+				"is_entity_handle_valid(handle: Entity_Handle, loc := #caller_location) -> bool"
+			],
+			[
+				"follow",
+				"follow_camera_system(ctx: ^Game_Context, handle: Entity_Handle)"
+			],
+			[
+				"WINDO",
+				"WINDOW_HEIGHT"
+			],
+			[
+				"WINDOW",
+				"WINDOW_WIDTH"
+			],
+			[
+				"window",
+				"window_name"
+			],
+			[
+				"GR",
+				"Graphics_Context"
+			],
+			[
+				"GRap",
+				"Graphics_Context"
+			],
+			[
+				"Fullsc",
+				"IsWindowFullscreen() -> bool"
+			],
+			[
+				"IsWin",
+				"IsWindowFullscreen() -> bool"
+			],
+			[
+				"cal",
+				"caller_location"
+			],
+			[
+				"get_entity",
+				"get_entity(handle: Entity_Handle, loc := #caller_location) -> ^Entity"
+			],
+			[
+				"Sys",
+				"System_Call"
+			],
+			[
+				"Compon",
+				"Component_Type"
+			],
+			[
+				"ComponentT",
+				"Component_Instances"
+			],
+			[
+				"info",
+				"info(args: ꓸꓸany, sep := \" \", location := #caller_location)"
+			],
+			[
+				"insta",
+				"instances"
+			],
+			[
+				"instan",
+				"instances"
+			],
+			[
+				"register",
+				"register_component_type(ctx: ^ECS_Context, $T: typeid, type: Component_Type, allocator := context.allocator, loc := #caller_location)"
+			],
+			[
+				"mas",
+				"component_mask"
+			],
+			[
+				"Com",
+				"Component_Type"
+			],
+			[
+				"com",
+				"component_type_maps"
+			],
+			[
+				"Entit",
+				"Entity_Id"
+			],
+			[
+				"setup",
+				"setup_components(ecs: ^ECS_Context, allocator := context.allocator, loc := #caller_location)"
+			],
+			[
+				"register_com",
+				"register_component_type(ctx: ^ECS_Context, $T: typeid, type: Component_Type, allocator := context.allocator, loc := #caller_location)"
+			],
+			[
+				"Compo",
+				"Component_Type"
+			],
+			[
+				"ent",
+				"active_entities"
+			],
+			[
+				"calle",
+				"caller_location"
+			],
+			[
+				"GameCon",
+				"Game_Context"
+			],
+			[
+				"Entity",
+				"Entity_Id"
+			],
+			[
+				"Game",
+				"Game_Context"
+			],
+			[
+				"entit",
+				"active_entities"
+			],
+			[
+				"free_",
+				"free_ecs_context(ctx: ^ECS_Context, allocator := context.allocator, loc := #caller_location)"
+			],
+			[
+				"new",
+				"new_ecs_context(allocator := context.allocator, loc := #caller_location) -> ^ECS_Context"
+			],
+			[
+				"get_entit",
+				"get_entity_handle_from_id(ctx: ^ECS_Context, id: Entity_Id, loc := #caller_location) -> Entity_Handle"
+			],
+			[
+				"get_En",
+				"get_entity_handle_from_entity(ctx: ^ECS_Context, entity: Entity, loc := #caller_location) -> Entity_Handle"
+			],
+			[
+				"entity_han",
+				"entity_handle_valid(handle: Entity_Handle, loc := #caller_location) -> bool"
+			],
+			[
+				"en",
+				"active_entities"
+			],
+			[
+				"Entity_",
+				"Entity_Handle"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "project_chronos.sublime-project",
+			"settings":
+			{
+				"buffer_size": 887,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			},
+			"undo_stack":
+			[
+				[
+					5,
+					1,
+					"insert",
+					{
+						"characters": "Chronos"
+					},
+					"BwAAANEAAAAAAAAA0gAAAAAAAAAKAAAATWFza2VkT25lc9IAAAAAAAAA0wAAAAAAAAAAAAAA0wAAAAAAAADUAAAAAAAAAAAAAADUAAAAAAAAANUAAAAAAAAAAAAAANUAAAAAAAAA1gAAAAAAAAAAAAAA1gAAAAAAAADXAAAAAAAAAAAAAADXAAAAAAAAANgAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAA0QAAAAAAAADbAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					15,
+					1,
+					"paste",
+					null,
+					"AQAAAEACAAAAAAAARwIAAAAAAAAKAAAATWFza2VkT25lcw",
+					"AQAAAAAAAAABAAAAQAIAAAAAAABKAgAAAAAAAAAAAAAAAPC/"
+				]
+			]
+		},
+		{
+			"file": "src/main.odin",
+			"settings":
+			{
+				"buffer_size": 35,
+				"encoding": "UTF-8",
+				"line_ending": "Windows",
+				"name": "package game"
+			},
+			"undo_stack":
+			[
+				[
+					1,
+					1,
+					"insert",
+					{
+						"characters": "main"
+					},
+					"BAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAMAAAAAAAAAAAAAAAMAAAAAAAAABAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					2,
+					5,
+					"left_delete",
+					null,
+					"BAAAAAMAAAAAAAAAAwAAAAAAAAABAAAAbgIAAAAAAAAAAgAAAAAAAAABAAAAaQEAAAAAAAAAAQAAAAAAAAABAAAAYQAAAAAAAAAAAAAAAAAAAAABAAAAbQ",
+					"AQAAAAAAAAABAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					3,
+					1,
+					"insert",
+					{
+						"characters": "package"
+					},
+					"BwAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAMAAAAAAAAAAAAAAAMAAAAAAAAABAAAAAAAAAAAAAAABAAAAAAAAAAFAAAAAAAAAAAAAAAFAAAAAAAAAAYAAAAAAAAAAAAAAAYAAAAAAAAABwAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					4,
+					1,
+					"insert",
+					{
+						"characters": " game"
+					},
+					"BQAAAAcAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAJAAAAAAAAAAAAAAAJAAAAAAAAAAoAAAAAAAAAAAAAAAoAAAAAAAAACwAAAAAAAAAAAAAACwAAAAAAAAAMAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAABwAAAAAAAAAHAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					5,
+					1,
+					"insert",
+					{
+						"characters": "\n\n"
+					},
+					"AgAAAAwAAAAAAAAADQAAAAAAAAAAAAAADQAAAAAAAAAOAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAADAAAAAAAAAAMAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					7,
+					1,
+					"insert",
+					{
+						"characters": "\np"
+					},
+					"AgAAAA4AAAAAAAAADwAAAAAAAAAAAAAADwAAAAAAAAAQAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAADgAAAAAAAAAOAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					8,
+					1,
+					"left_delete",
+					null,
+					"AQAAAA8AAAAAAAAADwAAAAAAAAABAAAAcA",
+					"AQAAAAAAAAABAAAAEAAAAAAAAAAQAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					9,
+					1,
+					"insert",
+					{
+						"characters": "main"
+					},
+					"BAAAAA8AAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAAAAARAAAAAAAAAAAAAAARAAAAAAAAABIAAAAAAAAAAAAAABIAAAAAAAAAEwAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAADwAAAAAAAAAPAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					10,
+					1,
+					"insert",
+					{
+						"characters": " ::"
+					},
+					"AwAAABMAAAAAAAAAFAAAAAAAAAAAAAAAFAAAAAAAAAAVAAAAAAAAAAAAAAAVAAAAAAAAABYAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAEwAAAAAAAAATAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					11,
+					1,
+					"insert",
+					{
+						"characters": " proc"
+					},
+					"BQAAABYAAAAAAAAAFwAAAAAAAAAAAAAAFwAAAAAAAAAYAAAAAAAAAAAAAAAYAAAAAAAAABkAAAAAAAAAAAAAABkAAAAAAAAAGgAAAAAAAAAAAAAAGgAAAAAAAAAbAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAFgAAAAAAAAAWAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					12,
+					1,
+					"insert_snippet",
+					{
+						"contents": "($0)"
+					},
+					"AQAAABsAAAAAAAAAHQAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAGwAAAAAAAAAbAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					14,
+					1,
+					"insert",
+					{
+						"characters": " "
+					},
+					"AQAAAB0AAAAAAAAAHgAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAHQAAAAAAAAAdAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					15,
+					1,
+					"insert_snippet",
+					{
+						"contents": "{$0}"
+					},
+					"AQAAAB4AAAAAAAAAIAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAHgAAAAAAAAAeAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					16,
+					1,
+					"run_macro_file",
+					{
+						"file": "res://Packages/Default/Add Line in Braces.sublime-macro"
+					},
+					"AwAAAB8AAAAAAAAAIAAAAAAAAAAAAAAAIAAAAAAAAAAhAAAAAAAAAAAAAAAgAAAAAAAAACEAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAHwAAAAAAAAAfAAAAAAAAAAAAAAAAAPC/"
+				]
+			]
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"remove a",
+				"Package Control: Remove Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"remove pack",
+				"Package Control: Remove Package"
+			],
+			[
+				"package remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"package",
+				"Package Control: Remove Package"
+			],
+			[
+				"ui tem",
+				"UI: Select Color Scheme"
+			],
+			[
+				"theme",
+				"UI: Select Color Scheme"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"llsp",
+				"LSP: Enable Language Server in Project"
+			],
+			[
+				"lsp dis",
+				"LSP: Disable Language Server in Project"
+			],
+			[
+				"enable",
+				"LSP: Enable Language Server in Project"
+			],
+			[
+				"lsp",
+				"LSP: Enable Language Server in Project"
+			],
+			[
+				"enable ls",
+				"LSP: Enable Language Server in Project"
+			],
+			[
+				"lsp ena",
+				"LSP: Enable Language Server in Project"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 130.0,
+		"history":
+		[
+			"CMD",
+			"cmd",
+			"clear",
+			".\\build.bat debug",
+			".\\build debug",
+			"build debug",
+			"build.bat debug"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/D/Projects/Odin/project-chronos",
+		"/D/Projects/Odin/project-chronos/src"
+	],
+	"file_history":
+	[
+		"/D/Projects/Odin/masked-ones/src/player.odin",
+		"/D/Projects/Odin/masked-ones/src/main.odin",
+		"/D/Projects/Odin/masked-ones/src/actor.odin",
+		"/D/Projects/Odin/masked-ones/src/math.odin",
+		"/D/Projects/Odin/masked-ones/src/graphics.odin",
+		"/D/Projects/Odin/masked-ones/src/follow_camera.odin",
+		"/D/Projects/Odin/masked-ones/src/sprite_renderer_system.odin",
+		"/D/Projects/Odin/masked-ones/src/level.odin",
+		"/D/Projects/Odin/masked-ones/src/transform.odin",
+		"/D/Projects/Odin/masked-ones/src/ecs.odin",
+		"/D/Projects/Odin/masked-ones/src/game_context.odin",
+		"/D/Projects/Odin/masked-ones/src/input.odin",
+		"/D/Projects/Odin/masked-ones/res/keymap.json",
+		"/D/Projects/Odin/masked-ones/src/input/input_mapping.odin",
+		"/D/Projects/Odin/masked-ones/keymap.json",
+		"/D/Projects/Odin/masked-ones/src/animation.odin",
+		"/D/Projects/Odin/masked-ones/src/handle.odin",
+		"/D/Projects/Odin/masked-ones/src/sprite.odin",
+		"/D/Projects/Odin/masked-ones/tests/ecs_tests.odin",
+		"/D/Projects/Odin/masked-ones/src/ecs/context.odin",
+		"/D/Projects/Odin/masked-ones/masked_ones.sublime-project",
+		"/D/Projects/Odin/masked-ones/src/actor/actor.odin",
+		"/D/Projects/Odin/masked-ones/tests/actor/actor_handle_test.odin",
+		"/D/Projects/Odin/masked-ones/src/actor/actor_handle.odin",
+		"/D/Projects/Odin/masked-ones/src/ecs_test.odin",
+		"/D/Projects/Odin/masked-ones/src/registration.odin",
+		"/D/Projects/Odin/masked-ones-test/src/main.odin",
+		"/D/Projects/Odin/masked-ones-test/masked_ones.sublime-project",
+		"/D/Projects/Odin/masked-ones-test/main.odin"
+	],
+	"find":
+	{
+		"height": 47.0
+	},
+	"find_in_files":
+	{
+		"height": 104.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"}\n",
+			"5",
+			"4",
+			"get_entity_handle",
+			"\n        ",
+			"rand",
+			"actors",
+			"Actors",
+			"Actor",
+			"actor",
+			"entity_lifetimes_multiple",
+			"loc"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"scrollbar_highlights": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"use_gitignore": true,
+		"whole_word": true,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "project_chronos.sublime-project",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 887,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								309,
+								309
+							]
+						],
+						"settings":
+						{
+							"lsp_uri": "file:///D:/Projects/Odin/project-chronos/project_chronos.sublime-project",
+							"syntax": "Packages/JSON/JSON.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "src/main.odin",
+					"selected": true,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 35,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								33,
+								33
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "<",
+									"selector": "text.html, text.xml"
+								},
+								{
+									"rhs_empty": true,
+									"selector": "punctuation.accessor"
+								},
+								{
+									"characters": ".>#\"/:",
+									"selector": "meta.tag, source - comment - string.quoted.double.block - string.quoted.single.block - string.unquoted.heredoc",
+									"server": "odin"
+								}
+							],
+							"auto_name": "package game",
+							"lsp_active": true,
+							"lsp_uri": "file:///D:/Projects/Odin/project-chronos/src/main.odin",
+							"show_definitions": false,
+							"syntax": "Packages/Odin/Odin.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"stack_multiselect": false,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 47.0
+	},
+	"input":
+	{
+		"height": 40.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.LSP Log Panel":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"output.diagnostics":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"output.find_results":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"pinned_build_system": "Build & Run (Debug)",
+	"project": "project_chronos.sublime-project",
+	"replace":
+	{
+		"height": 90.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"math",
+				"src\\math.odin"
+			],
+			[
+				"sprite",
+				"src\\sprite_renderer_system.odin"
+			],
+			[
+				"game",
+				"src\\game_context.odin"
+			],
+			[
+				"main.o",
+				"src\\main.odin"
+			],
+			[
+				"ecs",
+				"src\\ecs.odin"
+			],
+			[
+				"ecs.od",
+				"src\\ecs.odin"
+			],
+			[
+				"game_",
+				"src\\game_context.odin"
+			],
+			[
+				"main",
+				"src\\main.odin"
+			],
+			[
+				"handle",
+				"src\\actor\\actor_handle.odin"
+			],
+			[
+				"actor",
+				"src\\actor\\actor.odin"
+			],
+			[
+				"contextn",
+				"src\\ecs\\context.odin"
+			],
+			[
+				"src\\",
+				"src\\game_context.odin"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"",
+				"D:\\Projects\\Odin\\masked-ones\\masked_ones.sublime-project"
+			]
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 237.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
