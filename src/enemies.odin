@@ -44,3 +44,10 @@ load_enemies :: proc() -> [Enemy_Type]Enemy_Type_Data {
 		},
 	}
 }
+
+
+// The basic process for an enemy taking their turn.
+@(private="file")
+turn_basic_enemy :: proc(world: ^World, enemy: ^Combatant) {
+
+}

@@ -17,7 +17,6 @@ WINDOW_TITLE :: "Chronos"
 
 TARGET_FPS :: 60
 
-WORLD_UNITS :: 16
 WORLD_SIZE :: 10
 
 
@@ -38,14 +37,14 @@ main :: proc() {
 
 	// == Game state.
 	// TODO: Loading different levels.
-	arena: Combat_Arena
+	world: World
 
 	character_list := load_characters()
 	enemy_list := load_enemies()
 
 	// == Random stuff.
-	new_player(&arena, character_list[.Fighter])
-	new_enemy(&arena, enemy_list[.Goblin])
+	new_player(&world, character_list[.Fighter])
+	new_enemy(&world, enemy_list[.Goblin])
 	dirt_texture := rl.LoadTexture("res/images/dirt_tile.png")
 
 	// == Game loop.
@@ -53,15 +52,12 @@ main :: proc() {
 		// -- Input.
 
 		// -- Processing.
-		update_combatants(&arena, rl.GetFrameTime())
+		update_combatants(&world, rl.GetFrameTime())
 
 		// -- Rendering.
         rl.BeginTextureMode(target_texture)
 		rl.ClearBackground(rl.GRAY)
-
-		draw_world(dirt_texture)
-		draw_combatants(&arena)
-
+		draw_world(&world, dirt_texture)
         rl.EndTextureMode()
 
         draw_screen(target_texture)
@@ -97,22 +93,4 @@ draw_screen :: proc(target_texture: rl.RenderTexture) {
 		             tint     = rl.WHITE)
 
 	rl.EndDrawing()
-}
-
-
-to_world_units :: proc(grid_position: [2]i32) -> rl.Vector2 {
-	return rl.Vector2{
-		f32(grid_position.x) * WORLD_UNITS,
-		f32(grid_position.y) * WORLD_UNITS,
-	}
-}
-
-
-draw_world :: proc(texture: rl.Texture) {
-	for x in 0..<WORLD_SIZE {
-		for y in 0..<WORLD_SIZE {
-			position := to_world_units({ i32(x), i32(y) })
-			rl.DrawTextureV(texture, position, rl.WHITE)
-		}
-	}
 }
