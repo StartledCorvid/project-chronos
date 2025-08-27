@@ -18,7 +18,7 @@ WINDOW_TITLE :: "Chronos"
 TARGET_FPS :: 60
 
 WORLD_UNITS :: 16
-WORLD_SIZE :: 32
+WORLD_SIZE :: 10
 
 
 main :: proc() {
@@ -41,9 +41,11 @@ main :: proc() {
 	arena: Combat_Arena
 
 	character_list := load_characters()
+	enemy_list := load_enemies()
 
 	// == Random stuff.
 	new_player(&arena, character_list[.Fighter])
+	new_enemy(&arena, enemy_list[.Goblin])
 	dirt_texture := rl.LoadTexture("res/images/dirt_tile.png")
 
 	// == Game loop.

@@ -1,22 +1,19 @@
 package game
 /*
+import "core:math/rand"
 # Overview
-Structure to represent the Combatants in the game. This means the Player and the enemies.
-
+Structure to represent the Combatants in the game. This means the Player and the
+enemies.
 */
 
+import "core:math/rand"
 import rl "vendor:raylib"
 
 
 MAX_COMBATANTS :: 5
 
+
 Stat_Block :: [Stat]i32
-
-// TODO: Characters.
-
-
-
-
 
 
 Stat :: enum {
@@ -41,8 +38,7 @@ Combatant :: struct {
 	animator: Animator,
 	type: Combatant_Type,
 
-	base_stats: Stat_Block,
-	stat_modifiers: Stat_Block,
+	// TODO: Stat modifiers.
 
 	action_points: u32,
 	hit_points: u32,
@@ -63,7 +59,7 @@ Player :: struct {
 
 
 Enemy :: struct {
-	
+	enemy_type: Enemy_Type_Data,
 }
 
 
@@ -71,6 +67,7 @@ Combat_Arena :: struct {
 	combatants: [MAX_COMBATANTS]Combatant,
 
 	current_tick: u32,
+	player_moved: bool,
 }
 
 
@@ -110,6 +107,7 @@ Item_Instance :: struct {
 }
 
 
+// Creates a new player in the arena.
 new_player :: proc(arena: ^Combat_Arena, character: Player_Character, loc := #caller_location) -> ^Combatant {
 	assert(arena != nil, "Nil Combat_Arena pointer.", loc)
 
@@ -124,16 +122,42 @@ new_player :: proc(arena: ^Combat_Arena, character: Player_Character, loc := #ca
 
 	player.flags = { .Valid }
 	player.action_points = 0
-	player.base_stats = character.stats
-	player.hit_points = get_max_hp(player.base_stats)
+	player.hit_points = get_max_hp(character.stats)
 	player.type = Player{
 		character = character,
 	}
 
-	// TODO: Temp
+	// TODO: Temporary. Remove this.
 	player.animator.texture = character.icon
 
 	return player
+}
+
+
+// Creates a new enemy in the arena.
+new_enemy :: proc(arena: ^Combat_Arena, enemy_type: Enemy_Type_Data, loc := #caller_location) -> ^Combatant {
+	assert(arena != nil, "Nil Combat_Arena pointer.", loc)
+
+	enemy: ^Combatant = nil
+	for &slot in arena.combatants {
+		if .Valid not_in slot.flags {
+			enemy = &slot
+			break
+		}
+	}
+	assert(enemy != nil, "Couldn't find open slot for new Enemy.", loc)
+
+	enemy.flags = { .Valid }
+	enemy.action_points = 0
+	enemy.hit_points = get_max_hp(enemy_type.stats)
+	enemy.type = Enemy{
+		enemy_type = enemy_type,
+	}
+
+	// TODO: Temporary. Remove this.
+	enemy.animator.texture = enemy_type.icon
+
+	return enemy
 }
 
 
@@ -155,6 +179,8 @@ update_combatants :: proc(arena: ^Combat_Arena, delta_time: f32) {
 			update_enemy(arena, &combatant, delta_time)
 		}
 	}
+
+	arena.player_moved = false
 }
 
 
@@ -170,12 +196,53 @@ draw_combatants :: proc(arena: ^Combat_Arena) {
 
 
 update_player :: proc(arena: ^Combat_Arena, player: ^Combatant, delta_time: f32) {
+	// TODO: Proper input system with action mapping.
+	if rl.IsKeyPressed(.S) {
+		player.position.y += 1
+		arena.player_moved = true
+	}
+	if rl.IsKeyPressed(.W) {
+		player.position.y -= 1
+		arena.player_moved = true
+	}
+	if rl.IsKeyPressed(.D) {
+		player.position.x += 1
+		arena.player_moved = true
+	}
+	if rl.IsKeyPressed(.A) {
+		player.position.x -= 1
+		arena.player_moved = true
+	}
 
+	player.position.x = clamp(player.position.x, 0, WORLD_SIZE - 1)
+	player.position.y = clamp(player.position.y, 0, WORLD_SIZE - 1)
 }
 
 
-update_enemy :: proc(arena: ^Combat_Arena, player: ^Combatant, delta_time: f32) {
+update_enemy :: proc(arena: ^Combat_Arena, enemy: ^Combatant, delta_time: f32) {
+	if arena.player_moved {
+		random_dir := rand.uint32() % 4
 
+		UP :: 0
+		DOWN :: 1
+		LEFT :: 2
+		RIGHT :: 3
+
+
+		switch random_dir {
+		case UP:
+			enemy.position.y -= 1
+		case DOWN:
+			enemy.position.y += 1
+		case RIGHT:
+			enemy.position.x += 1
+		case LEFT:
+			enemy.position.x -= 1
+		}
+
+		enemy.position.x = clamp(enemy.position.x, 0, WORLD_SIZE - 1)
+		enemy.position.y = clamp(enemy.position.y, 0, WORLD_SIZE - 1)
+	}
 }
 
 
