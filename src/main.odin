@@ -1,5 +1,6 @@
 package game
 /*
+import "core:math/rand"
 # Overview
 
 */
@@ -44,7 +45,10 @@ main :: proc() {
 
 	// == Random stuff.
 	new_player(&world, character_list[.Fighter])
-	new_enemy(&world, enemy_list[.Goblin])
+
+	enemy := new_enemy(&world, enemy_list[.Goblin])
+	for !space_empty(&world, enemy.position) do enemy.position = random_world_point()
+	
 	dirt_texture := rl.LoadTexture("res/images/dirt_tile.png")
 
 	// == Game loop.
@@ -57,7 +61,9 @@ main :: proc() {
 		// -- Rendering.
         rl.BeginTextureMode(target_texture)
 		rl.ClearBackground(rl.GRAY)
+
 		draw_world(&world, dirt_texture)
+
         rl.EndTextureMode()
 
         draw_screen(target_texture)

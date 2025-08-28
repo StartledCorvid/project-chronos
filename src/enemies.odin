@@ -24,6 +24,7 @@ Enemy_Type_Data :: struct {
 	stats: Stat_Block,
 	icon: rl.Texture,
 	animator: Animator,
+	turn: proc(^World, ^Combatant),
 }
 
 
@@ -41,6 +42,7 @@ load_enemies :: proc() -> [Enemy_Type]Enemy_Type_Data {
 				.Toughness = 1,
 			},
 			icon = rl.LoadTexture("res/images/goblin.png"),
+			turn = turn_basic_enemy,
 		},
 	}
 }
@@ -49,5 +51,5 @@ load_enemies :: proc() -> [Enemy_Type]Enemy_Type_Data {
 // The basic process for an enemy taking their turn.
 @(private="file")
 turn_basic_enemy :: proc(world: ^World, enemy: ^Combatant) {
-
+	
 }

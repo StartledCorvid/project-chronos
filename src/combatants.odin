@@ -1,5 +1,6 @@
 package game
 /*
+import "core:log"
 import "core:math/rand"
 # Overview
 Structure to represent the Combatants in the game. This means the Player and the
@@ -7,6 +8,8 @@ enemies.
 */
 
 // import "core:math/rand"
+import sa "core:container/small_array"
+import "core:log"
 import rl "vendor:raylib"
 
 
@@ -21,6 +24,10 @@ MAX_COMBATANTS :: 5
 
 // A list of the different stats and their values.
 Stat_Block :: [Stat]i32
+
+
+// A handle that references a Combatant instance.
+Combatant_Handle :: distinct Handle
 
 
 // ----------------------------- !END DEFINITIONS! -----------------------------
@@ -52,6 +59,7 @@ Combatant_Flag :: enum {
 // Represents an entity that can move and fight in the world.
 Combatant :: struct {
 	name: string,
+	id: int,
 	flags: bit_set[Combatant_Flag],
 
 	animator: Animator,
@@ -59,10 +67,12 @@ Combatant :: struct {
 
 	// TODO: Stat modifiers.
 
-	action_points: u32,
 	hit_points: u32,
 
 	position: World_Coords,
+
+	_active_id: int,
+	_generation: int,
 }
 
 
@@ -73,75 +83,162 @@ Combatant_Type :: union {
 }
 
 
-// The player's Combatant.
-Player :: struct {
-	character: Player_Character,
-}
-
-
 // A foe Combatant for the player to play against.
 Enemy :: struct {
 	enemy_type: Enemy_Type_Data,
 }
 
 
+Handle :: struct {
+	id: int,
+	generation: int,
+
+	world: ^World,
+}
+
+
+
+
+
 // -------------------------------- !END TYPES! --------------------------------
 
 
 // +---------------------------------------------------------------------------+
-// |                                   !PLAYER!                                |
+// |                                   !HANDLE!                                |
 // +---------------------------------------------------------------------------+
 
 
-// Creates a new player in the arena.
-new_player :: proc(world: ^World, character: Player_Character, loc := #caller_location) -> ^Combatant {
-	assert(world != nil, "Nil World pointer.", loc)
+// Checks if the given handle is valid.
+is_combatant_handle_valid :: proc(handle: Combatant_Handle, loc := #caller_location) -> bool {
+	if handle.world == nil {
+		log.warn("Handle used that does not have a valid World pointer.", loc)
+		return false
+	}
 
-	player: ^Combatant = nil
-	for &slot in world.combatants {
+	if handle.id >= MAX_COMBATANTS {
+		log.warn("Handle used that does not have a valid Combatant ID.", loc)
+		return false
+	}
+
+	combatant := handle.world.combatants[handle.id]
+	return combatant._generation == handle.generation && .Valid in combatant.flags
+}
+
+
+// Gets a pointer to the Combatant the handle points to. Returns nil if it does
+// not point to a valid Combatant.
+get_combatant :: proc(handle: Combatant_Handle, loc := #caller_location) -> ^Combatant {
+	is_valid := is_combatant_handle_valid(handle)
+	if !is_valid do return nil
+
+	return &handle.world.combatants[handle.id]
+}
+
+
+// Creates a new Combatant_Handle from an instance of a Combatant.
+new_combatant_handle :: proc(world: ^World, combatant: Combatant, loc := #caller_location) -> Combatant_Handle {
+	assert(world != nil, "Nil World pointer.", loc)
+	assert(combatant.id < MAX_COMBATANTS, "Invalid Combatant ID.", loc)
+
+	return {
+		id = combatant.id,
+		generation = combatant._generation,
+
+		world = world,
+	}
+}
+
+
+// -------------------------------- !END HANDLE! -------------------------------
+
+
+// +---------------------------------------------------------------------------+
+// |                                 !COMBATANT!                               |
+// +---------------------------------------------------------------------------+
+
+
+// Gets a new instance of a Combatant.
+new_combatant :: proc(world: ^World, loc := #caller_location) -> Combatant_Handle {
+	assert(world != nil, "Nil World pointer.", loc)
+	
+	combatant: ^Combatant = nil
+	for &slot, id in world.combatants {
 		if .Valid not_in slot.flags {
-			player = &slot
+			combatant = &slot
+			combatant.id = id
 			break
 		}
 	}
-	assert(player != nil, "Couldn't find open slot for Player.", loc)
+	assert(combatant != nil, "Couldn't find open slot for new Combatant.", loc)
 
-	player.flags = { .Valid, .Solid }
-	player.action_points = 0
-	player.hit_points = get_max_hp(character.stats)
-	player.type = Player{
-		character = character,
-	}
+	combatant.flags = { .Valid, .Solid }
 
-	// TODO: Temporary. Remove this.
-	player.animator.texture = character.icon
+	handle := new_combatant_handle(world, combatant^, loc)
 
-	return player
+	combatant._active_id = sa.len(world.active_combatants)
+	sa.append(&world.active_combatants, handle)
+
+	return handle
 }
 
 
-// Does the frame-by-frame processing for the player.
-update_player :: proc(world: ^World, player: ^Combatant, delta_time: f32) {
-	// TODO: Proper input system with action mapping.
-	if rl.IsKeyPressed(.S) {
-		player.position.y += 1
-	}
-	if rl.IsKeyPressed(.W) {
-		player.position.y -= 1
-	}
-	if rl.IsKeyPressed(.D) {
-		player.position.x += 1
-	}
-	if rl.IsKeyPressed(.A) {
-		player.position.x -= 1
-	}
+// Removes the given Combatant from the world.
+free_combatant :: proc(handle: Combatant_Handle, loc := #caller_location) {
+	combatant := get_combatant(handle, loc)
+	assert(combatant != nil, "Got a nil Combatant from Handle.", loc)
 
-	player.position.x = clamp(player.position.x, 0, WORLD_SIZE - 1)
-	player.position.y = clamp(player.position.y, 0, WORLD_SIZE - 1)
+	combatant._generation += 1
+	combatant.flags -= { .Valid }
+	sa.unordered_remove(&handle.world.active_combatants, combatant._active_id)
+
+	if sa.len(handle.world.active_combatants) > 0 {
+		moved_handle := sa.get(handle.world.active_combatants, combatant._active_id)
+		moved_combatant := get_combatant(moved_handle)
+		moved_combatant._active_id = combatant._active_id
+	}
 }
 
 
-// -------------------------------- !END PLAYER! -------------------------------
+// ------------------------------- !END COMBATANT! -----------------------------
+
+
+// +---------------------------------------------------------------------------+
+// |                                   !GENERAL!                               |
+// +---------------------------------------------------------------------------+
+
+
+// Gets the maximum amount of HP that a Stat_Block allows for.
+get_max_hp :: proc(stats: Stat_Block) -> u32 {
+	return u32(max(1, stats[.Toughness]))
+}
+
+
+damage_combatant :: proc(target: Combatant_Handle, damage: u32, loc := #caller_location) {
+	combatant := get_combatant(target, loc)
+	assert(combatant != nil, "Nil Combatant pointer.", loc)
+
+	combatant.hit_points = max(0, combatant.hit_points - damage)
+
+	if combatant.hit_points <= 0 {
+		kill_combatant(target, loc)
+	}
+}
+
+
+kill_combatant :: proc(handle: Combatant_Handle, loc := #caller_location) {
+	combatant := get_combatant(handle, loc)
+	assert(combatant != nil, "Nil Combatant pointer.", loc)
+
+	// TODO: Play animation and spawn a body Object.
+
+	combatant.flags += { .Dead }
+	combatant.flags -= { .Solid }
+
+	log.infof("%v has died.", combatant.name)
+}
+
+
+// ------------------------------- !END GENERAL! -------------------------------
 
 
 // +---------------------------------------------------------------------------+
@@ -153,17 +250,10 @@ update_player :: proc(world: ^World, player: ^Combatant, delta_time: f32) {
 new_enemy :: proc(world: ^World, enemy_type: Enemy_Type_Data, loc := #caller_location) -> ^Combatant {
 	assert(world != nil, "Nil World pointer.", loc)
 
-	enemy: ^Combatant = nil
-	for &slot in world.combatants {
-		if .Valid not_in slot.flags {
-			enemy = &slot
-			break
-		}
-	}
-	assert(enemy != nil, "Couldn't find open slot for new Enemy.", loc)
+	enemy_handle := new_combatant(world, loc)
+	enemy := get_combatant(enemy_handle)
 
 	enemy.flags = { .Valid, .Solid }
-	enemy.action_points = 0
 	enemy.hit_points = get_max_hp(enemy_type.stats)
 	enemy.type = Enemy{
 		enemy_type = enemy_type,
@@ -176,7 +266,7 @@ new_enemy :: proc(world: ^World, enemy_type: Enemy_Type_Data, loc := #caller_loc
 }
 
 
-update_enemy :: proc(world: ^World, enemy: ^Combatant, delta_time: f32) {
+update_enemy :: proc(handle: Combatant_Handle, delta_time: f32) {
 	// random_dir := rand.uint32() % 4
 
 	// UP :: 0
@@ -203,12 +293,6 @@ update_enemy :: proc(world: ^World, enemy: ^Combatant, delta_time: f32) {
 // --------------------------------- !END ENEMY! -------------------------------
 
 
-
-get_max_hp :: proc(stats: Stat_Block) -> u32 {
-	return u32(max(1, stats[.Toughness]))
-}
-
-
 // +---------------------------------------------------------------------------+
 // |                                   !ENGINE!                                |
 // +---------------------------------------------------------------------------+
@@ -223,9 +307,9 @@ update_combatants :: proc(world: ^World, delta_time: f32) {
 
 		switch type in combatant.type {
 		case Player:
-			update_player(world, &combatant, delta_time)
+			update_player(new_combatant_handle(world, combatant), delta_time)
 		case Enemy:
-			update_enemy(world, &combatant, delta_time)
+			update_enemy(new_combatant_handle(world, combatant), delta_time)
 		}
 	}
 }
