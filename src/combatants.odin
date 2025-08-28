@@ -7,7 +7,7 @@ Structure to represent the Combatants in the game. This means the Player and the
 enemies.
 */
 
-// import "core:math/rand"
+import "core:math/rand"
 import sa "core:container/small_array"
 import "core:log"
 import rl "vendor:raylib"
@@ -282,26 +282,25 @@ new_enemy :: proc(world: ^World, enemy_type: Enemy_Type_Data, loc := #caller_loc
 
 
 update_enemy :: proc(handle: Combatant_Handle, delta_time: f32) {
-	// random_dir := rand.uint32() % 4
+	if handle.world.turn_manager.player_turn {
+		return
+	}
 
-	// UP :: 0
-	// DOWN :: 1
-	// LEFT :: 2
-	// RIGHT :: 3
+	action := do_enemy_turn(handle)
+	do_action(&handle.world.turn_manager, action)
 
-	// switch random_dir {
-	// case UP:
-	// 	enemy.position.y -= 1
-	// case DOWN:
-	// 	enemy.position.y += 1
-	// case RIGHT:
-	// 	enemy.position.x += 1
-	// case LEFT:
-	// 	enemy.position.x -= 1
-	// }
+	handle.world.turn_manager.player_turn = true // TOOD: Better turn tracking.
+}
 
-	// enemy.position.x = clamp(enemy.position.x, 0, WORLD_SIZE - 1)
-	// enemy.position.y = clamp(enemy.position.y, 0, WORLD_SIZE - 1)
+
+do_enemy_turn :: proc(handle: Combatant_Handle) -> Action {
+	action := create_action(handle)
+	action.type = Move_Action{
+		direction = rand.choice_enum(Direction),
+		distance = 1,
+	}
+
+	return action
 }
 
 
@@ -319,11 +318,13 @@ update_combatants :: proc(world: ^World, delta_time: f32) {
 			continue
 		}
 
+		handle := new_combatant_handle(world, combatant)
+
 		switch type in combatant.type {
 		case Player:
-			update_player(new_combatant_handle(world, combatant), delta_time)
+			update_player(handle, delta_time)
 		case Enemy:
-			update_enemy(new_combatant_handle(world, combatant), delta_time)
+			update_enemy(handle, delta_time)
 		}
 	}
 }

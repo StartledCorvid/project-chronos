@@ -90,7 +90,14 @@ Object :: struct {
 // Creates a new World.
 new_world :: proc(size: int, allocator := context.allocator, loc := #caller_location) -> ^World {
 	world := new(World, allocator, loc)
+	world.turn_manager.player_turn = true
 	return world
+}
+
+
+free_world :: proc(world: ^World, allocator := context.allocator, loc := #caller_location) {
+	assert(world != nil, "Nil World pointer.", loc)
+	free(world, allocator, loc)
 }
 
 

@@ -28,7 +28,6 @@ Action :: struct {
 }
 
 
-
 // Manages keeping track of turns.
 Turn_Manager :: struct {
 	player_turn: bool,

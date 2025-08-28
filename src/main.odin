@@ -38,17 +38,18 @@ main :: proc() {
 
 	// == Game state.
 	// TODO: Loading different levels.
-	world: World
+	world := new_world(16)
+	defer free_world(world)
 
 	character_list := load_characters()
 	enemy_list := load_enemies()
 
 	// == Random stuff.
-	new_player(&world, character_list[.Fighter])
+	new_player(world, character_list[.Fighter])
 
-	enemy := new_enemy(&world, enemy_list[.Goblin])
+	enemy := new_enemy(world, enemy_list[.Goblin])
 	random_pos := random_world_point()
-	for !space_empty(&world, random_pos) do random_pos = random_world_point()
+	for !space_empty(world, random_pos) do random_pos = random_world_point()
 	enemy.position = random_pos
 	
 	dirt_texture := rl.LoadTexture("res/images/dirt_tile.png")
@@ -58,13 +59,13 @@ main :: proc() {
 		// -- Input.
 
 		// -- Processing.
-		update_combatants(&world, rl.GetFrameTime())
+		update_combatants(world, rl.GetFrameTime())
 
 		// -- Rendering.
         rl.BeginTextureMode(target_texture)
 		rl.ClearBackground(rl.GRAY)
 
-		draw_world(&world, dirt_texture)
+		draw_world(world, dirt_texture)
 
         rl.EndTextureMode()
 
