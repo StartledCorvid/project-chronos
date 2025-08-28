@@ -94,9 +94,9 @@ do_attack :: proc(attack: Attack_Action) {
 
 		}
 
-		combatant != nil && .Dead not_in combatant.flags {
-			damage_combatant(combatant, attack.attack.damage) // TODO: Damage modifier.
-			if .Pierce not_in attack.attack.flags && .Solid in combatant.flags do break
-		}
+		// combatant != nil && .Dead not_in combatant.flags {
+		// 	damage_combatant(combatant_handle, attack.attack.damage) // TODO: Damage modifier.
+		// 	if .Pierce not_in attack.attack.flags && .Solid in combatant.flags do break
+		// }
 	}
 }

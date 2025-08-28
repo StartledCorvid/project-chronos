@@ -47,7 +47,9 @@ main :: proc() {
 	new_player(&world, character_list[.Fighter])
 
 	enemy := new_enemy(&world, enemy_list[.Goblin])
-	for !space_empty(&world, enemy.position) do enemy.position = random_world_point()
+	random_pos := random_world_point()
+	for !space_empty(&world, random_pos) do random_pos = random_world_point()
+	enemy.position = random_pos
 	
 	dirt_texture := rl.LoadTexture("res/images/dirt_tile.png")
 

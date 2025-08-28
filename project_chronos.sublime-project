@@ -8,39 +8,46 @@
 	"build_systems":
 	[
 		{
-			"name": "Build & Run (Debug)",
+			"name": "Debug",
 			"working_dir": "$project_path",
-			"cmd": [
-				"odin",
-				"run",
-				"src",
-				"-out:builds\\debug\\Chronos.exe",
-				"-show-timings",
-				"-subsystem:console",
-				"-strict-style",
-				"-vet-unused",
-				"-vet-style",
-				"-vet-semicolon",
-				"-debug"
-			],
-			"file_regex": "^(.+)\\(([0-9]+):([0-9]+)\\) (.+)$"
+			"file_regex": "^(.+)\\(([0-9]+):([0-9]+)\\) (.+)$",
+			"variants": [
+				{
+					"name": "Build",
+					"cmd": [
+						"$project_path\\build.bat",
+						"debug"
+					]
+				},
+				{
+					"name": "Run",
+					"cmd": [
+						"$project_path\\run.bat",
+						"debug"
+					]
+				}
+			]
 		},
 		{
-			"name": "Build & Run (Release)",
+			"name": "Release",
 			"working_dir": "$project_path",
-			"cmd": [
-				"odin",
-				"run",
-				"src",
-				"-out:builds\\release\\Chronos.exe",
-				"-show-timings",
-				"-subsystem:window",
-				"-strict-style",
-				"-vet-unused",
-				"-vet-style",
-				"-vet-semicolon"
-			],
-			"file_regex": "^(.+)\\(([0-9]+):([0-9]+)\\) (.+)$"
+			"file_regex": "^(.+)\\(([0-9]+):([0-9]+)\\) (.+)$",
+			"variants": [
+				{
+					"name": "Build",
+					"cmd": [
+						"$project_path\\build.bat",
+						"release"
+					]
+				},
+				{
+					"name": "Run",
+					"cmd": [
+						"$project_path\\run.bat",
+						"release"
+					]
+				}
+			]
 		}
 	],
 	"settings":

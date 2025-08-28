@@ -110,13 +110,7 @@ Handle :: struct {
 
 // Checks if the given handle is valid.
 is_combatant_handle_valid :: proc(handle: Combatant_Handle, loc := #caller_location) -> bool {
-	if handle.world == nil {
-		log.warn("Handle used that does not have a valid World pointer.", loc)
-		return false
-	}
-
-	if handle.id >= MAX_COMBATANTS {
-		log.warn("Handle used that does not have a valid Combatant ID.", loc)
+	if handle.world == nil || handle.id >= MAX_COMBATANTS {
 		return false
 	}
 
@@ -213,6 +207,27 @@ get_max_hp :: proc(stats: Stat_Block) -> u32 {
 }
 
 
+// Moves the Combatant in the given direction. Distance sets how far the movement is.
+// Stops once it reaches a Solid.
+move_combatant :: proc(handle: Combatant_Handle, direction: Direction, distance: u32 = 1, loc := #caller_location) {
+	combatant := get_combatant(handle, loc)
+
+	final_point := combatant.position
+	for i in 1..=distance {
+		point := combatant.position + (directions[direction] * i32(i))
+		if space_empty(handle.world, point) {
+			final_point = point
+		} else {
+			break
+		}
+	}
+
+	combatant.position = final_point
+	combatant.position.x = clamp(combatant.position.x, 0, WORLD_SIZE - 1)
+	combatant.position.y = clamp(combatant.position.y, 0, WORLD_SIZE - 1)
+}
+
+
 damage_combatant :: proc(target: Combatant_Handle, damage: u32, loc := #caller_location) {
 	combatant := get_combatant(target, loc)
 	assert(combatant != nil, "Nil Combatant pointer.", loc)
@@ -296,7 +311,6 @@ update_enemy :: proc(handle: Combatant_Handle, delta_time: f32) {
 // +---------------------------------------------------------------------------+
 // |                                   !ENGINE!                                |
 // +---------------------------------------------------------------------------+
-
 
 // Does frame processing for all of the Combatants in the given world.
 update_combatants :: proc(world: ^World, delta_time: f32) {

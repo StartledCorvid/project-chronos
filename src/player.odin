@@ -45,29 +45,14 @@ new_player :: proc(world: ^World, character: Player_Character, loc := #caller_lo
 
 // Does the frame-by-frame processing for the player.
 update_player :: proc(player_handle: Combatant_Handle, delta_time: f32) {
-	player := get_combatant(player_handle)
+	// TOOD: Check if it is the player's turn. Maybe make wait_for_player_turn?
 
-	movement := World_Coords{}
-	if is_action_pressed(.Move_Down) {
-		movement.y = 1
-	}
-	if is_action_pressed(.Move_Up) {
-		movement.y = -1
-	}
-	if is_action_pressed(.Move_Right) {
-		movement.x = 1
-	}
-	if is_action_pressed(.Move_Left) {
-		movement.x = -1
-	}
+	// action := create_action(player_handle)
 
-	next_pos := player.position + movement
-	if space_empty(player_handle.world, next_pos) {
-		player.position = next_pos
-	}
-
-	player.position.x = clamp(player.position.x, 0, WORLD_SIZE - 1)
-	player.position.y = clamp(player.position.y, 0, WORLD_SIZE - 1)
+	if is_action_pressed(.Move_Down) do move_combatant(player_handle, .Down)
+	else if is_action_pressed(.Move_Up) do move_combatant(player_handle, .Up)
+	else if is_action_pressed(.Move_Right) do move_combatant(player_handle, .Right)
+	else if is_action_pressed(.Move_Left) do move_combatant(player_handle, .Left)
 }
 
 

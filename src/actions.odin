@@ -4,24 +4,29 @@ package game
 Handles Combatant Actions.
 
 # Adding New Action Types
-1. Add to the Action_Type enum.
-2. Optionally, create a new child struct of Action for unique action data.
-3. Define the new action data in the ACTIONS list.
+1. Create a struct type for the Action's data.
+2. Add the struct to the Action_Type union.
+3. Add a handler to the do_action proc. This will usually call a different proc.
 */
 
 
-Action_Type :: enum {
-	Move,
+Action_Type :: union {
+	Move_Action,	
 }
 
 
-// All of the Actions that can be done.
-ACTIONS :: [Action_Type]Action {
-	.Move = Move_Action{
-		ap_cost = 5,
-		direction = 1,
-	},
+
+Move_Action :: struct {
+	direction: Direction,
+	distance: u32,
 }
+
+
+Action :: struct {
+	target: Combatant_Handle,
+	type: Action_Type,
+}
+
 
 
 // Manages keeping track of turns.
@@ -33,23 +38,32 @@ Turn_Manager :: struct {
 }
 
 
-// An Action that a Combatant can take.
-Action :: struct {
-	combatant: ^Combatant,
-	ap_cost: u32,
-}
-
-
-Move_Action :: struct {
-	using action: Action,
-	direction: u8,
-}
-
-
-// Executes the given Action.
-do_action :: proc(world: ^World, action: Action) {
-	switch typeid_of(type_of(action)) {
-	case Move_Action:
-		
+create_action :: proc(handle: Combatant_Handle, loc := #caller_location) -> Action {
+	assert(is_combatant_handle_valid(handle), "Invalid Combatant_Handle.", loc)
+	return {
+		target = handle,
 	}
+}
+
+
+create_empty_action :: proc() -> Action {
+	return {}
+}
+
+
+is_action_valid :: proc(action: Action) -> bool {
+	return action.type != nil && is_combatant_handle_valid(action.target)
+}
+
+
+do_action :: proc(manager: ^Turn_Manager, action: Action) {
+	// TODO: Combatants have queues for future turns?
+
+	switch type in action.type {
+	case Move_Action:
+		data := action.type.(Move_Action)
+		move_combatant(action.target, data.direction, data.distance)
+	}
+
+	append(&manager.actions, action)
 }

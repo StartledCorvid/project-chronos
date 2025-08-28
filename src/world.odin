@@ -45,6 +45,8 @@ World :: struct {
 
 	combatants: [MAX_COMBATANTS]Combatant,
 	objects: [MAX_OBJECTS]Object,
+
+	turn_manager: Turn_Manager, // TODO: Handle another way?
 }
 
 
@@ -148,7 +150,7 @@ space_empty :: proc(world: ^World, coords: World_Coords) -> bool {
 		return false
 	}
 
-	if get_object_at(world, coords) == nil do return false
+	if get_object_at(world, coords) != nil do return false
 	return true
 }
 
