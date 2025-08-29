@@ -4,6 +4,8 @@ package game
 Handles Player Entities.
 */
 
+import "core:log"
+
 
 // +-------------------------------------------------------------------------------------+
 // |                                      !TYPES!                                        |
@@ -51,14 +53,32 @@ player_tick :: proc(entity_handle: Entity_Handle, delta_time: f32) {
 	entity := get_entity(entity_handle)
 	player := &entity.type.(Player)
 
+	// TODO: Testing only. Remove -->
+	if is_action_pressed(.Attack_Right) {
+		event := Event{
+			owner = entity_handle,
+			flags = { .Blocks },
+			on_tick = proc(event: ^Event, delta_time: f32) {
+				if event.time > 10 {
+					entity_move(event.owner, .Right)
+					event.flags -= { .Playing }
+				}
+			},
+		}
+
+		append(&player.timeline.events, event)
+	}
+	// <--
+
 	// Always executed.
 	timeline_tick(&player.timeline, delta_time)
-	// blocked := player.timeline.current_event != nil ? .Blocks in player.timeline.current_event.flags : false
+	blocked := player.timeline.current_event != nil ? .Blocks in player.timeline.current_event.flags : false
 
 	// Only executed on turn.
 	// if game.turn_manager.current_phase != .Player_Turn || blocked {
-	// 	return
-	// }
+	if blocked {
+		return
+	}
 
 	action := player_turn(entity_handle)
 	if is_action_valid(action) {

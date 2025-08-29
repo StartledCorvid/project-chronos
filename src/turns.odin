@@ -50,7 +50,7 @@ Event_Flag :: enum {
 
 
 Event :: struct {
-    owner: Combatant_Handle,
+    owner: Entity_Handle,
 
     flags: bit_set[Event_Flag],
     time: f32,
