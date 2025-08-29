@@ -4,8 +4,6 @@ package game
 Handles Player Entities.
 */
 
-import "core:log"
-
 
 // +-------------------------------------------------------------------------------------+
 // |                                      !TYPES!                                        |
@@ -53,82 +51,86 @@ player_tick :: proc(entity_handle: Entity_Handle, delta_time: f32) {
 	entity := get_entity(entity_handle)
 	player := &entity.type.(Player)
 
-	// TODO: Testing only. Remove -->
-	if is_action_pressed(.Attack_Right) {
-		event := Event{
-			owner = entity_handle,
-			flags = { .Blocks },
-			on_tick = proc(event: ^Event, delta_time: f32) {
-				if event.time > 10 {
-					entity_move(event.owner, .Right)
-					event.flags -= { .Playing }
-				}
-			},
-		}
-
-		append(&player.timeline.events, event)
-	}
-	// <--
-
 	// Always executed.
 	timeline_tick(&player.timeline, delta_time)
 	blocked := player.timeline.current_event != nil ? .Blocks in player.timeline.current_event.flags : false
 
 	// Only executed on turn.
-	// if game.turn_manager.current_phase != .Player_Turn || blocked {
-	if blocked {
+	if game.turn_manager.current_phase != .Player_Turn || blocked {
 		return
 	}
 
 	action := player_turn(entity_handle)
-	if is_action_valid(action) {
-		do_action(action)
+	if valid_event(action) {
+		add_event(&player.timeline, action)
+		next_turn(&game.turn_manager)
 	}
 }
 
 
 
-player_turn :: proc(player_handle: Entity_Handle) -> Action {
-	if move_action := query_player_move(player_handle); is_action_valid(move_action) {
+player_turn :: proc(player_handle: Entity_Handle) -> Event {
+	if move_action := query_player_move(player_handle); valid_event(move_action) {
 		return move_action
 	}
 
-	return create_empty_action()
+	return INVALID_EVENT
 }
 
 
-query_player_move :: proc(player_handle: Entity_Handle) -> Action {
+query_player_move :: proc(player_handle: Entity_Handle) -> Event {
+	valid := false
+	event := create_event(player_handle)
+	event.action = Action_Move{
+		direction = .Down,
+		distance = 1,
+		time = 0.25,
+	}
+	action := &event.action.(Action_Move)
+	event.flags += { .Blocks }
+	event.on_tick = move_action
+
 	if is_action_pressed(.Move_Down) {
-		action := create_action(player_handle)
-		action.type = Move_Action{
-			direction = .Down,
-			distance = 1,
-		}
-		return action
+		valid = true
+		action.direction = .Down
 	} else if is_action_pressed(.Move_Up) {
-		action := create_action(player_handle)
-		action.type = Move_Action{
-			direction = .Up,
-			distance = 1,
-		}
-		return action
+		valid = true
+		action.direction = .Up
 	} else if is_action_pressed(.Move_Right) {
-		action := create_action(player_handle)
-		action.type = Move_Action{
-			direction = .Right,
-			distance = 1,
-		}
-		return action
+		valid = true
+		action.direction = .Right
 	} else if is_action_pressed(.Move_Left) {
-		action := create_action(player_handle)
-		action.type = Move_Action{
-			direction = .Left,
-			distance = 1,
-		}
-		return action
+		valid = true
+		action.direction = .Left
 	}
 
-	return create_empty_action()
+	if valid do return event
+	else do return INVALID_EVENT
+}
+
+
+move_action :: proc(e: ^Event, delta_time: f32) {
+	move_action := e.action.(Action_Move)
+	entity := get_entity(e.owner)
+	move_direction := directions[move_action.direction] * i32(move_action.distance)
+
+	if !world_space_empty(e.owner.world, entity.position + move_direction) {
+		e.flags -= { . Playing }
+		return
+	}
+
+	t := e.duration / move_action.time
+	target_pos := world_to_screen(move_direction)
+	new_pos := lerp(Vector2{ 0, 0 },
+		            target_pos,
+		            t)
+
+	entity.offset = new_pos
+	if e.duration >= move_action.time {
+		e.flags -= { .Playing }
+		entity.offset = { 0, 0 }
+		entity_move(e.owner, move_action.direction, move_action.distance)
+	}
 }
 
 

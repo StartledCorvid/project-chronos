@@ -2,8 +2,14 @@ package game
 /*
 # Overview
 Handles the management of turns in the game.
+
+# Creating a New Event Type
+1. Create a struct to house the event data.
+2. Add the new struct to the Action union.
 */
 
+
+INVALID_EVENT :: Event{}
 
 Phase :: enum {
     Waiting,
@@ -52,12 +58,26 @@ Event_Flag :: enum {
 Event :: struct {
     owner: Entity_Handle,
 
+    action: Action,
+
     flags: bit_set[Event_Flag],
-    time: f32,
+    duration: f32,
 
     on_start: proc(^Event),
     on_end: proc(^Event),
     on_tick: proc(^Event, f32),
+}
+
+
+Action :: union {
+    Action_Move,
+}
+
+
+Action_Move :: struct {
+    direction: Direction,
+    distance: u32,
+    time: f32,
 }
 
 
@@ -80,7 +100,7 @@ timeline_tick :: proc(timeline: ^Timeline, delta_time: f32) {
     }
 
     // on_tick
-    current_event.time += delta_time
+    current_event.duration += delta_time
     if current_event.on_tick != nil {
         current_event.on_tick(current_event, delta_time)
     }
@@ -93,3 +113,35 @@ timeline_tick :: proc(timeline: ^Timeline, delta_time: f32) {
     }
 }
 
+
+next_turn :: proc(turn_manager: ^Turn_Manager) {
+    #partial switch turn_manager.current_phase {
+    case .Player_Turn:
+        turn_manager.current_phase = .Enemy_Turn
+    case .Enemy_Turn:
+        turn_manager.current_phase = .Player_Turn
+    }
+}
+
+
+// Creates a new event owned by the Entity passed. Adds the event to the given timeline.
+create_event :: proc(owner: Entity_Handle, loc := #caller_location) -> Event {
+    assert(entity_handle_valid(owner), "Invalid Entity_Handle.", loc)
+
+    return {
+        owner = owner,
+    }
+}
+
+
+// Adds the given event to the Timeline.
+add_event :: proc(timeline: ^Timeline, event: Event, loc := #caller_location) {
+    assert(timeline != nil, "Nil Timeline pointer.", loc)
+    append(&timeline.events, event)
+}
+
+
+// Checks if the given Event is a valid, executable Event.
+valid_event :: proc(event: Event) -> bool {
+    return event.action != nil && entity_handle_valid(event.owner)
+}

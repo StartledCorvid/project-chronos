@@ -6,6 +6,7 @@ import "core:math/rand"
 */
 
 import "core:log"
+import "core:os"
 import rl "vendor:raylib"
 
 
@@ -23,8 +24,19 @@ WORLD_SIZE :: 10
 
 
 main :: proc() {
-	logger := log.create_console_logger()
-	defer log.destroy_console_logger(logger)
+	c_log := log.create_console_logger()
+	defer log.destroy_console_logger(c_log)
+
+    log_file, err := os.open("log.txt", os.O_WRONLY | os.O_CREATE | os.O_TRUNC)
+    assert(err == nil, "Problem setting up the file logger.")
+    defer os.close(log_file)
+
+	f_log := log.create_file_logger(log_file)
+	defer log.destroy_file_logger(f_log)
+
+	logger := log.create_multi_logger(f_log, c_log)
+	defer log.destroy_multi_logger(logger)
+
 	context.logger = logger
 
 	// == Inint Raylib.
@@ -56,6 +68,8 @@ main :: proc() {
 	// random_pos := random_world_point()
 	// for !space_empty(world, random_pos) do random_pos = random_world_point()
 	// enemy.position = random_pos
+
+	game.turn_manager.current_phase = .Player_Turn
 	
 	// == Game loop.
 	for !rl.WindowShouldClose() {

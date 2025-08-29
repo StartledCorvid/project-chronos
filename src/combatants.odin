@@ -264,14 +264,14 @@ update_enemy :: proc(handle: Combatant_Handle, delta_time: f32) {
 }
 
 
-do_enemy_turn :: proc(handle: Combatant_Handle) -> Action {
+do_enemy_turn :: proc(handle: Combatant_Handle) -> Event {
 	// action := create_action(handle)
 	// action.type = Move_Action{
 	// 	direction = rand.choice_enum(Direction),
 	// 	distance = 1,
 	// }
 
-	return create_empty_action()
+	return INVALID_EVENT
 }
 
 

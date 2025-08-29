@@ -55,6 +55,7 @@ Entity :: struct {
 
     hit_points: u32,
     position: World_Coords,
+    offset: [2]f32,
 
     _active_id: int,
     _generation: int,
@@ -220,7 +221,7 @@ entity_tick :: proc(handle: Entity_Handle, delta_time: f32) {
 entity_draw :: proc(handle: Entity_Handle) {
     entity := get_entity(handle)
 
-    world_position := world_to_screen(entity.position)
+    world_position := world_to_screen(entity.position) + entity.offset
     rl.DrawTextureV(entity.animator.texture, world_position, rl.WHITE)
 }
 
