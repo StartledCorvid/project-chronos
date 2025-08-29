@@ -1,65 +1,74 @@
 package game
 /*
 # Overview
-Handles Player Combatants.
+Handles Player Entities.
 */
 
 
-// +---------------------------------------------------------------------------+
-// |                                  !TYPES!                                  |
-// +---------------------------------------------------------------------------+
+// +-------------------------------------------------------------------------------------+
+// |                                      !TYPES!                                        |
+// +-------------------------------------------------------------------------------------+
 
 
-// The player's Combatant.
+// The player's Entity.
 Player :: struct {
 	character: Player_Character,
+	timeline: Timeline,
 }
 
 
-// -------------------------------- !END TYPES! --------------------------------
+// ------------------------------------- !END TYPES! -------------------------------------
 
 
-// +---------------------------------------------------------------------------+
-// |                                   !PLAYER!                                |
-// +---------------------------------------------------------------------------+
+// +-------------------------------------------------------------------------------------+
+// |                                     !PLAYER!                                        |
+// +-------------------------------------------------------------------------------------+
 
 
-// Creates a new player in the arena. Use free_combatant to free it.
-new_player :: proc(world: ^World, character: Player_Character, loc := #caller_location) -> Combatant_Handle {
+// Creates a new player `Entity` in the `World`. Use `free_entity` to free it.
+new_player :: proc(world: ^World, character: Player_Character, loc := #caller_location) -> Entity_Handle {
 	assert(world != nil, "Nil World pointer.", loc)
 
-	player_handle := new_combatant(world, loc)
-	player := get_combatant(player_handle)
+	entity_handle := new_entity(world, loc)
+	entity := get_entity(entity_handle)
 
-	player.hit_points = get_max_hp(character.stats)
-	player.type = Player{
+	entity.flags += { .Hittable, .Solid }
+	entity.hit_points = get_max_hp(character.stats)
+
+	entity.type = Player{
 		character = character,
 	}
 
 	// TODO: Temporary. Remove this.
-	player.animator.texture = character.icon
+	entity.animator.texture = character.icon
 
-	return new_combatant_handle(world, player^)
+	return entity_handle
 }
 
 
-// Does the frame-by-frame processing for the player.
-update_player :: proc(player_handle: Combatant_Handle, delta_time: f32) {
-	// TOOD: Check if it is the player's turn. Maybe make wait_for_player_turn?
+// Called when a processing tick passes.
+player_tick :: proc(entity_handle: Entity_Handle, delta_time: f32) {
+	entity := get_entity(entity_handle)
+	player := &entity.type.(Player)
 
-	if !player_handle.world.turn_manager.player_turn {
-		return
-	}
+	// Always executed.
+	timeline_tick(&player.timeline, delta_time)
+	// blocked := player.timeline.current_event != nil ? .Blocks in player.timeline.current_event.flags : false
 
-	action := player_turn(player_handle)
+	// Only executed on turn.
+	// if game.turn_manager.current_phase != .Player_Turn || blocked {
+	// 	return
+	// }
+
+	action := player_turn(entity_handle)
 	if is_action_valid(action) {
-		do_action(&player_handle.world.turn_manager, action)
-		player_handle.world.turn_manager.player_turn = false
+		do_action(action)
 	}
 }
 
 
-player_turn :: proc(player_handle: Combatant_Handle) -> Action {
+
+player_turn :: proc(player_handle: Entity_Handle) -> Action {
 	if move_action := query_player_move(player_handle); is_action_valid(move_action) {
 		return move_action
 	}
@@ -68,7 +77,7 @@ player_turn :: proc(player_handle: Combatant_Handle) -> Action {
 }
 
 
-query_player_move :: proc(player_handle: Combatant_Handle) -> Action {
+query_player_move :: proc(player_handle: Entity_Handle) -> Action {
 	if is_action_pressed(.Move_Down) {
 		action := create_action(player_handle)
 		action.type = Move_Action{
@@ -103,4 +112,4 @@ query_player_move :: proc(player_handle: Combatant_Handle) -> Action {
 }
 
 
-// -------------------------------- !END PLAYER! -------------------------------
+// ------------------------------------- !END PLAYER! ------------------------------------

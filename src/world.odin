@@ -7,6 +7,7 @@ Basic world procedures and data.
 import sa "core:container/small_array"
 import "core:math/rand"
 import rl "vendor:raylib"
+import "core:strings"
 
 
 // +---------------------------------------------------------------------------+
@@ -38,15 +39,28 @@ Object_Handle :: distinct Handle
 // +---------------------------------------------------------------------------+
 
 
+// Serializable World data.
+World_Data :: struct {
+	tile_texture_path: string,
+	world_size: u32,
+}
+
+
 // Data for a game level world.
 World :: struct {
+	tile_texture: rl.Texture,
+	world_size: u32,
+
 	active_combatants: sa.Small_Array(MAX_COMBATANTS, Combatant_Handle),
 	active_objects: sa.Small_Array(MAX_OBJECTS, int),
 
 	combatants: [MAX_COMBATANTS]Combatant,
 	objects: [MAX_OBJECTS]Object,
 
-	turn_manager: Turn_Manager, // TODO: Handle another way?
+
+	entities: [MAX_ENTITIES]Entity,
+	_active_entities: sa.Small_Array(MAX_ENTITIES, int),
+	_inactive_entities: sa.Small_Array(MAX_ENTITIES, int),
 }
 
 
@@ -78,6 +92,10 @@ Object :: struct {
 	position: World_Coords,
 }
 
+Object_Data :: struct {
+
+}
+
 
 // -------------------------------- !END TYPES! --------------------------------
 
@@ -87,18 +105,38 @@ Object :: struct {
 // +---------------------------------------------------------------------------+
 
 
+
+
+
 // Creates a new World.
-new_world :: proc(size: int, allocator := context.allocator, loc := #caller_location) -> ^World {
+new_world :: proc(world_data: World_Data, allocator := context.allocator, loc := #caller_location) -> ^World {
 	world := new(World, allocator, loc)
-	world.turn_manager.player_turn = true
+
+	tile_path_cstring := strings.clone_to_cstring(world_data.tile_texture_path)
+	defer delete(tile_path_cstring)
+
+	world.tile_texture = rl.LoadTexture(tile_path_cstring)
+	world.world_size = world_data.world_size
+
+	for id in 0..<MAX_ENTITIES {
+		sa.append(&world._inactive_entities, id)
+	}
+
 	return world
 }
 
 
 free_world :: proc(world: ^World, allocator := context.allocator, loc := #caller_location) {
 	assert(world != nil, "Nil World pointer.", loc)
+
+	rl.UnloadTexture(world.tile_texture)
+
 	free(world, allocator, loc)
 }
+
+
+
+
 
 
 // Gets a random point in the World.
@@ -150,47 +188,60 @@ get_combatant_at :: proc(world: World, position: World_Coords) -> Combatant_Hand
 }
 
 
-// Checks if the given coordinates are free, or if an Object or Combatant is already there.
-space_empty :: proc(world: ^World, coords: World_Coords) -> bool {
-	combatant_handle := get_combatant_at(world^, coords)
-	if is_combatant_handle_valid(combatant_handle) {
-		return false
+// Checks if the given coordinates are free, or if a solid Entity is already there.
+world_space_empty :: proc(world: ^World, coords: World_Coords, loc := #caller_location) -> bool {
+	for i in 0..<sa.len(world._active_entities) {
+		entity_id := sa.get(world._active_entities, i)
+		entity := world.entities[entity_id]
+
+		assert(.Valid in entity.flags, "An invalid Entity somehow got in the active list.", loc)
+
+		if entity.position == coords && .Solid in entity.flags {
+			return false
+		}
 	}
 
-	if get_object_at(world, coords) != nil do return false
 	return true
-}
-
-break_object :: proc(object: ^Object) {
-
 }
 
 
 // -------------------------------- !END GENERAL! ------------------------------
 
 
-// +---------------------------------------------------------------------------+
-// |                                   !ENGINE!                                |
-// +---------------------------------------------------------------------------+
+// +-------------------------------------------------------------------------------------+
+// |                                  !PROCESSING!                                       |
+// +-------------------------------------------------------------------------------------+
 
 
-// Draws the world grid and background.
-draw_world :: proc(world: ^World, texture: rl.Texture) {
-	// Draw background.
-	for x in 0..<WORLD_SIZE {
-		for y in 0..<WORLD_SIZE {
-			position := world_to_screen({ i32(x), i32(y) })
-			rl.DrawTextureV(texture, position, rl.WHITE)
-		}
+// Calls a processing tick on all the Entities in the World.
+world_tick :: proc(world: ^World, delta_time: f32, loc := #caller_location) {
+	for i in 0..<sa.len(world._active_entities) {
+		entity_id := sa.get(world._active_entities, i)
+		entity_handle := new_entity_handle(world, entity_id)
+
+		entity_tick(entity_handle, delta_time)
 	}
-
-
-	// Draw objects.
-
-
-	// Draw combatants.
-	draw_combatants(world)
 }
 
 
-// -------------------------------- !END ENGINE! -------------------------------
+// Draws the contents of the World.
+world_draw :: proc(world: ^World) {
+	// Draw background.
+	for x in 0..<world.world_size {
+		for y in 0..<world.world_size {
+			position := world_to_screen({ i32(x), i32(y) })
+			rl.DrawTextureV(world.tile_texture, position, rl.WHITE)
+		}
+	}
+
+	// Draw entities.
+	for i in 0..<sa.len(world._active_entities) {
+		entity_id := sa.get(world._active_entities, i)
+		entity_handle := new_entity_handle(world, entity_id)
+
+		entity_draw(entity_handle)
+	}
+}
+
+
+// ----------------------------------- !END PROCESSING! ----------------------------------

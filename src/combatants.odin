@@ -7,7 +7,7 @@ Structure to represent the Combatants in the game. This means the Player and the
 enemies.
 */
 
-import "core:math/rand"
+// import "core:math/rand"
 import sa "core:container/small_array"
 import "core:log"
 import rl "vendor:raylib"
@@ -51,7 +51,7 @@ Stat :: enum {
 // The different state flags of a Combatant.
 Combatant_Flag :: enum {
 	Valid,
-	Dead,
+	Hittable,
 	Solid,
 }
 
@@ -207,27 +207,6 @@ get_max_hp :: proc(stats: Stat_Block) -> u32 {
 }
 
 
-// Moves the Combatant in the given direction. Distance sets how far the movement is.
-// Stops once it reaches a Solid.
-move_combatant :: proc(handle: Combatant_Handle, direction: Direction, distance: u32 = 1, loc := #caller_location) {
-	combatant := get_combatant(handle, loc)
-
-	final_point := combatant.position
-	for i in 1..=distance {
-		point := combatant.position + (directions[direction] * i32(i))
-		if space_empty(handle.world, point) {
-			final_point = point
-		} else {
-			break
-		}
-	}
-
-	combatant.position = final_point
-	combatant.position.x = clamp(combatant.position.x, 0, WORLD_SIZE - 1)
-	combatant.position.y = clamp(combatant.position.y, 0, WORLD_SIZE - 1)
-}
-
-
 damage_combatant :: proc(target: Combatant_Handle, damage: u32, loc := #caller_location) {
 	combatant := get_combatant(target, loc)
 	assert(combatant != nil, "Nil Combatant pointer.", loc)
@@ -246,7 +225,6 @@ kill_combatant :: proc(handle: Combatant_Handle, loc := #caller_location) {
 
 	// TODO: Play animation and spawn a body Object.
 
-	combatant.flags += { .Dead }
 	combatant.flags -= { .Solid }
 
 	log.infof("%v has died.", combatant.name)
@@ -282,25 +260,18 @@ new_enemy :: proc(world: ^World, enemy_type: Enemy_Type_Data, loc := #caller_loc
 
 
 update_enemy :: proc(handle: Combatant_Handle, delta_time: f32) {
-	if handle.world.turn_manager.player_turn {
-		return
-	}
 
-	action := do_enemy_turn(handle)
-	do_action(&handle.world.turn_manager, action)
-
-	handle.world.turn_manager.player_turn = true // TOOD: Better turn tracking.
 }
 
 
 do_enemy_turn :: proc(handle: Combatant_Handle) -> Action {
-	action := create_action(handle)
-	action.type = Move_Action{
-		direction = rand.choice_enum(Direction),
-		distance = 1,
-	}
+	// action := create_action(handle)
+	// action.type = Move_Action{
+	// 	direction = rand.choice_enum(Direction),
+	// 	distance = 1,
+	// }
 
-	return action
+	return create_empty_action()
 }
 
 
@@ -310,24 +281,6 @@ do_enemy_turn :: proc(handle: Combatant_Handle) -> Action {
 // +---------------------------------------------------------------------------+
 // |                                   !ENGINE!                                |
 // +---------------------------------------------------------------------------+
-
-// Does frame processing for all of the Combatants in the given world.
-update_combatants :: proc(world: ^World, delta_time: f32) {
-	for &combatant in world.combatants {
-		if .Valid not_in combatant.flags {
-			continue
-		}
-
-		handle := new_combatant_handle(world, combatant)
-
-		switch type in combatant.type {
-		case Player:
-			update_player(handle, delta_time)
-		case Enemy:
-			update_enemy(handle, delta_time)
-		}
-	}
-}
 
 
 // Draws a specific Combatant.

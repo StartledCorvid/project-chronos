@@ -23,22 +23,14 @@ Move_Action :: struct {
 
 
 Action :: struct {
-	target: Combatant_Handle,
+	target: Entity_Handle,
 	type: Action_Type,
 }
 
 
-// Manages keeping track of turns.
-Turn_Manager :: struct {
-	player_turn: bool,
-	turn_time: f32,
 
-	actions: [dynamic]Action,
-}
-
-
-create_action :: proc(handle: Combatant_Handle, loc := #caller_location) -> Action {
-	assert(is_combatant_handle_valid(handle), "Invalid Combatant_Handle.", loc)
+create_action :: proc(handle: Entity_Handle, loc := #caller_location) -> Action {
+	assert(entity_handle_valid(handle), "Invalid Entity_Handle.", loc)
 	return {
 		target = handle,
 	}
@@ -51,18 +43,18 @@ create_empty_action :: proc() -> Action {
 
 
 is_action_valid :: proc(action: Action) -> bool {
-	return action.type != nil && is_combatant_handle_valid(action.target)
+	return action.type != nil && entity_handle_valid(action.target)
 }
 
 
-do_action :: proc(manager: ^Turn_Manager, action: Action) {
-	// TODO: Combatants have queues for future turns?
+do_action :: proc(action: Action) {
+	// TODO: Entities have queues for future turns?
 
 	switch type in action.type {
 	case Move_Action:
 		data := action.type.(Move_Action)
-		move_combatant(action.target, data.direction, data.distance)
+		entity_move(action.target, data.direction, data.distance)
 	}
 
-	append(&manager.actions, action)
+	append(&game.turn_manager.actions, action)
 }

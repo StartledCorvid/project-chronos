@@ -85,7 +85,7 @@ do_attack :: proc(attack: Attack_Action) {
 		point := attack.attacker.position + (direction * i32(length))
 
 		if object := get_object_at(attack.world, point); object != nil {
-			if .Breakable in object.flags do break_object(object)
+			// if .Breakable in object.flags do break_object(object)
 			if .Pierce not_in attack.attack.flags && .Solid in object.flags do break
 		}
 

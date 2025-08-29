@@ -22,6 +22,8 @@ Enemy_Type_Data :: struct {
 	name: string,
 	description: string,
 	stats: Stat_Block,
+	difficulty: u32,
+
 	icon: rl.Texture,
 	animator: Animator,
 	turn: proc(^World, ^Combatant),
@@ -41,10 +43,16 @@ load_enemies :: proc() -> [Enemy_Type]Enemy_Type_Data {
 				.Agility   = 8,
 				.Toughness = 1,
 			},
+			difficulty = 1,
 			icon = rl.LoadTexture("res/images/goblin.png"),
 			turn = turn_basic_enemy,
 		},
 	}
+}
+
+
+enemy_tick :: proc(handle: Entity_Handle, delta_time: f32) {
+	
 }
 
 

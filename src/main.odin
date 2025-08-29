@@ -5,6 +5,7 @@ import "core:math/rand"
 
 */
 
+import "core:log"
 import rl "vendor:raylib"
 
 
@@ -22,6 +23,10 @@ WORLD_SIZE :: 10
 
 
 main :: proc() {
+	logger := log.create_console_logger()
+	defer log.destroy_console_logger(logger)
+	context.logger = logger
+
 	// == Inint Raylib.
 	rl.InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
 	defer rl.CloseWindow()
@@ -37,35 +42,33 @@ main :: proc() {
     rl.SetTextureFilter(target_texture.texture, .POINT)
 
 	// == Game state.
+	init_game()
+	defer deinit_game()
+
 	// TODO: Loading different levels.
-	world := new_world(16)
+	world := new_world(world_data_list[.Default])
 	defer free_world(world)
 
-	character_list := load_characters()
-	enemy_list := load_enemies()
-
 	// == Random stuff.
-	new_player(world, character_list[.Fighter])
+	new_player(world, game.character_types[.Fighter])
 
-	enemy := new_enemy(world, enemy_list[.Goblin])
-	random_pos := random_world_point()
-	for !space_empty(world, random_pos) do random_pos = random_world_point()
-	enemy.position = random_pos
+	// enemy := new_enemy(world, enemy_list[.Goblin])
+	// random_pos := random_world_point()
+	// for !space_empty(world, random_pos) do random_pos = random_world_point()
+	// enemy.position = random_pos
 	
-	dirt_texture := rl.LoadTexture("res/images/dirt_tile.png")
-
 	// == Game loop.
 	for !rl.WindowShouldClose() {
 		// -- Input.
 
 		// -- Processing.
-		update_combatants(world, rl.GetFrameTime())
+		world_tick(world, rl.GetFrameTime())
 
 		// -- Rendering.
         rl.BeginTextureMode(target_texture)
 		rl.ClearBackground(rl.GRAY)
 
-		draw_world(world, dirt_texture)
+		world_draw(world)
 
         rl.EndTextureMode()
 
