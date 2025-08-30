@@ -69,10 +69,13 @@ main :: proc() {
 	// == Random stuff.
 	new_character(world, .Fighter)
 
-	enemy := new_character(world, .Goblin)
-	random_pos := random_world_point()
-	for !world_space_empty(world, random_pos) do random_pos = random_world_point()
-	get_entity(enemy).position = random_pos
+	for _ in 0..<5 {
+		enemy := new_character(world, .Goblin)
+		random_pos := random_world_point()
+		for !world_space_empty(world, random_pos) do random_pos = random_world_point()
+		get_entity(enemy).position = random_pos
+	}
+
 	
 	// == Game loop.
 	for !rl.WindowShouldClose() {

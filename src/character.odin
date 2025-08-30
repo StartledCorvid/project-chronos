@@ -148,7 +148,7 @@ new_character :: proc(world: ^World, character_type: Character_Type, allocator :
 
 
 // +-------------------------------------------------------------------------------------+
-// |                                    !OPERATIONS!                                     |
+// |                                    !ACTIONS!                                        |
 // +-------------------------------------------------------------------------------------+
 
 
@@ -161,7 +161,10 @@ get_max_hp :: proc(stats: Stat_Block) -> i32 {
 // Damages the given Character, killing it if its health reaches 0.
 damage_character :: proc(handle: Entity_Handle, damage: i32, loc := #caller_location) {
 	entity := get_entity(handle, loc)
-	character := &entity.type.(Character)
+	character, ok := &entity.type.(Character)
+	if !ok {
+		return
+	}
 	character.hit_points = max(0, character.hit_points - damage)
 
 	if character.hit_points <= 0 {
@@ -179,4 +182,4 @@ kill_combatant :: proc(handle: Entity_Handle, loc := #caller_location) {
 }
 
 
-// ------------------------------------ !END GENERAL! ------------------------------------
+// ------------------------------------ !END ACTIONS! ------------------------------------
