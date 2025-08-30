@@ -7,7 +7,9 @@ import "core:math/rand"
 
 import "core:log"
 import "core:os"
+import "core:mem"
 import rl "vendor:raylib"
+
 
 
 WINDOW_WIDTH :: 1280
@@ -20,14 +22,28 @@ WINDOW_TITLE :: "Chronos"
 
 TARGET_FPS :: 60
 
-WORLD_SIZE :: 10
-
 
 main :: proc() {
+	// == Leak Tracker.
+	when ODIN_DEBUG {
+		track: mem.Tracking_Allocator
+		mem.tracking_allocator_init(&track, context.allocator)
+		context.allocator = mem.tracking_allocator(&track)
+		defer {
+			if len(track.allocation_map) > 0 {
+				for _, entry in track.allocation_map {
+					log.warnf("%v leaked %v bytes.", entry.location, entry.size)
+				}
+			}
+			mem.tracking_allocator_destroy(&track)
+		}
+	}
+
+	// == Logger.
 	c_log := log.create_console_logger()
 	defer log.destroy_console_logger(c_log)
 
-    log_file, err := os.open("log.log", os.O_WRONLY | os.O_CREATE | os.O_TRUNC)
+    log_file, err := os.open("chronos.log", os.O_WRONLY | os.O_CREATE | os.O_TRUNC)
     assert(err == nil, "Problem setting up the file logger.")
     defer os.close(log_file)
 
@@ -59,8 +75,6 @@ main :: proc() {
 
 	// TODO: Loading different levels.
 	world := new_world(world_data_list[.Default])
-	defer free_world(world)
-
 	game.current_world = world
 
 	fight := new_fight()
@@ -69,10 +83,10 @@ main :: proc() {
 	// == Random stuff.
 	new_character(world, .Fighter)
 
-	for _ in 0..<5 {
+	for _ in 0..<2 {
 		enemy := new_character(world, .Goblin)
-		random_pos := random_world_point()
-		for !world_space_empty(world, random_pos) do random_pos = random_world_point()
+		random_pos := random_world_point(world^)
+		for !world_space_empty(world, random_pos) do random_pos = random_world_point(world^)
 		get_entity(enemy).position = random_pos
 	}
 
@@ -83,7 +97,9 @@ main :: proc() {
 
 		// -- Processing.
 		// TODO: Process animations. Maybe make a general tick method that does both.
-		fight_tick(fight, rl.GetFrameTime())
+		delta_time := rl.GetFrameTime()
+		fight_tick(fight, delta_time)
+		world_tick(world, delta_time)
 
 		// -- Rendering.
         rl.BeginTextureMode(target_texture)

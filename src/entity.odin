@@ -11,6 +11,7 @@ anything that can be spawned in the world.
 */
 
 import "core:log"
+import "core:fmt"
 import sa "core:container/small_array"
 import rl "vendor:raylib"
 
@@ -182,23 +183,23 @@ new_entity :: proc(world: ^World, loc := #caller_location) -> Entity_Handle {
 
 // Removes the given Entity from the world.
 free_entity :: proc(handle: Entity_Handle, loc := #caller_location) {
-    entity := get_entity(handle, loc)
-    assert(entity != nil, "Got a nil Entity from Handle.", loc)
+    freed_entity := get_entity(handle, loc)
+    assert(freed_entity != nil, "Got a nil Entity from Handle.", loc)
 
-    entity._generation += 1
-    entity.flags -= { .Valid }
+    freed_entity._generation += 1
+    freed_entity.flags -= { .Valid }
 
     // Remove from active Entity list.
-    sa.unordered_remove(&handle.world._active_entities, entity._active_id)
+    sa.unordered_remove(&handle.world._active_entities, freed_entity._active_id, loc)
 
     if sa.len(handle.world._active_entities) > 0 {
-        moved_id := sa.get(handle.world._active_entities, entity._active_id)
-        moved_entity := handle.world.entities[moved_id]
-        moved_entity._active_id = entity._active_id
+        moved_id := sa.get(handle.world._active_entities, freed_entity._active_id)
+        moved_entity := &handle.world.entities[moved_id]
+        moved_entity._active_id = freed_entity._active_id
     }
 
     // Add to inactive Entity list.
-    sa.append(&handle.world._inactive_entities, entity.id)
+    sa.append(&handle.world._inactive_entities, freed_entity.id)
 }
 
 
@@ -226,8 +227,24 @@ entity_tick :: proc(handle: Entity_Handle, delta_time: f32) {
 entity_draw :: proc(handle: Entity_Handle) {
     entity := get_entity(handle)
 
-    world_position := world_to_screen(entity.position) + entity.offset
-    rl.DrawTextureV(entity.animator.texture, world_position, rl.WHITE)
+    screen_position := world_to_screen(entity.position) + entity.offset
+    rl.DrawTextureV(entity.animator.texture, screen_position, rl.WHITE)
+
+    // Draw the ID of the Character.
+    if _, ok := entity.type.(Character); ok {
+        mouse_pos := rl.GetMousePosition()
+        character_box := rl.Rectangle{
+            width = WORLD_UNITS,
+            height = WORLD_UNITS,
+            x = screen_position.x,
+            y = screen_position.y,
+        }
+        rl.DrawCircle(i32(mouse_pos.x), i32(mouse_pos.y), 4.0, rl.RED)
+        if rl.CheckCollisionPointRec(mouse_pos, character_box) {
+            text := fmt.ctprintf("%v", entity.id)
+            rl.DrawText(text, i32(screen_position.x), i32(screen_position.y), 16, rl.WHITE)
+        }
+    }
 }
 
 
@@ -258,6 +275,5 @@ entity_move :: proc(handle: Entity_Handle, direction: Direction, distance: u32 =
     entity.position.x = clamp(entity.position.x, 0, i32(handle.world.world_size) - 1)
     entity.position.y = clamp(entity.position.y, 0, i32(handle.world.world_size) - 1)
 }
-
 
 // ----------------------------------- !END OPERATIONS! ----------------------------------

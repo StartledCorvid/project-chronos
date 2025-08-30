@@ -98,9 +98,6 @@ Object_Data :: struct {
 // +---------------------------------------------------------------------------+
 
 
-
-
-
 // Creates a new World.
 new_world :: proc(world_data: World_Data, allocator := context.allocator, loc := #caller_location) -> ^World {
 	world := new(World, allocator, loc)
@@ -129,10 +126,10 @@ free_world :: proc(world: ^World, allocator := context.allocator, loc := #caller
 
 
 // Gets a random point in the World.
-random_world_point :: proc() -> World_Coords {
+random_world_point :: proc(world: World) -> World_Coords {
 	return {
-		rand.int31() % WORLD_SIZE,
-		rand.int31() % WORLD_SIZE,
+		rand.int31() % i32(world.world_size),
+		rand.int31() % i32(world.world_size),
 	}
 }
 
@@ -166,6 +163,20 @@ world_space_empty :: proc(world: ^World, coords: World_Coords, loc := #caller_lo
 	}
 
 	return true
+}
+
+
+// Returns a bit_set populated with the directions that are available to move
+// from the origin.
+get_free_directions :: proc(origin: World_Coords) -> bit_set[Direction] {
+    free_directions: bit_set[Direction]
+    for direction in Direction {
+        potential_position := origin + directions[direction]
+        is_free := world_space_empty(game.current_world, potential_position)
+
+        if is_free do free_directions += { direction }
+    }
+    return free_directions
 }
 
 

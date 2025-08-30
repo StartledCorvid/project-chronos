@@ -15,7 +15,7 @@ player_turn :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 	handle := new_entity_handle(game.current_world, self^)
 
 	// Movement.
-	if move_action := query_player_move(handle); valid_event(move_action) {
+	if move_action := query_player_move(self); valid_event(move_action) {
 		add_event(timeline, move_action)
 		return true
 	}
@@ -33,14 +33,17 @@ player_turn :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 
 // Checks if the player is inputting a move action.
 @(private="file")
-query_player_move :: proc(handle: Entity_Handle) -> Event {
-	if is_action_pressed(.Move_Down) {
+query_player_move :: proc(self: ^Entity) -> Event {
+	free_directions := get_free_directions(self.position)
+	handle := new_entity_handle(game.current_world, self^)
+
+	if is_action_pressed(.Move_Down) && .Down in free_directions {
 		return event_entity_move(handle, .Down)
-	} else if is_action_pressed(.Move_Up) {
+	} else if is_action_pressed(.Move_Up) && .Up in free_directions {
 		return event_entity_move(handle, .Up)
-	} else if is_action_pressed(.Move_Right) {
+	} else if is_action_pressed(.Move_Right) && .Right in free_directions {
 		return event_entity_move(handle, .Right)
-	} else if is_action_pressed(.Move_Left) {
+	} else if is_action_pressed(.Move_Left) && .Left in free_directions {
 		return event_entity_move(handle, .Left)
 	}
 

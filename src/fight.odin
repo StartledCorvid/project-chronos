@@ -94,8 +94,6 @@ new_round :: proc(fight: ^Fight, loc := #caller_location) {
     assert(len(fight.turn_order) > 0, "No Characters in Fight.", loc)
 
     fight.current_character = fight.turn_order[fight.current_turn]
-
-    log.debug("Starting new round.")
 }
 
 
@@ -162,7 +160,7 @@ fight_next_turn :: proc(fight: ^Fight) {
         fight.current_character = fight.turn_order[fight.current_turn]
     }
 
-    log.debugf("Starting next turn for %v", get_entity(fight.current_character).type.(Character).base.display_name)
+    log.debugf("Starting next turn for %v", get_entity(fight.current_character).id)
 }
 
 
@@ -171,7 +169,6 @@ fight_next_turn :: proc(fight: ^Fight) {
 fight_change_phase :: proc(fight: ^Fight, new_phase: Fight_Phase) {
     if fight.phase == new_phase do return
     fight.phase = new_phase
-    log.debugf("Entering phase %v", fight.phase)
 }
 
 

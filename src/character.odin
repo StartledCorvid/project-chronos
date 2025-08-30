@@ -168,17 +168,13 @@ damage_character :: proc(handle: Entity_Handle, damage: i32, loc := #caller_loca
 	character.hit_points = max(0, character.hit_points - damage)
 
 	if character.hit_points <= 0 {
-		kill_combatant(handle, loc)
+		kill_combatant(handle)
 	}
 }
 
 
 kill_combatant :: proc(handle: Entity_Handle, loc := #caller_location) {
-	entity := get_entity(handle, loc)
-
-	// TODO: Play animation and spawn a body Object.
-
-	entity.flags -= { .Solid }
+	free_entity(handle, loc)
 }
 
 
