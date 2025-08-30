@@ -18,7 +18,6 @@ Game_State :: enum {
 // Holds the global values of the game.
 Game :: struct {
     state: Game_State,
-    turn_manager: Turn_Manager,
     current_world: ^World,
 
     character_types: [Character_Type]Character_Data,
@@ -35,7 +34,6 @@ init_game :: proc(allocator := context.allocator, loc := #caller_location) {
 
     game.state = .Main_Menu
     game.character_types = load_character_types()
-    init_turn_manager(&game.turn_manager)
 }
 
 

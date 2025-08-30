@@ -10,10 +10,18 @@ Definitions for specific actions that can be taken by Entities.
 */
 
 
+// +-------------------------------------------------------------------------------------+
+// |                                   !DEFINITIONS!                                     |
+// +-------------------------------------------------------------------------------------+
+
+
 // The different types of Event that can be executed.
 Event_Type :: union {
     Event_Entity_Move,
 }
+
+
+// ---------------------------------- !END DEFINITIONS! ----------------------------------
 
 
 // +-------------------------------------------------------------------------------------+
@@ -24,8 +32,8 @@ Event_Type :: union {
 // An Event type for moving an Entity.
 Event_Entity_Move :: struct {
     direction: Direction, // The direction to move.
-    distance: u32, // The amount of spaces to try and move.
-    time: f32, // The time it takes to move.
+    distance: u32,        // The amount of spaces to try and move.
+    time: f32,            // The time it takes to move.
 }
 
 

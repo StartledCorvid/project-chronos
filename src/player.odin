@@ -1,7 +1,7 @@
 package game
 /*
 # Overview
-Handles Player Entities.
+Mainly handles the management of the Player's turn.
 */
 
 
