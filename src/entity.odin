@@ -255,8 +255,8 @@ entity_move :: proc(handle: Entity_Handle, direction: Direction, distance: u32 =
     }
 
     entity.position = final_point
-    entity.position.x = clamp(entity.position.x, 0, WORLD_SIZE - 1)
-    entity.position.y = clamp(entity.position.y, 0, WORLD_SIZE - 1)
+    entity.position.x = clamp(entity.position.x, 0, i32(handle.world.world_size) - 1)
+    entity.position.y = clamp(entity.position.y, 0, i32(handle.world.world_size) - 1)
 }
 
 

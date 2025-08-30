@@ -27,7 +27,7 @@ main :: proc() {
 	c_log := log.create_console_logger()
 	defer log.destroy_console_logger(c_log)
 
-    log_file, err := os.open("log.txt", os.O_WRONLY | os.O_CREATE | os.O_TRUNC)
+    log_file, err := os.open("log.log", os.O_WRONLY | os.O_CREATE | os.O_TRUNC)
     assert(err == nil, "Problem setting up the file logger.")
     defer os.close(log_file)
 

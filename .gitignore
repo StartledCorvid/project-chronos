@@ -1,2 +1,4 @@
 builds
 *.sublime-workspace
+*.exe
+*.log

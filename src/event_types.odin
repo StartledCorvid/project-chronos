@@ -50,7 +50,6 @@ event_entity_move :: proc(owner: Entity_Handle, direction: Direction, t: f32 = 0
         distance = 1,
         time = t,
     }
-    event.flags += { .Blocks }
 
     // on_tick -->
     event.on_tick = proc(e: ^Event, delta_time: f32) {
@@ -104,7 +103,6 @@ event_basic_attack :: proc(owner: Entity_Handle, direction: Direction, damage: i
         direction = direction,
         damage = damage,
     }
-    event.flags += { .Blocks }
 
     // on_tick -->
     event.on_tick = proc(e: ^Event, delta_time: f32) {
@@ -155,7 +153,6 @@ event_lunge :: proc(owner: Entity_Handle, direction: Direction, distance: f32, t
         distance = distance,
         time = t,
     }
-    event.flags += { .Blocks }
 
     // on_tick -->
     event.on_tick = proc(e: ^Event, delta_time: f32) {

@@ -148,6 +148,13 @@ world_to_screen :: proc(grid_position: World_Coords) -> rl.Vector2 {
 
 // Checks if the given coordinates are free, or if a solid Entity is already there.
 world_space_empty :: proc(world: ^World, coords: World_Coords, loc := #caller_location) -> bool {
+	if coords.x >= i32(world.world_size) ||
+	   coords.y >= i32(world.world_size) ||
+	   coords.x < 0 ||
+	   coords.y < 0 {
+	   	return false
+   }
+
 	for entity_id in sa.slice(&world._active_entities) {
 		entity := world.entities[entity_id]
 
