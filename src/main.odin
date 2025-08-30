@@ -61,22 +61,26 @@ main :: proc() {
 	world := new_world(world_data_list[.Default])
 	defer free_world(world)
 
+	game.current_world = world
+
+	fight := new_fight()
+	defer free_fight(fight)
+
 	// == Random stuff.
-	new_player(world, game.character_types[.Fighter])
+	new_character(world, .Fighter)
 
-	// enemy := new_enemy(world, enemy_list[.Goblin])
-	// random_pos := random_world_point()
-	// for !space_empty(world, random_pos) do random_pos = random_world_point()
-	// enemy.position = random_pos
-
-	game.turn_manager.current_phase = .Player_Turn
+	enemy := new_character(world, .Goblin)
+	random_pos := random_world_point()
+	for !world_space_empty(world, random_pos) do random_pos = random_world_point()
+	get_entity(enemy).position = random_pos
 	
 	// == Game loop.
 	for !rl.WindowShouldClose() {
 		// -- Input.
 
 		// -- Processing.
-		world_tick(world, rl.GetFrameTime())
+		// TODO: Process animations. Maybe make a general tick method that does both.
+		fight_tick(fight, rl.GetFrameTime())
 
 		// -- Rendering.
         rl.BeginTextureMode(target_texture)

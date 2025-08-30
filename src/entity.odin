@@ -36,11 +36,20 @@ Entity_Handle :: distinct Handle
 // +-------------------------------------------------------------------------------------+
 
 
+// A reference to something in the World.
+Handle :: struct {
+    id: int,
+    generation: int,
+
+    world: ^World,
+}
+
+
 // Attribute flags for an Entity.
 Entity_Flag :: enum {
-    Valid,
-    Hittable,
-    Solid,
+    Valid,      // Is a valid instance.
+    Hittable,   // Can be hit by attacks.
+    Solid,      // Can collide with other Entities.
 }
 
 
@@ -53,7 +62,6 @@ Entity :: struct {
     animator: Animator,
     type: Entity_Type,
 
-    hit_points: u32,
     position: World_Coords,
     offset: [2]f32,
 
@@ -64,8 +72,7 @@ Entity :: struct {
 
 // Variations of an Entity.
 Entity_Type :: union {
-    Player,
-    Enemy,
+    Character,
     Object,
 }
 
@@ -208,10 +215,8 @@ entity_tick :: proc(handle: Entity_Handle, delta_time: f32) {
     entity := get_entity(handle)
 
     switch type in entity.type {
-    case Player:
-        player_tick(handle, delta_time)
-    case Enemy:
-        enemy_tick(handle, delta_time)
+    case Character:
+        // player_tick(handle, delta_time)
     case Object:
     }
 }

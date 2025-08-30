@@ -21,8 +21,7 @@ Game :: struct {
     turn_manager: Turn_Manager,
     current_world: ^World,
 
-    character_types: [Character_Type]Player_Character,
-    enemy_types: [Enemy_Type]Enemy_Type_Data,
+    character_types: [Character_Type]Character_Data,
 }
 
 
@@ -35,8 +34,7 @@ init_game :: proc(allocator := context.allocator, loc := #caller_location) {
     game = Game{}
 
     game.state = .Main_Menu
-    game.character_types = load_characters()
-    game.enemy_types = load_enemies()
+    game.character_types = load_character_types()
     init_turn_manager(&game.turn_manager)
 }
 

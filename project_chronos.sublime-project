@@ -10,6 +10,17 @@
 		{
 			"name": "Debug",
 			"working_dir": "$project_path",
+			"cmd": [
+				"odin",
+				"run",
+				"src",
+				"-show-timings",
+				"-strict-style",
+				"-vet-unused",
+				"-vet-style",
+				"-vet-semicolon",
+				"-debug",
+			],
 			"file_regex": "^(.+)\\(([0-9]+):([0-9]+)\\) (.+)$",
 			"variants": [
 				{

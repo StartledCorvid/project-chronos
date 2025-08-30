@@ -1,0 +1,311 @@
+[DEBUG] --- [2025-08-30 01:59:01] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:01] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:01] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:02] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:02] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:03] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:03] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:03] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:03] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:03] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:03] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:04] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:04] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:04] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:04] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:04] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:04] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:05] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:05] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:05] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:05] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:05] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:05] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:05] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:06] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:06] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:06] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:06] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:06] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:06] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:06] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:06] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:06] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:07] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:07] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:07] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:07] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:07] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:07] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:07] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:07] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:07] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:07] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:07] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:07] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:08] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:08] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:08] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:08] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:08] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:08] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:08] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:08] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:08] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:09] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:09] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:09] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:09] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:09] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:09] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:09] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:09] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:09] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:10] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:10] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:10] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:10] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:10] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:10] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:10] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:10] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:10] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:11] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:11] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:11] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:11] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:11] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:11] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:11] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:11] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:11] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:11] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:11] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:12] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:12] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:12] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:12] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:12] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:12] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:14] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:14] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:14] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:14] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:15] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:15] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:15] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:16] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:16] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:16] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:16] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:16] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:16] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:17] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:17] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:17] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:17] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:17] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:17] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:17] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:17] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:17] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:18] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:18] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:18] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:18] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:18] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:18] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:18] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:18] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:19] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:19] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:19] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:19] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:19] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:19] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:19] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:20] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:20] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:20] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:20] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:20] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:20] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:20] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:20] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:20] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:21] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:21] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:21] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:21] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:21] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:21] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:21] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:21] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:21] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:22] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:22] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:22] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:22] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:22] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:22] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:22] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:22] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:22] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:23] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:23] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:23] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:24] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:24] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:24] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:24] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:24] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:24] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:24] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:24] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:24] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:24] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:24] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:25] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:25] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:25] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:25] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:25] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:25] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:25] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:26] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:26] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:26] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:26] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:26] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:26] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:26] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:26] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:26] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:26] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:26] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:27] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:27] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:27] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:27] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:27] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:27] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:27] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:27] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:27] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:27] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:28] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:28] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:28] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:28] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:28] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:28] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:28] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:28] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:29] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:29] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:29] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:29] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:29] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:29] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:29] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:30] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:30] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:30] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:30] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:30] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:30] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:30] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:30] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:30] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:31] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:31] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:31] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:31] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:31] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:31] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:31] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:31] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:31] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:32] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:32] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:32] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:32] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:32] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:32] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:32] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:32] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:32] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:33] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:33] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:33] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:33] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:33] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:33] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:33] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:33] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:33] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:34] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:34] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:34] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:34] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:34] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:34] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:34] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:34] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:34] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:35] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:35] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:35] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:35] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:35] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:35] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:35] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:35] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:36] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:36] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:36] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:36] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:36] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:36] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:36] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:37] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:37] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:37] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:37] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:37] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:37] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:37] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:37] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:38] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:38] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:38] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:38] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:38] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:38] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:38] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:39] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:39] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:39] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:39] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:39] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:39] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:39] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:39] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:40] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:40] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:40] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:40] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:40] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:40] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:40] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:41] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:41] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:41] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:41] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:41] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:41] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:41] [turn_manager.odin:102:new_round()] Starting new round.
+[DEBUG] --- [2025-08-30 01:59:41] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn
+[DEBUG] --- [2025-08-30 01:59:41] [turn_manager.odin:178:fight_change_phase()] Entering phase Processing
+[DEBUG] --- [2025-08-30 01:59:41] [turn_manager.odin:169:fight_next_turn()] Starting next turn for Fighter
+[DEBUG] --- [2025-08-30 01:59:41] [turn_manager.odin:178:fight_change_phase()] Entering phase Turn

@@ -51,13 +51,6 @@ World :: struct {
 	tile_texture: rl.Texture,
 	world_size: u32,
 
-	active_combatants: sa.Small_Array(MAX_COMBATANTS, Combatant_Handle),
-	active_objects: sa.Small_Array(MAX_OBJECTS, int),
-
-	combatants: [MAX_COMBATANTS]Combatant,
-	objects: [MAX_OBJECTS]Object,
-
-
 	entities: [MAX_ENTITIES]Entity,
 	_active_entities: sa.Small_Array(MAX_ENTITIES, int),
 	_inactive_entities: sa.Small_Array(MAX_ENTITIES, int),
@@ -135,10 +128,6 @@ free_world :: proc(world: ^World, allocator := context.allocator, loc := #caller
 }
 
 
-
-
-
-
 // Gets a random point in the World.
 random_world_point :: proc() -> World_Coords {
 	return {
@@ -157,41 +146,9 @@ world_to_screen :: proc(grid_position: World_Coords) -> rl.Vector2 {
 }
 
 
-// Gets the Object located at the given position. If there is not an Object
-// there, returns nil.
-get_object_at :: proc(world: ^World, position: World_Coords) -> ^Object {
-	for i in 0..<sa.len(world.active_objects) {
-		object_id := sa.get(world.active_objects, i)
-		object := &world.objects[object_id]
-
-		if object.position == position {
-			return object
-		}
-	}
-
-	return nil
-}
-
-
-// Gets a handle to the Combatant located at the given position. Second return is if it was found.
-get_combatant_at :: proc(world: World, position: World_Coords) -> Combatant_Handle {
-	for i in 0..<sa.len(world.active_combatants) {
-		combatant_handle := sa.get(world.active_combatants, i)
-		combatant := get_combatant(combatant_handle)
-
-		if combatant.position == position {
-			return combatant_handle
-		}
-	}
-
-	return Combatant_Handle{}
-}
-
-
 // Checks if the given coordinates are free, or if a solid Entity is already there.
 world_space_empty :: proc(world: ^World, coords: World_Coords, loc := #caller_location) -> bool {
-	for i in 0..<sa.len(world._active_entities) {
-		entity_id := sa.get(world._active_entities, i)
+	for entity_id in sa.slice(&world._active_entities) {
 		entity := world.entities[entity_id]
 
 		assert(.Valid in entity.flags, "An invalid Entity somehow got in the active list.", loc)
@@ -215,12 +172,7 @@ world_space_empty :: proc(world: ^World, coords: World_Coords, loc := #caller_lo
 
 // Calls a processing tick on all the Entities in the World.
 world_tick :: proc(world: ^World, delta_time: f32, loc := #caller_location) {
-	for i in 0..<sa.len(world._active_entities) {
-		entity_id := sa.get(world._active_entities, i)
-		entity_handle := new_entity_handle(world, entity_id)
-
-		entity_tick(entity_handle, delta_time)
-	}
+	
 }
 
 
@@ -235,10 +187,8 @@ world_draw :: proc(world: ^World) {
 	}
 
 	// Draw entities.
-	for i in 0..<sa.len(world._active_entities) {
-		entity_id := sa.get(world._active_entities, i)
+	for entity_id in sa.slice(&world._active_entities) {
 		entity_handle := new_entity_handle(world, entity_id)
-
 		entity_draw(entity_handle)
 	}
 }
