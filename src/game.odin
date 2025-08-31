@@ -5,6 +5,7 @@ Handling of the overall game state.
 */
 
 import "core:log"
+import rl "vendor:raylib"
 
 game: Game
 
@@ -19,6 +20,7 @@ Game_State :: enum {
 Game :: struct {
     state: Game_State,
     current_world: ^World,
+    camera: rl.Camera2D,
 
     character_types: [Character_Type]Character_Data,
 }
@@ -34,6 +36,10 @@ init_game :: proc(allocator := context.allocator, loc := #caller_location) {
 
     game.state = .Main_Menu
     game.character_types = load_character_types()
+
+    game.camera = rl.Camera2D{
+        zoom = 1.0,
+    }
 }
 
 

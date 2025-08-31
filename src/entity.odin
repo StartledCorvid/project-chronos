@@ -232,14 +232,13 @@ entity_draw :: proc(handle: Entity_Handle) {
 
     // Draw the ID of the Character.
     if _, ok := entity.type.(Character); ok {
-        mouse_pos := rl.GetMousePosition()
+        mouse_pos := window_to_screen(rl.GetMousePosition())
         character_box := rl.Rectangle{
             width = WORLD_UNITS,
             height = WORLD_UNITS,
             x = screen_position.x,
             y = screen_position.y,
         }
-        rl.DrawCircle(i32(mouse_pos.x), i32(mouse_pos.y), 4.0, rl.RED)
         if rl.CheckCollisionPointRec(mouse_pos, character_box) {
             text := fmt.ctprintf("%v", entity.id)
             rl.DrawText(text, i32(screen_position.x), i32(screen_position.y), 16, rl.WHITE)

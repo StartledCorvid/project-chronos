@@ -1,5 +1,6 @@
 package game
 /*
+import "core:encoding/base32"
 import "core:math/rand"
 # Overview
 
@@ -7,7 +8,9 @@ import "core:math/rand"
 
 import "core:log"
 import "core:os"
+import "core:fmt"
 import "core:mem"
+import "core:strings"
 import rl "vendor:raylib"
 
 
@@ -76,6 +79,11 @@ main :: proc() {
 	// TODO: Loading different levels.
 	world := new_world(world_data_list[.Default])
 	game.current_world = world
+	half_size := f32(game.current_world.world_size * WORLD_UNITS) / 2.0
+	game.camera.offset = {
+		(RES_X / 2) - half_size,
+		(RES_Y / 2) - half_size,
+	}
 
 	fight := new_fight()
 	defer free_fight(fight)
@@ -97,6 +105,7 @@ main :: proc() {
 
 		// -- Processing.
 		// TODO: Process animations. Maybe make a general tick method that does both.
+		//       Or handle in the draw call.
 		delta_time := rl.GetFrameTime()
 		fight_tick(fight, delta_time)
 		world_tick(world, delta_time)
@@ -105,12 +114,89 @@ main :: proc() {
         rl.BeginTextureMode(target_texture)
 		rl.ClearBackground(rl.GRAY)
 
+		rl.BeginMode2D(game.camera)
 		world_draw(world)
+		rl.EndMode2D()
+
+		mouse_pos := window_to_screen(rl.GetMousePosition()) + game.camera.offset
+        rl.DrawCircle(i32(mouse_pos.x), i32(mouse_pos.y), 4.0, rl.RED)
+
+        mouse_pos_text := fmt.ctprintf("mouse_pos = (%v, %v)", mouse_pos.x, mouse_pos.y)
+        rl.DrawText(mouse_pos_text, RES_X - 128, 0, 8, rl.WHITE)
+
+        render_size_text := fmt.ctprintf("render_size = (%v, %v)", rl.GetRenderWidth(), rl.GetScreenHeight())
+        rl.DrawText(render_size_text, RES_X - 128, 8, 8, rl.WHITE)
+
+        screen_size_text := fmt.tprintf("screen_size = (%v, %v)", rl.GetScreenWidth(), rl.GetScreenHeight())
+        // rl.DrawText(screen_size_text, RES_X - i32(len(screen_size_text)), 16, 8, rl.WHITE)
+        draw_text_aligned(screen_size_text, 8, .Max, .None, { 0, 16 })
 
         rl.EndTextureMode()
 
         draw_screen(target_texture)
 	}
+}
+
+
+Text_Alignment :: enum{
+	None,
+	Min,
+	Max,
+	Center,
+}
+
+draw_text_aligned :: proc(text: string, size: f32, horizontal: Text_Alignment, vertical: Text_Alignment, offset: Vector2 = { 0, 0, }) {
+	c_text := strings.clone_to_cstring(text)
+	defer delete(c_text)
+
+	// width := rl.MeasureText(c_text, i32(size))
+
+	spacing: f32 = size
+
+	font := rl.GetFontDefault()
+	dim := rl.MeasureTextEx(font, c_text, f32(size), spacing)
+
+	h_offset: f32 = 0.0
+	switch horizontal {
+	case .None:
+	case .Min:
+		h_offset = 0
+	case .Max:
+		h_offset = RES_X - dim.x
+	case .Center:
+		h_offset = (RES_X / 2.0) - (dim.x / 2.0)
+	}
+
+	v_offset: f32 = 0.0
+	switch vertical {
+	case .None:
+	case .Min:
+		v_offset = 0
+	case .Max:
+		v_offset = RES_Y - size
+	case .Center:
+		v_offset = (RES_Y / 2.0) - (size / 2.0)
+	}
+
+	rl.DrawTextEx(
+		font,
+		c_text,
+		{
+			h_offset + offset.x,
+			v_offset + offset.y,
+		},
+		size,
+		spacing,
+		rl.WHITE,
+	)
+}
+
+
+window_to_screen :: proc(window_pos: rl.Vector2) -> rl.Vector2 {
+	relative_x := window_pos.x / f32(rl.GetRenderWidth())
+	relative_y := window_pos.y / f32(rl.GetRenderHeight())
+
+	return { RES_X * relative_x, RES_Y * relative_y, } - game.camera.offset
 }
 
 

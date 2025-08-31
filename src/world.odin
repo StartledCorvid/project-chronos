@@ -136,7 +136,7 @@ random_world_point :: proc(world: World) -> World_Coords {
 
 // Converts world coordinates to screen coordinates.
 world_to_screen :: proc(grid_position: World_Coords) -> rl.Vector2 {
-	return rl.Vector2{
+	return {
 		f32(grid_position.x) * WORLD_UNITS,
 		f32(grid_position.y) * WORLD_UNITS,
 	}
