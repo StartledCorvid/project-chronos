@@ -12,7 +12,7 @@ Handling of a participant in combat. This includes different prefabs for enemies
 1. Add a new entry to the Stat enum.
 */
 
-import rl "vendor:raylib"
+// import rl "vendor:raylib"
 
 
 // +-------------------------------------------------------------------------------------+
@@ -56,7 +56,7 @@ Character_Data :: struct {
 
 	stats: Stat_Block,
 
-	texture: rl.Texture, // TODO: Build a Texture cache instead.
+	animator: Animator,
 
 	on_turn: proc(self: ^Entity, timeline: ^Timeline) -> bool,
 }
@@ -92,7 +92,13 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 				.Agility   = 8,
 				.Toughness = 12,
 			},
-			texture = rl.LoadTexture("res/images/fighter.png"),
+			animator = setup_character_animator({
+				atlas = new_texture_atlas(.Fighter, { 1, 1 }),
+				starting_frame = 0,
+				ending_frame = 0,
+				fps = 1,
+				loop_count = -1,
+			}),
 			on_turn = player_turn,
 		},
 
@@ -106,7 +112,14 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 				.Agility   = 6,
 				.Toughness = 1,
 			},
-			texture = rl.LoadTexture("res/images/goblin.png"),
+			// animator = setup_character_animator(.Goblin, { 1, 1 }),
+			animator = setup_character_animator({
+				atlas = new_texture_atlas(.Puff, { 6, 1 }),
+				starting_frame = 0,
+				ending_frame = 5,
+				fps = 6,
+				loop_count = -1,
+			}),
 			on_turn = turn_random_move,
 		},
 	}
@@ -119,6 +132,17 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 // +-------------------------------------------------------------------------------------+
 // |                                    !OPERATIONS!                                     |
 // +-------------------------------------------------------------------------------------+
+
+
+// Creates an `Animator` instance for a generic Character Entity.
+setup_character_animator :: proc(idle_animation: Animation) -> Animator {
+	return Animator{
+		current_animation = idle_animation,
+		play = true,
+
+		_t = 0,
+	}
+}
 
 
 // Creates a new enemy `Entity` Character of the given type in the `World`.
@@ -136,9 +160,7 @@ new_character :: proc(world: ^World, character_type: Character_Type, allocator :
 		base = base,
 		hit_points = get_max_hp(base.stats),
 	}
-
-	// TODO: Actually set up the animator.
-	entity.animator.texture = base.texture
+	entity.animator = base.animator
 
 	return handle
 }

@@ -214,7 +214,8 @@ free_entity :: proc(handle: Entity_Handle, loc := #caller_location) {
 // Does a processing tick on an Entity.
 entity_tick :: proc(handle: Entity_Handle, delta_time: f32) {
     entity := get_entity(handle)
-
+    animator_tick(&entity.animator, delta_time)
+    
     switch type in entity.type {
     case Character:
         // player_tick(handle, delta_time)
@@ -228,7 +229,19 @@ entity_draw :: proc(handle: Entity_Handle) {
     entity := get_entity(handle)
 
     screen_position := world_to_screen(entity.position) + entity.offset
-    rl.DrawTextureV(entity.animator.texture, screen_position, rl.WHITE)
+
+    frame_rect := entity.animator.current_animation.current_frame
+    screen_rect := rl.Rectangle{
+        x = screen_position.x,
+        y = screen_position.y,
+
+        // TODO: Scale instead of having low resolution?
+        width = frame_rect.width,
+        height = frame_rect.height,
+    }
+
+    atlas := get_texture(entity.animator.current_animation.atlas.texture)
+    rl.DrawTexturePro(atlas, frame_rect, screen_rect, { 0, 0 }, 0, rl.WHITE)
 
     // Draw the ID of the Character.
     if _, ok := entity.type.(Character); ok {

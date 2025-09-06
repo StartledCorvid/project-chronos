@@ -190,7 +190,10 @@ get_free_directions :: proc(origin: World_Coords) -> bit_set[Direction] {
 
 // Calls a processing tick on all the Entities in the World.
 world_tick :: proc(world: ^World, delta_time: f32, loc := #caller_location) {
-	
+	for entity_id in sa.slice(&world._active_entities) {
+		handle := new_entity_handle(world, entity_id)
+		entity_tick(handle, delta_time)
+	}
 }
 
 

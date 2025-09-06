@@ -23,6 +23,7 @@ Game :: struct {
     camera: rl.Camera2D,
 
     character_types: [Character_Type]Character_Data,
+    textures: [Texture_Name]rl.Texture,
 }
 
 
@@ -35,6 +36,7 @@ init_game :: proc(allocator := context.allocator, loc := #caller_location) {
     game = Game{}
 
     game.state = .Main_Menu
+    game.textures = load_textures()
     game.character_types = load_character_types()
 
     game.camera = rl.Camera2D{

@@ -2,7 +2,7 @@
 	"folders":
 	[
 		{
-			"path": "."
+			"path": ".",
 		}
 	],
 	"build_systems":
@@ -28,16 +28,16 @@
 					"cmd": [
 						"$project_path\\build.bat",
 						"debug"
-					]
+					],
 				},
 				{
 					"name": "Run",
 					"cmd": [
 						"$project_path\\run.bat",
 						"debug"
-					]
+					],
 				}
-			]
+			],
 		},
 		{
 			"name": "Release",
@@ -49,16 +49,16 @@
 					"cmd": [
 						"$project_path\\build.bat",
 						"release"
-					]
+					],
 				},
 				{
 					"name": "Run",
 					"cmd": [
 						"$project_path\\run.bat",
 						"release"
-					]
+					],
 				}
-			]
+			],
 		}
 	],
 	"settings":
@@ -68,8 +68,8 @@
 		{
 			"odin":
 			{
-				"enabled": true
-			}
-		}
-	}
+				"enabled": true,
+			},
+		},
+	},
 }

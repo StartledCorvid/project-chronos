@@ -183,3 +183,25 @@ event_lunge :: proc(owner: Entity_Handle, direction: Direction, distance: f32, t
 
 
 // ------------------------------------- !END LUNGE! -------------------------------------
+
+
+// +-------------------------------------------------------------------------------------+
+// |                                    !PARTICLE!                                       |
+// +-------------------------------------------------------------------------------------+
+
+
+Event_Particle :: struct {
+    lifetime: f32,
+    loop: bool, // Should this Particle loop?
+    cycle_length: f32, // The amount of time a single cycle of the loop takes.
+    framerate: f32,
+    texture: Texture_Atlas,
+}
+
+
+event_particle :: proc(owner: Entity_Handle, atlas: Texture_Atlas, t: f32 = 1.0, loop := false, fps: f32 = 60) {
+
+}
+
+
+// ----------------------------------- !END PARTICLE! ------------------------------------

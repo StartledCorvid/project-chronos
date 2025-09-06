@@ -21,6 +21,8 @@ WINDOW_HEIGHT :: 720
 RES_X :: 320
 RES_Y :: 180
 
+PANEL_SIZE :: 64
+
 WINDOW_TITLE :: "Chronos"
 
 TARGET_FPS :: 60
@@ -131,10 +133,25 @@ main :: proc() {
         // rl.DrawText(screen_size_text, RES_X - i32(len(screen_size_text)), 16, 8, rl.WHITE)
         draw_text_aligned(screen_size_text, 8, .Max, .None, { 0, 16 })
 
+		draw_left_panel()
+		draw_right_panel()
+
         rl.EndTextureMode()
 
         draw_screen(target_texture)
 	}
+}
+
+
+draw_left_panel :: proc() {
+	rl.DrawRectangleV({ 0, 0 }, { PANEL_SIZE, RES_Y }, rl.BLACK)
+
+	
+}
+
+
+draw_right_panel :: proc() {
+	rl.DrawRectangleV({ RES_X - PANEL_SIZE, 0 }, { PANEL_SIZE, RES_Y }, rl.BLACK)
 }
 
 
