@@ -12,6 +12,24 @@ Animator :: struct {
 }
 
 
+// The different Animations that a Character can have.
+Character_Animation :: enum {
+	Idle,
+	Attack,
+	Ability,
+	Hurt,
+	Die,
+}
+
+
+// An Animator with a state machine specifically for Characters.
+Character_Animator :: struct {
+	using animator: Animator,
+	current_state: Character_Animation,
+	animations: [Character_Animation]Animation,
+}
+
+
 Animation :: struct {
 	starting_frame: i32,
 	ending_frame:   i32,

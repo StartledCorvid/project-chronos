@@ -55,9 +55,8 @@ event_entity_move :: proc(owner: Entity_Handle, direction: Direction, t: f32 = 0
     event.on_tick = proc(e: ^Event, delta_time: f32) {
         move_action := e.type.(Event_Entity_Move)
         entity := get_entity(e.owner)
-        move_direction := directions[move_action.direction] * i32(move_action.distance)
+        move_direction := DIRECTIONS[move_action.direction] * i32(move_action.distance)
 
-        // TODO: Will still play animation if tries to run into wall.
         if !world_space_empty(e.owner.world, entity.position + move_direction) {
             stop_event(e)
             return
@@ -108,7 +107,7 @@ event_basic_attack :: proc(owner: Entity_Handle, direction: Direction, damage: i
     event.on_tick = proc(e: ^Event, delta_time: f32) {
         attack_action := e.type.(Event_Basic_Attack)
         entity := get_entity(e.owner)
-        attack_direction := directions[attack_action.direction]
+        attack_direction := DIRECTIONS[attack_action.direction]
 
         for entity_id in sa.slice(&e.owner.world._active_entities) {
             handle := new_entity_handle(e.owner.world, entity_id)
@@ -159,7 +158,7 @@ event_lunge :: proc(owner: Entity_Handle, direction: Direction, distance: f32, t
         lunge_action := e.type.(Event_Lunge)
 
         entity := get_entity(e.owner)
-        attack_direction := directions[lunge_action.direction]
+        attack_direction := DIRECTIONS[lunge_action.direction]
 
         half_time := lunge_action.time / 2.0
         start_pos := Vector2{ 0, 0 }

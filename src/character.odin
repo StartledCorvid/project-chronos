@@ -92,7 +92,7 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 				.Agility   = 8,
 				.Toughness = 12,
 			},
-			animator = setup_character_animator({
+			animator = basic_character_animator({
 				atlas = new_texture_atlas(.Fighter, { 1, 1 }),
 				starting_frame = 0,
 				ending_frame = 0,
@@ -113,14 +113,14 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 				.Toughness = 1,
 			},
 			// animator = setup_character_animator(.Goblin, { 1, 1 }),
-			animator = setup_character_animator({
-				atlas = new_texture_atlas(.Puff, { 6, 1 }),
+			animator = basic_character_animator({
+				atlas = new_texture_atlas(.Goblin, { 1, 1 }),
 				starting_frame = 0,
-				ending_frame = 5,
-				fps = 6,
+				ending_frame = 0,
+				fps = 1,
 				loop_count = -1,
 			}),
-			on_turn = turn_random_move,
+			on_turn = turn_aggressive,
 		},
 	}
 }
@@ -135,7 +135,7 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 
 
 // Creates an `Animator` instance for a generic Character Entity.
-setup_character_animator :: proc(idle_animation: Animation) -> Animator {
+basic_character_animator :: proc(idle_animation: Animation) -> Animator {
 	return Animator{
 		current_animation = idle_animation,
 		play = true,

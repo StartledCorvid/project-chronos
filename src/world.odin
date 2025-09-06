@@ -63,7 +63,7 @@ Direction :: enum {
 }
 
 @(rodata)
-directions := [Direction]World_Coords{
+DIRECTIONS := [Direction]World_Coords{
 	.Up = { 0, -1 },
 	.Down = { 0, 1 },
 	.Left = { -1, 0 },
@@ -171,7 +171,7 @@ world_space_empty :: proc(world: ^World, coords: World_Coords, loc := #caller_lo
 get_free_directions :: proc(origin: World_Coords) -> bit_set[Direction] {
     free_directions: bit_set[Direction]
     for direction in Direction {
-        potential_position := origin + directions[direction]
+        potential_position := origin + DIRECTIONS[direction]
         is_free := world_space_empty(game.current_world, potential_position)
 
         if is_free do free_directions += { direction }

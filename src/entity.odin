@@ -218,7 +218,6 @@ entity_tick :: proc(handle: Entity_Handle, delta_time: f32) {
     
     switch type in entity.type {
     case Character:
-        // player_tick(handle, delta_time)
     case Object:
     }
 }
@@ -275,7 +274,7 @@ entity_move :: proc(handle: Entity_Handle, direction: Direction, distance: u32 =
 
     final_point := entity.position
     for i in 1..=distance {
-        point := entity.position + (directions[direction] * i32(i))
+        point := entity.position + (DIRECTIONS[direction] * i32(i))
         if world_space_empty(handle.world, point) {
             final_point = point
         } else {

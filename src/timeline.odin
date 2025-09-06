@@ -19,7 +19,12 @@ Timeline :: struct {
     //       multiple pops throughout.
     current_event: ^Event, 
     events: [dynamic]Event,
+
+    sequences: [dynamic]Event_Sequence,
 }
+
+
+Event_Sequence :: [dynamic]Event
 
 
 // Flags for configuring the state of an Event.

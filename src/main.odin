@@ -91,7 +91,7 @@ main :: proc() {
 	defer free_fight(fight)
 
 	// == Random stuff.
-	new_character(world, .Fighter)
+	game.player = new_character(world, .Fighter)
 
 	for _ in 0..<2 {
 		enemy := new_character(world, .Goblin)

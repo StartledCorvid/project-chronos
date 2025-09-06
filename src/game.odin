@@ -22,6 +22,8 @@ Game :: struct {
     current_world: ^World,
     camera: rl.Camera2D,
 
+    player: Entity_Handle,
+
     character_types: [Character_Type]Character_Data,
     textures: [Texture_Name]rl.Texture,
 }
