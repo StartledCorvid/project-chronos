@@ -1,4 +1,9 @@
 package game
+
+import rl "vendor:raylib"
+import "core:fmt"
+
+
 /*
 # Overview
 Mainly handles the management of the Player's turn.
@@ -69,3 +74,36 @@ query_player_attack :: proc() -> (Direction, bool) {
 
 
 // ------------------------------------- !END PLAYER! ------------------------------------
+
+
+// +-------------------------------------------------------------------------------------+
+// |                                       !UI!                                          |
+// +-------------------------------------------------------------------------------------+
+
+
+// Draws the user interface for the player info.
+draw_player_ui :: proc(handle: Entity_Handle, loc := #caller_location) {
+	player := get_entity(handle)
+	character, ok := player.type.(Character)
+	assert(ok, "Entity is not a Character.", loc)
+
+	health_bar_dim := Vector2{ 16, 8 }
+	current_health := f32(character.hit_points)
+	max_health := f32(get_max_hp(character.base.stats))
+
+	ui_draw_bar({ 0, 0 }, health_bar_dim, current_health / max_health, rl.RED, rl.BLACK)
+
+	health_text := fmt.ctprintf("%v/%v", current_health, max_health)
+	rl.DrawText(health_text, i32(health_bar_dim.x), 0, 8, rl.RED)
+}
+
+
+// ------------------------------------- !END UI! ----------------------------------------
+
+
+ui_draw_bar :: proc(position: Vector2, dimensions: Vector2, fill: f32, fill_color: rl.Color, background_color: rl.Color) {
+	rl.DrawRectangleV(position, dimensions, background_color)
+
+	fill_width := dimensions.x * fill
+	rl.DrawRectangleV(position, { fill_width, dimensions.y }, fill_color)
+}

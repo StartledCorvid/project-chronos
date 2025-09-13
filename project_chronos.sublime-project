@@ -13,10 +13,10 @@
 			"cmd": [
 				"odin",
 				"run",
-				"src",
+				"game",
 				"-show-timings",
 				"-strict-style",
-				"-vet-unused",
+				// "-vet-unused",
 				"-vet-style",
 				"-vet-semicolon",
 				"-debug",

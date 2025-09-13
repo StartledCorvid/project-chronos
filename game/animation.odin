@@ -84,6 +84,11 @@ animator_tick :: proc(animator: ^Animator, delta_time: f32, loc := #caller_locat
 	frame_count   := (animation.ending_frame - animation.starting_frame) + 1
 	frames_passed := i32(animator._t * f32(animation.fps))
 
+	if animation.loop_count >= 0 && frames_passed >= (frame_count * animation.loop_count) {
+		animator_pause(animator)
+		return
+	}
+
 	current_frame_index := (frames_passed % frame_count) + animation.starting_frame
 
 	atlas := animation.atlas

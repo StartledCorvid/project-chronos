@@ -73,8 +73,9 @@ Entity :: struct {
 
 // Variations of an Entity.
 Entity_Type :: union {
-    Character,
-    Object,
+    Character, // character.odin
+    Object,    // ???
+    Particle,  // particle.odin
 }
 
 
@@ -100,11 +101,11 @@ entity_handle_valid :: proc(handle: Entity_Handle, loc := #caller_location) -> b
 
 // Gets a pointer to the Entity the handle points to. Returns nil if it does
 // not point to a valid Entity.
-get_entity :: proc(handle: Entity_Handle, loc := #caller_location) -> ^Entity {
+get_entity :: proc(handle: Entity_Handle, loc := #caller_location) -> (^Entity, bool) #optional_ok {
     is_valid := entity_handle_valid(handle)
-    if !is_valid do return nil
+    if !is_valid do return nil, false
 
-    return &handle.world.entities[handle.id]
+    return &handle.world.entities[handle.id], true
 }
 
 
@@ -219,6 +220,8 @@ entity_tick :: proc(handle: Entity_Handle, delta_time: f32) {
     switch type in entity.type {
     case Character:
     case Object:
+    case Particle:
+        particle_tick(entity)
     }
 }
 

@@ -1,12 +1,17 @@
 package game
+
+import "core:log"
+// import "core:fmt"
+import "core:slice"
+import rl "vendor:raylib"
+import "core:math/rand"
+import sa "core:container/small_array"
+
+
 /*
 # Overview
 Handles the management of Fights, Rounds, and turns in the game.
 */
-
-import "core:log"
-import "core:slice"
-import sa "core:container/small_array"
 
 
 // +-------------------------------------------------------------------------------------+
@@ -56,8 +61,16 @@ Fight :: struct {
 
 
 // Creates a new Fight instance and intializes it.
-new_fight :: proc(allocator := context.allocator, loc := #caller_location) -> ^Fight {
+new_fight :: proc(difficulty: i32, allocator := context.allocator, loc := #caller_location) -> ^Fight {
     fight := new(Fight, allocator, loc)
+
+    characters := generate_fight(fight, difficulty, allocator, loc)
+    defer delete(characters, allocator, loc)
+
+
+    // TODO: Add characters to fight.
+
+
     fight.phase = .Starting
     return fight
 }
@@ -111,7 +124,11 @@ fight_tick :: proc(fight: ^Fight, delta_time: f32, loc := #caller_location) {
     case .Processing:
         processing_tick(fight, delta_time)
     case .Player_Lose:
+        free_fight(fight)
+        game.state = .Lose_Screen
     case .Player_Win:
+        game.won_games += 1
+        game.state = .Win_Screen
     }
 }
 
@@ -134,12 +151,38 @@ turn_tick :: proc(fight: ^Fight) {
 processing_tick :: proc(fight: ^Fight, delta_time: f32) {
     timeline_tick(&fight.timeline, delta_time)
     if len(fight.timeline.events) <= 0 {
-        fight_next_turn(fight)
-        // TODO: Check if Player has won or lost.
-        fight_change_phase(fight, .Turn)
+        next_phase := get_next_phase(fight)
+
+        if next_phase == .Turn {
+            fight_next_turn(fight)
+        }
+
+        fight_change_phase(fight, next_phase)
     }
 }
 
+
+fight_has_enemy :: proc(fight: ^Fight) -> bool {
+    for handle in fight.turn_order {
+        if handle.id == game.player.id do continue
+        if entity_handle_valid(handle) {
+            return true
+        }
+    }
+
+    return false
+}
+
+
+get_next_phase :: proc(fight: ^Fight) -> Fight_Phase {
+    if !entity_handle_valid(game.player) {
+        return .Player_Lose
+    } else if !fight_has_enemy(fight) {
+        return .Player_Win
+    }
+
+    return .Turn
+}
 
 // Moves the Fight on to the next turn, starting a new Round if past the last turn.
 fight_next_turn :: proc(fight: ^Fight) {
@@ -169,6 +212,7 @@ fight_next_turn :: proc(fight: ^Fight) {
 fight_change_phase :: proc(fight: ^Fight, new_phase: Fight_Phase) {
     if fight.phase == new_phase do return
     fight.phase = new_phase
+    log.infof("Changed Fight phase to '%v'.", fight.phase)
 }
 
 
@@ -188,3 +232,78 @@ compare_character_speed :: proc(handle_a: Entity_Handle, handle_b: Entity_Handle
 
 
 // ------------------------------------- !END FIGHT! -------------------------------------
+
+
+// +-------------------------------------------------------------------------------------+
+// |                                 !FIGHT GENERATION!                                  |
+// +-------------------------------------------------------------------------------------+
+
+
+// Populates the given Fight using the FIGHTS list. Supposed to match the
+// difficulty as closely as possible.
+generate_fight :: proc(fight: ^Fight, difficulty: i32, allocator := context.allocator, loc := #caller_location) -> []Character_Type {
+
+
+    // fight_comp: Fight_Comp
+
+    // if fight_index != -1 {
+    //     fight_comp = FIGHTS[fight_index]
+    // } else {
+    //     fight_comp = rand.choice(FIGHTS[:])
+    // }
+
+    // for type in fight_comp {
+    //     enemy := new_character(game.current_world, type)
+    //     random_pos := random_world_point(game.current_world^)
+    //     for !world_space_empty(game.current_world, random_pos) do random_pos = random_world_point(game.current_world^)
+    //     get_entity(enemy).position = random_pos
+    // }
+}
+
+
+// ------------------------------- !END FIGHT GENERATION! --------------------------------
+
+
+
+// +-------------------------------------------------------------------------------------+
+// |                                          !UI!                                       |
+// +-------------------------------------------------------------------------------------+
+
+
+// Draws the timeline UI for the fight.
+ui_fight_draw_turn_timeline :: proc(fight: Fight) {
+    TIMELINE_WIDTH :: 100
+    TIMELINE_HEIGHT :: 2
+    TIMELINE_PADDING_Y :: 2
+    TIMELINE_ENTRY_SPACING :: 2
+    MID_SCREEN :: f32(RES_X) / 2.0
+
+    start_pos := MID_SCREEN - (f32(TIMELINE_WIDTH) / 2.0)
+    rl.DrawRectangleV({ start_pos, TIMELINE_PADDING_Y + (TIMELINE_HEIGHT / 2) }, { TIMELINE_WIDTH, TIMELINE_HEIGHT }, rl.BLACK)
+
+    total_offset := f32(0)
+
+    for handle, index in fight.turn_order {
+        if index < fight.current_turn || !entity_handle_valid(handle) {
+            continue
+        }
+        entity := get_entity(handle)
+        character, ok := entity.type.(Character)
+        if !ok {
+            log.errorf("An Entity that is not a Character got included in the Timeline.")
+            continue
+        }
+
+        icon_image := get_texture(character.base.icon)
+
+        // TODO: Center timeline? Adjust the throughline timeline width (black line above).
+        icon_pos := start_pos + total_offset
+
+        rl.DrawTextureV(icon_image, { icon_pos, 0 }, rl.WHITE)
+
+        total_offset += f32(icon_image.width) + TIMELINE_ENTRY_SPACING
+    }
+}
+
+
+// --------------------------------------- !END UI! --------------------------------------

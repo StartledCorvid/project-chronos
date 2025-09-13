@@ -21,27 +21,26 @@ Texture_Name :: enum {
     Fighter,
     Goblin,
 
+    Icon_Fighter,
+    Icon_Goblin,
+
     Puff,
 }
 
 
 load_textures :: proc() -> [Texture_Name]rl.Texture {
-    textures := [Texture_Name]rl.Texture{
+    defer log.infof("Loaded %v Textures.", len(Texture_Name))
+    return [Texture_Name]rl.Texture{
         .Tile_Dirt = rl.LoadTexture("res/images/dirt_tile.png"),
 
         .Fighter = rl.LoadTexture("res/images/fighter.png"),
         .Goblin = rl.LoadTexture("res/images/goblin.png"),
 
+        .Icon_Fighter = rl.LoadTexture("res/images/fighter.png"), // TODO: Make icon.
+        .Icon_Goblin = rl.LoadTexture("res/images/icon_goblin.png"),
+
         .Puff = rl.LoadTexture("res/images/puff.png"),
     }
-
-    when ODIN_DEBUG {
-        for texture, texture_name in textures {
-            log.debugf("Loaded texture %v: (width: %v, height: %v)", texture_name, texture.width, texture.height)
-        }
-    }
-
-    return textures
 }
 
 

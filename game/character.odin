@@ -1,4 +1,8 @@
 package game
+
+import "core:log"
+
+
 /*
 # Overview
 Handling of a participant in combat. This includes different prefabs for enemies
@@ -11,8 +15,6 @@ Handling of a participant in combat. This includes different prefabs for enemies
 # Adding a New Stat Type
 1. Add a new entry to the Stat enum.
 */
-
-// import rl "vendor:raylib"
 
 
 // +-------------------------------------------------------------------------------------+
@@ -53,6 +55,7 @@ Character_Type :: enum {
 Character_Data :: struct {
 	display_name: string,
 	description: string,
+	icon: Texture_Name,
 
 	stats: Stat_Block,
 
@@ -81,10 +84,12 @@ Character :: struct {
 
 // Loads the different character types into an array.
 load_character_types :: proc() -> [Character_Type]Character_Data {
+	defer log.infof("Loaded %v Character Types.", len(Character_Type))
 	return {
 		.Fighter = {
 			display_name = "Fighter",
 			description = "A fighter, not a lover.",
+			icon = .Icon_Fighter,
 			stats = {
 				.Speed     = 10,
 				.Strength  = 12,
@@ -105,6 +110,7 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 		.Goblin = {
 			display_name = "Goblin",
 			description = "A lover, not a fighter.",
+			icon = .Icon_Goblin,
 			stats = {
 				.Speed     = 4,
 				.Strength  = 4,

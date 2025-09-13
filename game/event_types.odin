@@ -118,7 +118,7 @@ event_basic_attack :: proc(owner: Entity_Handle, direction: Direction, damage: i
             }
         }
 
-        // TODO: Play particles? Make that another Event?
+        new_particle(entity.position + attack_direction, Particle_Name.Puff)
 
         stop_event(e)
     } // <-- on_tick 

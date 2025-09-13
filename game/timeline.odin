@@ -64,6 +64,10 @@ timeline_tick :: proc(timeline: ^Timeline, delta_time: f32) {
     }
 
     current_event := &timeline.events[0]
+    if !valid_event(current_event^) {
+        pop_front(&timeline.events)
+        return
+    }
 
     // on_start
     if timeline.current_event == nil {

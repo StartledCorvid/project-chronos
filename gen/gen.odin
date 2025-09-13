@@ -1,7 +1,8 @@
 package gen
 
-import "core:io"
-import "core:os"
+import "core:log"
+// import "core:io"
+// import "core:os"
 
 /*
 # Overview
@@ -11,15 +12,10 @@ and creates hard-coded lookups for each image, animation, etc.
 
 
 main :: proc() {
+    logger := log.create_console_logger()
+    defer log.destroy_console_logger(logger)
 
-}
+    context.logger = logger
 
-
-gen_textures :: proc() {
-    
-}
-
-
-gen_animations :: proc() {
-    
+    // gen_fights("res/fights", "game/gen_fights.odin")
 }
