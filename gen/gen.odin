@@ -17,5 +17,5 @@ main :: proc() {
 
     context.logger = logger
 
-    // gen_fights("res/fights", "game/gen_fights.odin")
+    gen_fights("res/fights", "game/gen_content_fights.odin")
 }

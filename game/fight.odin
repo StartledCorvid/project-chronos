@@ -1,16 +1,21 @@
 package game
 
+import "core:math/rand"
 import "core:log"
 // import "core:fmt"
 import "core:slice"
 import rl "vendor:raylib"
-import "core:math/rand"
+// import "core:math/rand"
 import sa "core:container/small_array"
 
 
 /*
 # Overview
 Handles the management of Fights, Rounds, and turns in the game.
+
+# Adding a New Fight
+1. Create a fight JSON file in the res/fights/ directory.
+2. Run the gen program (or the gen.bat script).
 */
 
 
@@ -52,6 +57,12 @@ Fight :: struct {
 }
 
 
+Fight_Info :: struct {
+    rating: i32, // The difficulty rating of the fight.
+    composition: []Character_Type, // The Character_Types of the enemies in the fight.
+}
+
+
 // ------------------------------------- !END TYPES! -------------------------------------
 
 
@@ -64,12 +75,16 @@ Fight :: struct {
 new_fight :: proc(difficulty: i32, allocator := context.allocator, loc := #caller_location) -> ^Fight {
     fight := new(Fight, allocator, loc)
 
-    characters := generate_fight(fight, difficulty, allocator, loc)
-    defer delete(characters, allocator, loc)
+    characters := generate_fight(difficulty, allocator, loc)
+    log.debugf("Generated fight: %v", characters)
 
+    for character_type in characters {
+        enemy := new_character(game.current_world, character_type)
+        random_pos := random_world_point(game.current_world^)
 
-    // TODO: Add characters to fight.
-
+        for !world_space_empty(game.current_world, random_pos) do random_pos = random_world_point(game.current_world^)
+        get_entity(enemy).position = random_pos
+    }
 
     fight.phase = .Starting
     return fight
@@ -241,23 +256,66 @@ compare_character_speed :: proc(handle_a: Entity_Handle, handle_b: Entity_Handle
 
 // Populates the given Fight using the FIGHTS list. Supposed to match the
 // difficulty as closely as possible.
-generate_fight :: proc(fight: ^Fight, difficulty: i32, allocator := context.allocator, loc := #caller_location) -> []Character_Type {
+generate_fight :: proc(difficulty: i32, allocator := context.allocator, loc := #caller_location) -> []Character_Type {
+    potential_fights := get_closest_fights(difficulty)
+    chosen_fight := rand.choice(potential_fights[:])
+
+    return chosen_fight.composition
+}
 
 
-    // fight_comp: Fight_Comp
+@(private="file")
+get_closest_fights :: proc(difficulty: i32) -> []Fight_Info {
+    lower_index := 0
+    upper_index := len(FIGHTS) - 1
+    middle_index := (upper_index + lower_index) / 2
 
-    // if fight_index != -1 {
-    //     fight_comp = FIGHTS[fight_index]
-    // } else {
-    //     fight_comp = rand.choice(FIGHTS[:])
-    // }
+    for upper_index != lower_index {
+        if upper_index - 1 == lower_index {
+            upper_difference := abs(difficulty - FIGHTS[upper_index].rating)
+            lower_difference := abs(difficulty - FIGHTS[lower_index].rating)
 
-    // for type in fight_comp {
-    //     enemy := new_character(game.current_world, type)
-    //     random_pos := random_world_point(game.current_world^)
-    //     for !world_space_empty(game.current_world, random_pos) do random_pos = random_world_point(game.current_world^)
-    //     get_entity(enemy).position = random_pos
-    // }
+            if upper_difference > lower_difference {
+                middle_index = lower_index
+            } else if lower_difference > upper_difference {
+                middle_index = upper_index
+            } else if upper_difference == lower_difference {
+                middle_index = lower_index
+            }
+
+            break
+        }
+
+        fight := FIGHTS[middle_index]
+        
+        if difficulty > fight.rating {
+            lower_index = middle_index
+        } else if difficulty < fight.rating {
+            upper_index = middle_index
+        } else if difficulty == fight.rating {
+            break
+        }
+
+        middle_index = (upper_index + lower_index) / 2
+    }
+
+    selected_rating := FIGHTS[middle_index].rating
+
+    min_index := middle_index
+    for (min_index - 1) > 0 && FIGHTS[min_index - 1].rating == selected_rating {
+        min_index -= 1
+    }
+
+    max_index := middle_index
+    length := len(FIGHTS)
+    for max_index < length && FIGHTS[max_index].rating == selected_rating {
+        max_index += 1
+    }
+
+    log.debugf("Total fights: %v", FIGHTS)
+    log.debugf("When generating fight: {{ difficulty: %v, selected_rating: %v, min: %v, max: %v, middle_index: %v }}", difficulty, selected_rating, min_index, max_index, middle_index)
+
+    return FIGHTS[min_index:max_index]
 }
 
 

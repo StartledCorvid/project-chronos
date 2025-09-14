@@ -1,5 +1,7 @@
 package gen
 
+import "core:slice"
+import "core:sort"
 import "core:encoding/json"
 import "core:path/filepath"
 import "core:log"
@@ -15,18 +17,10 @@ using the json files found in the given directory.
 
 
 Fight_Info :: struct {
-    fight_numbers: []int,
-    fight_comp: []string,
+    rating: int,
+    composition: []string,
 }
 
-
-All_Fight_Info :: struct {
-    fight_map: map[int][dynamic]Fight_Info,
-}
-
-Fight_Comp       :: []string
-Potential_Fights :: []Fight_Comp
-Fight_Comp_Data  :: []Potential_Fights
 
 
 // Generate the gen file for Fight types.
@@ -67,18 +61,18 @@ gen_fights :: proc(source_dir: string, dest: string) -> bool {
     log.infof("Loading %v files.", len(files_info))
 
     fight_info := get_fight_info(files_info)
-    defer delete_fight_info(fight_info)
+    defer delete(fight_info)
 
     file_header(gen_file)
-    fight_contents(gen_file, fight_info)
+    fight_contents(gen_file, fight_info[:])
 
     return true
 }
 
 
 @(private="file")
-get_fight_info :: proc(files: []os.File_Info) -> map[int][dynamic]Fight_Info {
-    info: map[int][dynamic]Fight_Info
+get_fight_info :: proc(files: []os.File_Info) -> [dynamic]Fight_Info {
+    info: [dynamic]Fight_Info
 
     for file in files {
         file_contents, read_err := os.read_entire_file_or_err(file.fullpath)
@@ -95,25 +89,14 @@ get_fight_info :: proc(files: []os.File_Info) -> map[int][dynamic]Fight_Info {
             continue
         }
 
-        for level in fight_info.fight_numbers {
-            if level not_in info {
-                info[level] = make([dynamic]Fight_Info)
-            }
-
-            append(&info[level], fight_info)
-        }
+        append(&info, fight_info)
     }
+
+    slice.sort_by(info[:], proc(a, b: Fight_Info) -> bool {
+        return a.rating < b.rating
+    })
 
     return info
-}
-
-
-delete_fight_info :: proc(info: map[int][dynamic]Fight_Info) {
-    for _, entry in info {
-        delete(entry)
-    }
-
-    delete(info)
 }
 
 
@@ -123,27 +106,24 @@ file_header :: proc(f: os.Handle) {
     fmt.fprintfln(f, "// Generated file")
     fmt.fprintfln(f, "package game")
     fmt.fprintln(f, "")
-    fmt.fprintln(f, "Fight_Comp       :: []Character_Type")
-    fmt.fprintln(f, "Potential_Fights :: []Fight_Comp")
-    fmt.fprintln(f, "Fight_Comp_Data  :: []Potential_Fights")
-    fmt.fprintln(f, "")
 }
 
 
 @(private="file")
-fight_contents :: proc(f: os.Handle, info: map[int][dynamic]Fight_Info) {
+fight_contents :: proc(f: os.Handle, info: []Fight_Info) {
     fmt.fprintln(f, "@(rodata)")
-    fmt.fprintln(f, "FIGHTS := [?]Potential_Fights{")
+    fmt.fprintln(f, "FIGHTS := [?]Fight_Info{")
 
-    for index, fights in info {
-        fmt.fprintfln(f, "\t// Fight %v", index)
+    for info, index in info {
         fmt.fprintln(f, "\t{")
+        fmt.fprintfln(f, "\t\trating = %v,", info.rating)
+        fmt.fprintln(f, "\t\tcomposition = {")
 
-        for fight in fights {
-            fmt.fprintln(f, "\t\t{")
-            for type in fight.fight_comp do fmt.fprintfln(f, "\t\t\t.%v,", type)
-            fmt.fprintln(f, "\t\t},")
+        for type in info.composition {
+            fmt.fprintfln(f, "\t\t\t.%v,", type)
         }
+
+        fmt.fprintln(f, "\t\t},")
 
         fmt.fprintln(f, "\t},")
     }

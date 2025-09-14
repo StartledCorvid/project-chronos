@@ -69,11 +69,18 @@ start_fight :: proc(game: ^Game) {
     if game.current_fight != nil {
         free_fight(game.current_fight)
     }
-    game.current_fight = new_fight()
+
+    difficulty := fight_difficulty_scaling(game.won_games)
+    game.current_fight = new_fight(difficulty)
     
     game.player = new_character(game.current_world, game.player_type)
 
     game.state = .Gameplay
+}
+
+
+fight_difficulty_scaling :: proc(won_games: i32) -> i32 {
+    return won_games + 1
 }
 
 
@@ -84,7 +91,9 @@ reset_game :: proc(game: ^Game, player_type: Character_Type) {
     game.player = new_character(game.current_world, player_type)
     game.state = .Gameplay
 
-    game.current_fight = new_fight()
+    if game.current_fight != nil {
+        free_fight(game.current_fight)
+    }
 }
 
 
