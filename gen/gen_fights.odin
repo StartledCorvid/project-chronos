@@ -16,8 +16,11 @@ using the json files found in the given directory.
 */
 
 
+Fight_Level :: [dynamic]Fight_Info
+
 Fight_Info :: struct {
-    rating: int,
+    arena_size: int,
+    arena_tile: string,
     composition: []string,
 }
 
@@ -60,7 +63,7 @@ gen_fights :: proc(source_dir: string, dest: string) -> bool {
 
     log.infof("Loading %v files.", len(files_info))
 
-    fight_info := get_fight_info(files_info)
+    fight_info := get_levels(files_info)
     defer delete(fight_info)
 
     file_header(gen_file)
@@ -71,8 +74,8 @@ gen_fights :: proc(source_dir: string, dest: string) -> bool {
 
 
 @(private="file")
-get_fight_info :: proc(files: []os.File_Info) -> [dynamic]Fight_Info {
-    info: [dynamic]Fight_Info
+get_levels :: proc(files: []os.File_Info) -> [dynamic]Fight_Level {
+    levels: [dynamic]Fight_Level
 
     for file in files {
         file_contents, read_err := os.read_entire_file_or_err(file.fullpath)
@@ -82,21 +85,17 @@ get_fight_info :: proc(files: []os.File_Info) -> [dynamic]Fight_Info {
         }
         defer delete(file_contents)
 
-        fight_info: Fight_Info
-        unmarshal_err := json.unmarshal(file_contents, &fight_info)
+        fight_level: Fight_Level
+        unmarshal_err := json.unmarshal(file_contents, &fight_level)
         if unmarshal_err != nil {
             log.errorf("Problem unmarshalling JSON from file '%v': %v", file.fullpath, unmarshal_err)
             continue
         }
 
-        append(&info, fight_info)
+        append(&levels, fight_level)
     }
 
-    slice.sort_by(info[:], proc(a, b: Fight_Info) -> bool {
-        return a.rating < b.rating
-    })
-
-    return info
+    return levels
 }
 
 
@@ -110,20 +109,27 @@ file_header :: proc(f: os.Handle) {
 
 
 @(private="file")
-fight_contents :: proc(f: os.Handle, info: []Fight_Info) {
+fight_contents :: proc(f: os.Handle, info: []Fight_Level) {
     fmt.fprintln(f, "@(rodata)")
-    fmt.fprintln(f, "FIGHTS := [?]Fight_Info{")
+    fmt.fprintln(f, "FIGHTS := [?]Fight_Level{")
 
-    for info, index in info {
+    for level, index in info {
+        fmt.fprintfln(f, "\t// Level %v", index)
         fmt.fprintln(f, "\t{")
-        fmt.fprintfln(f, "\t\trating = %v,", info.rating)
-        fmt.fprintln(f, "\t\tcomposition = {")
 
-        for type in info.composition {
-            fmt.fprintfln(f, "\t\t\t.%v,", type)
+        for info in level {
+            fmt.fprintln(f, "\t\t{")
+            fmt.fprintfln(f, "\t\t\tarena_size = %v,", info.arena_size)
+            fmt.fprintfln(f, "\t\t\tarena_tile = .%v,", info.arena_tile)
+            fmt.fprintln(f,  "\t\t\tcomposition = {")
+
+            for type in info.composition {
+                fmt.fprintfln(f, "\t\t\t\t.%v,", type)
+            }
+
+            fmt.fprintln(f, "\t\t\t},")
+            fmt.fprintln(f, "\t\t},")
         }
-
-        fmt.fprintln(f, "\t\t},")
 
         fmt.fprintln(f, "\t},")
     }

@@ -11,7 +11,6 @@ anything that can be spawned in the world.
 */
 
 import "core:log"
-import "core:fmt"
 import sa "core:container/small_array"
 import rl "vendor:raylib"
 
@@ -245,8 +244,8 @@ entity_draw :: proc(handle: Entity_Handle) {
     atlas := get_texture(entity.animator.current_animation.atlas.texture)
     rl.DrawTexturePro(atlas, frame_rect, screen_rect, { 0, 0 }, 0, rl.WHITE)
 
-    // Draw the ID of the Character.
-    if _, ok := entity.type.(Character); ok {
+    // Draw the healthbar if the mouse is over the character.
+    if character, ok := entity.type.(Character); ok {
         mouse_pos := window_to_screen(rl.GetMousePosition())
         character_box := rl.Rectangle{
             width = WORLD_UNITS,
@@ -255,8 +254,9 @@ entity_draw :: proc(handle: Entity_Handle) {
             y = screen_position.y,
         }
         if rl.CheckCollisionPointRec(mouse_pos, character_box) {
-            text := fmt.ctprintf("%v", entity.id)
-            rl.DrawText(text, i32(screen_position.x), i32(screen_position.y), 16, rl.WHITE)
+            start_pos := world_to_screen(entity.position)
+            health_percentage := f32(character.hit_points) / f32(get_max_hp(character.base.stats)) 
+            ui_draw_bar(start_pos, { 16, 1 }, health_percentage, rl.RED, rl.BLACK)
         }
     }
 }

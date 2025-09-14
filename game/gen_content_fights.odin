@@ -2,26 +2,49 @@
 package game
 
 @(rodata)
-FIGHTS := [?]Fight_Info{
+FIGHTS := [?]Fight_Level{
+	// Level 0
 	{
-		rating = 1,
-		composition = {
-			.Goblin,
+		{
+			arena_size = 5,
+			arena_tile = .Tile_Dirt,
+			composition = {
+				.Goblin,
+			},
+		},
+		{
+			arena_size = 5,
+			arena_tile = .Tile_Dirt,
+			composition = {
+				.Spider,
+			},
 		},
 	},
+	// Level 1
 	{
-		rating = 3,
-		composition = {
-			.Goblin,
-			.Goblin,
+		{
+			arena_size = 5,
+			arena_tile = .Tile_Dirt,
+			composition = {
+				.Goblin,
+				.Goblin,
+			},
 		},
-	},
-	{
-		rating = 5,
-		composition = {
-			.Goblin,
-			.Goblin,
-			.Goblin,
+		{
+			arena_size = 5,
+			arena_tile = .Tile_Dirt,
+			composition = {
+				.Goblin,
+				.Spider,
+			},
+		},
+		{
+			arena_size = 5,
+			arena_tile = .Tile_Dirt,
+			composition = {
+				.Spider,
+				.Spider,
+			},
 		},
 	},
 }

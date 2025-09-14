@@ -46,8 +46,10 @@ Stat :: enum {
 
 // Different types of Characters by name.
 Character_Type :: enum {
-	Goblin,
 	Fighter,
+
+	Goblin,
+	Spider,
 }
 
 
@@ -112,15 +114,35 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 			description = "A lover, not a fighter.",
 			icon = .Icon_Goblin,
 			stats = {
-				.Speed     = 4,
-				.Strength  = 4,
+				.Speed     = 1,
+				.Strength  = 1,
 				.Magic     = 0,
 				.Agility   = 6,
 				.Toughness = 1,
 			},
-			// animator = setup_character_animator(.Goblin, { 1, 1 }),
 			animator = basic_character_animator({
 				atlas = new_texture_atlas(.Goblin, { 1, 1 }),
+				starting_frame = 0,
+				ending_frame = 0,
+				fps = 1,
+				loop_count = -1,
+			}),
+			on_turn = turn_aggressive,
+		},
+
+		.Spider = {
+			display_name = "Spider",
+			description = "Creppy.",
+			icon = .Icon_Spider,
+			stats = {
+				.Speed     = 8,
+				.Strength  = 2,
+				.Magic     = 0,
+				.Agility   = 8,
+				.Toughness = 2,
+			},
+			animator = basic_character_animator({
+				atlas = new_texture_atlas(.Spider, { 1, 1 }),
 				starting_frame = 0,
 				ending_frame = 0,
 				fps = 1,

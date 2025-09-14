@@ -20,9 +20,11 @@ Texture_Name :: enum {
 
     Fighter,
     Goblin,
+    Spider,
 
     Icon_Fighter,
     Icon_Goblin,
+    Icon_Spider,
 
     Puff,
 }
@@ -35,9 +37,11 @@ load_textures :: proc() -> [Texture_Name]rl.Texture {
 
         .Fighter = rl.LoadTexture("res/images/fighter.png"),
         .Goblin = rl.LoadTexture("res/images/goblin.png"),
+        .Spider = rl.LoadTexture("res/images/spider.png"),
 
         .Icon_Fighter = rl.LoadTexture("res/images/fighter.png"), // TODO: Make icon.
         .Icon_Goblin = rl.LoadTexture("res/images/icon_goblin.png"),
+        .Icon_Spider = rl.LoadTexture("res/images/icon_spider.png"),
 
         .Puff = rl.LoadTexture("res/images/puff.png"),
     }

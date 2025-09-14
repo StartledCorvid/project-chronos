@@ -1,8 +1,6 @@
 package gen
 
 import "core:log"
-// import "core:io"
-// import "core:os"
 
 /*
 # Overview
@@ -17,5 +15,5 @@ main :: proc() {
 
     context.logger = logger
 
-    gen_fights("res/fights", "game/gen_content_fights.odin")
+    gen_fights("embed/fights", "game/gen_content_fights.odin")
 }

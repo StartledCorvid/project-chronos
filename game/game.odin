@@ -14,6 +14,7 @@ Game_State :: enum {
     Main_Menu,
     Win_Screen,
     Lose_Screen,
+    Win_Game,
     Gameplay,
     Quit,
 }
@@ -70,17 +71,10 @@ start_fight :: proc(game: ^Game) {
         free_fight(game.current_fight)
     }
 
-    difficulty := fight_difficulty_scaling(game.won_games)
-    game.current_fight = new_fight(difficulty)
-    
+    game.current_fight = new_fight(game.won_games)
     game.player = new_character(game.current_world, game.player_type)
 
     game.state = .Gameplay
-}
-
-
-fight_difficulty_scaling :: proc(won_games: i32) -> i32 {
-    return won_games + 1
 }
 
 
@@ -141,9 +135,20 @@ tick_game :: proc(game: ^Game) {
         tick_gameplay(delta_time, game.current_fight, game.current_world)
     case .Win_Screen:
         if rl.IsMouseButtonPressed(.LEFT) {
-            start_fight(game)
+            if game.won_games < len(FIGHTS) {
+                start_fight(game)
+            } else {
+                game.state = .Win_Game
+            }
         }
     case .Lose_Screen:
+        if rl.IsMouseButtonPressed(.LEFT) {
+            game.state = .Main_Menu
+        }
+    case .Win_Game:
+        if rl.IsMouseButtonPressed(.LEFT) {
+            game.state = .Main_Menu
+        }
     case .Quit:
         rl.CloseWindow()
     }
@@ -161,6 +166,7 @@ draw_game :: proc(game: ^Game) {
     case .Win_Screen:
         world_draw(game.current_world)
     case .Lose_Screen:
+    case .Win_Game:
     case .Quit:
     }
 }
@@ -180,6 +186,10 @@ ui_game :: proc(game: ^Game) {
     case .Win_Screen:
         rl.DrawText("Win! Click to Continue", 0, 0, 8, rl.GREEN)
     case .Lose_Screen:
+        rl.DrawText("Lose! Click to Continue", 0, 0, 8, rl.GREEN)
+    case .Win_Game:
+        rl.DrawText("You have won the game!", 0, 0, 8, rl.GREEN)
+        rl.DrawText("Click to continue.", 0, 8, 8, rl.WHITE)
     case .Quit:
     }
 }

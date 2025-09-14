@@ -57,9 +57,13 @@ Fight :: struct {
 }
 
 
+Fight_Level :: []Fight_Info
+
+
 Fight_Info :: struct {
-    rating: i32, // The difficulty rating of the fight.
-    composition: []Character_Type, // The Character_Types of the enemies in the fight.
+    arena_size: int,
+    arena_tile: Texture_Name,
+    composition: []Character_Type,
 }
 
 
@@ -72,10 +76,10 @@ Fight_Info :: struct {
 
 
 // Creates a new Fight instance and intializes it.
-new_fight :: proc(difficulty: i32, allocator := context.allocator, loc := #caller_location) -> ^Fight {
+new_fight :: proc(fight_index: i32, allocator := context.allocator, loc := #caller_location) -> ^Fight {
     fight := new(Fight, allocator, loc)
 
-    characters := generate_fight(difficulty, allocator, loc)
+    characters := generate_fight(fight_index, allocator, loc)
     log.debugf("Generated fight: %v", characters)
 
     for character_type in characters {
@@ -256,66 +260,11 @@ compare_character_speed :: proc(handle_a: Entity_Handle, handle_b: Entity_Handle
 
 // Populates the given Fight using the FIGHTS list. Supposed to match the
 // difficulty as closely as possible.
-generate_fight :: proc(difficulty: i32, allocator := context.allocator, loc := #caller_location) -> []Character_Type {
-    potential_fights := get_closest_fights(difficulty)
-    chosen_fight := rand.choice(potential_fights[:])
+generate_fight :: proc(fight_index: i32, allocator := context.allocator, loc := #caller_location) -> []Character_Type {
+    assert(fight_index >= 0 && fight_index < len(FIGHTS), "Fight out of bounds", loc)
 
-    return chosen_fight.composition
-}
-
-
-@(private="file")
-get_closest_fights :: proc(difficulty: i32) -> []Fight_Info {
-    lower_index := 0
-    upper_index := len(FIGHTS) - 1
-    middle_index := (upper_index + lower_index) / 2
-
-    for upper_index != lower_index {
-        if upper_index - 1 == lower_index {
-            upper_difference := abs(difficulty - FIGHTS[upper_index].rating)
-            lower_difference := abs(difficulty - FIGHTS[lower_index].rating)
-
-            if upper_difference > lower_difference {
-                middle_index = lower_index
-            } else if lower_difference > upper_difference {
-                middle_index = upper_index
-            } else if upper_difference == lower_difference {
-                middle_index = lower_index
-            }
-
-            break
-        }
-
-        fight := FIGHTS[middle_index]
-        
-        if difficulty > fight.rating {
-            lower_index = middle_index
-        } else if difficulty < fight.rating {
-            upper_index = middle_index
-        } else if difficulty == fight.rating {
-            break
-        }
-
-        middle_index = (upper_index + lower_index) / 2
-    }
-
-    selected_rating := FIGHTS[middle_index].rating
-
-    min_index := middle_index
-    for (min_index - 1) > 0 && FIGHTS[min_index - 1].rating == selected_rating {
-        min_index -= 1
-    }
-
-    max_index := middle_index
-    length := len(FIGHTS)
-    for max_index < length && FIGHTS[max_index].rating == selected_rating {
-        max_index += 1
-    }
-
-    log.debugf("Total fights: %v", FIGHTS)
-    log.debugf("When generating fight: {{ difficulty: %v, selected_rating: %v, min: %v, max: %v, middle_index: %v }}", difficulty, selected_rating, min_index, max_index, middle_index)
-
-    return FIGHTS[min_index:max_index]
+    random_fight := rand.choice(FIGHTS[fight_index][:])
+    return random_fight.composition
 }
 
 

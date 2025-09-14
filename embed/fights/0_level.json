@@ -1,0 +1,16 @@
+[
+    {
+        "arena_size": 5,
+        "arena_tile": "Tile_Dirt",
+        "composition": [
+            "Goblin",
+        ],
+    },
+    {
+        "arena_size": 5,
+        "arena_tile": "Tile_Dirt",
+        "composition": [
+            "Spider",
+        ],
+    },
+]
