@@ -7,7 +7,6 @@ Basic world procedures and data.
 import sa "core:container/small_array"
 import "core:math/rand"
 import rl "vendor:raylib"
-import "core:strings"
 
 
 // +---------------------------------------------------------------------------+
@@ -41,7 +40,7 @@ Object_Handle :: distinct Handle
 
 // Serializable World data.
 World_Data :: struct {
-	tile_texture_path: string,
+	tile_texture: Texture_Name,
 	world_size: u32,
 }
 
@@ -102,10 +101,7 @@ Object_Data :: struct {
 new_world :: proc(world_data: World_Data, allocator := context.allocator, loc := #caller_location) -> ^World {
 	world := new(World, allocator, loc)
 
-	tile_path_cstring := strings.clone_to_cstring(world_data.tile_texture_path)
-	defer delete(tile_path_cstring)
-
-	world.tile_texture = rl.LoadTexture(tile_path_cstring)
+	world.tile_texture = get_texture(world_data.tile_texture)
 	world.world_size = world_data.world_size
 
 	for id in 0..<MAX_ENTITIES {
@@ -118,9 +114,6 @@ new_world :: proc(world_data: World_Data, allocator := context.allocator, loc :=
 
 free_world :: proc(world: ^World, allocator := context.allocator, loc := #caller_location) {
 	assert(world != nil, "Nil World pointer.", loc)
-
-	rl.UnloadTexture(world.tile_texture)
-
 	free(world, allocator, loc)
 }
 

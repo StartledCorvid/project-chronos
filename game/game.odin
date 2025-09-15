@@ -1,11 +1,14 @@
 package game
+
+import "core:math/rand"
+import "core:log"
+import rl "vendor:raylib"
+
 /*
 # Overview
 Handling of the overall game state.
 */
 
-import "core:log"
-import rl "vendor:raylib"
 
 game: Game
 
@@ -65,7 +68,13 @@ start_new_game :: proc(game: ^Game, player_type: Character_Type) {
 
 
 start_fight :: proc(game: ^Game) {
-    load_world(.Default)
+    fight_data := rand.choice(FIGHTS[game.won_games][:])
+    world_data := World_Data{
+        tile_texture = fight_data.arena_tile,
+        world_size = u32(fight_data.arena_size),
+    }
+
+    load_world(game, world_data)
 
     if game.current_fight != nil {
         free_fight(game.current_fight)
@@ -95,19 +104,20 @@ deinit_game :: proc(allocator := context.allocator, loc := #caller_location) {
     assert(game.state != .Not_Init, "Game not initialized.", loc)
 
     if game.current_world != nil {
-        unload_world(allocator, loc)
+        free_world(game.current_world, allocator, loc)
     }
 }
 
 
-load_world :: proc(world: World_Names, allocator := context.allocator, loc := #caller_location) {
+load_world :: proc(game: ^Game, world_data: World_Data, allocator := context.allocator, loc := #caller_location) {
     assert(game.state != .Not_Init, "Game not initialized.", loc)
+    assert(game != nil, "Nil Game pointer.", loc)
 
     if game.current_world != nil {
-        unload_world(allocator, loc)
+        free_world(game.current_world, allocator, loc)
     }
 
-    game.current_world = new_world(world_data_list[world], allocator, loc)
+    game.current_world = new_world(world_data, allocator, loc)
 
     half_size := f32(game.current_world.world_size * WORLD_UNITS) / 2.0
     game.camera.offset = {
@@ -117,9 +127,14 @@ load_world :: proc(world: World_Names, allocator := context.allocator, loc := #c
 }
 
 
-unload_world :: proc(allocator := context.allocator, loc := #caller_location) {
-    assert(game.current_world != nil, "No World currently loaded.", loc)
-    free_world(game.current_world, allocator, loc)
+return_to_main_menu :: proc(game: ^Game) {
+    game.state = .Main_Menu
+    if game.current_fight != nil {
+        free_fight(game.current_fight)
+    }
+    if game.current_world != nil {
+        free_world(game.current_world)
+    }
 }
 
 
@@ -143,11 +158,11 @@ tick_game :: proc(game: ^Game) {
         }
     case .Lose_Screen:
         if rl.IsMouseButtonPressed(.LEFT) {
-            game.state = .Main_Menu
+            return_to_main_menu(game)
         }
     case .Win_Game:
         if rl.IsMouseButtonPressed(.LEFT) {
-            game.state = .Main_Menu
+            return_to_main_menu(game)
         }
     case .Quit:
         rl.CloseWindow()
