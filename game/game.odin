@@ -26,8 +26,8 @@ Game_State :: enum {
 // Holds the global values of the game.
 Game :: struct {
     state: Game_State,
-    current_world: ^World,
-    current_fight: ^Fight,
+    current_world: World,
+    current_fight: Fight,
     camera: rl.Camera2D,
 
     player_type: Character_Type,
@@ -76,12 +76,13 @@ start_fight :: proc(game: ^Game) {
 
     load_world(game, world_data)
 
-    if game.current_fight != nil {
-        free_fight(game.current_fight)
-    }
+    deinit_fight(&game.current_fight)
+    init_fight(&game.current_fight, game.won_games)
 
-    game.current_fight = new_fight(game.won_games)
-    game.player = new_character(game.current_world, game.player_type)
+    if entity_handle_valid(game.player) {
+        free_entity(game.player)
+    }
+    game.player = new_character(&game.current_world, game.player_type)
 
     game.state = .Gameplay
 }
@@ -91,21 +92,16 @@ start_fight :: proc(game: ^Game) {
 reset_game :: proc(game: ^Game, player_type: Character_Type) {
     game.won_games = 0
 
-    game.player = new_character(game.current_world, player_type)
-    game.state = .Gameplay
+    deinit_world(&game.current_world)
+    deinit_fight(&game.current_fight)
 
-    if game.current_fight != nil {
-        free_fight(game.current_fight)
-    }
+    // game.player = new_character(&game.current_world, player_type)
+    game.state = .Gameplay
 }
 
 
 deinit_game :: proc(allocator := context.allocator, loc := #caller_location) {
     assert(game.state != .Not_Init, "Game not initialized.", loc)
-
-    if game.current_world != nil {
-        free_world(game.current_world, allocator, loc)
-    }
 }
 
 
@@ -113,11 +109,8 @@ load_world :: proc(game: ^Game, world_data: World_Data, allocator := context.all
     assert(game.state != .Not_Init, "Game not initialized.", loc)
     assert(game != nil, "Nil Game pointer.", loc)
 
-    if game.current_world != nil {
-        free_world(game.current_world, allocator, loc)
-    }
-
-    game.current_world = new_world(world_data, allocator, loc)
+    deinit_world(&game.current_world)
+    init_world(&game.current_world, world_data)
 
     half_size := f32(game.current_world.world_size * WORLD_UNITS) / 2.0
     game.camera.offset = {
@@ -129,12 +122,9 @@ load_world :: proc(game: ^Game, world_data: World_Data, allocator := context.all
 
 return_to_main_menu :: proc(game: ^Game) {
     game.state = .Main_Menu
-    if game.current_fight != nil {
-        free_fight(game.current_fight)
-    }
-    if game.current_world != nil {
-        free_world(game.current_world)
-    }
+
+    deinit_world(&game.current_world)
+    deinit_fight(&game.current_fight)
 }
 
 
@@ -147,7 +137,7 @@ tick_game :: proc(game: ^Game) {
     case .Main_Menu:
         tick_main_menu(delta_time)
     case .Gameplay:
-        tick_gameplay(delta_time, game.current_fight, game.current_world)
+        tick_gameplay(delta_time, &game.current_fight, &game.current_world)
     case .Win_Screen:
         if rl.IsMouseButtonPressed(.LEFT) {
             if game.won_games < len(FIGHTS) {
@@ -177,9 +167,9 @@ draw_game :: proc(game: ^Game) {
     case .Gameplay:
         // TODO: Process animations. Maybe make a general tick method that does both.
         //       Or handle in the draw call.
-        world_draw(game.current_world)
+        world_draw(&game.current_world)
     case .Win_Screen:
-        world_draw(game.current_world)
+        world_draw(&game.current_world)
     case .Lose_Screen:
     case .Win_Game:
     case .Quit:
@@ -193,7 +183,7 @@ ui_game :: proc(game: ^Game) {
     case .Main_Menu:
         ui_main_menu()
     case .Gameplay:
-        ui_fight_draw_turn_timeline(game.current_fight^)
+        ui_fight_draw_turn_timeline(game.current_fight)
 
         if entity_handle_valid(game.player) {
             draw_player_ui(game.player)

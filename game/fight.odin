@@ -75,39 +75,33 @@ Fight_Info :: struct {
 // +-------------------------------------------------------------------------------------+
 
 
-// Creates a new Fight instance and intializes it.
-new_fight :: proc(fight_index: i32, allocator := context.allocator, loc := #caller_location) -> ^Fight {
-    fight := new(Fight, allocator, loc)
-
-    characters := generate_fight(fight_index, allocator, loc)
+init_fight :: proc(fight: ^Fight, fight_index: i32) {
+    characters := generate_fight(fight_index)
     log.debugf("Generated fight: %v", characters)
 
     for character_type in characters {
-        enemy := new_character(game.current_world, character_type)
-        random_pos := random_world_point(game.current_world^)
+        enemy := new_character(&game.current_world, character_type)
+        random_pos := random_world_point(game.current_world)
 
-        for !world_space_empty(game.current_world, random_pos) do random_pos = random_world_point(game.current_world^)
+        for !world_space_empty(&game.current_world, random_pos) do random_pos = random_world_point(game.current_world)
         get_entity(enemy).position = random_pos
     }
 
     fight.phase = .Starting
-    return fight
 }
 
 
-// Frees a Fight instance.
-free_fight :: proc(fight: ^Fight, allocator := context.allocator, loc := #caller_location) {
-    assert(fight != nil, "Invalid Fight pointer.", loc)
+deinit_fight :: proc(fight: ^Fight) {
+    fight.current_character = Entity_Handle{}
+    fight.current_turn = 0
+    fight.phase = .Starting
 
-    delete(fight.turn_order, loc)
-    free(fight, allocator, loc)
+    clear(&fight.turn_order)
 }
 
 
 // Starts a new Round in the Fight.
 new_round :: proc(fight: ^Fight, loc := #caller_location) {
-    assert(game.current_world != nil, "No World loaded.", loc)
-
     world := game.current_world
     clear(&fight.turn_order)
 
@@ -115,7 +109,7 @@ new_round :: proc(fight: ^Fight, loc := #caller_location) {
         entity := world.entities[entity_id]
 
         if _, ok := entity.type.(Character); ok {
-            handle := new_entity_handle(world, entity_id)
+            handle := new_entity_handle(&world, entity_id)
             append(&fight.turn_order, handle)
         }
     }
@@ -143,7 +137,7 @@ fight_tick :: proc(fight: ^Fight, delta_time: f32, loc := #caller_location) {
     case .Processing:
         processing_tick(fight, delta_time)
     case .Player_Lose:
-        free_fight(fight)
+        deinit_fight(fight)
         game.state = .Lose_Screen
     case .Player_Win:
         game.won_games += 1
@@ -170,13 +164,14 @@ turn_tick :: proc(fight: ^Fight) {
 processing_tick :: proc(fight: ^Fight, delta_time: f32) {
     timeline_tick(&fight.timeline, delta_time)
     if len(fight.timeline.events) <= 0 {
-        next_phase := get_next_phase(fight)
+        fight_next_turn(fight)
+        fight_change_phase(fight, .Turn)
+    }
 
-        if next_phase == .Turn {
-            fight_next_turn(fight)
-        }
-
-        fight_change_phase(fight, next_phase)
+    if !entity_handle_valid(game.player) {
+        fight_change_phase(fight, .Player_Lose)
+    } else if !fight_has_enemy(fight) {
+        fight_change_phase(fight, .Player_Win)
     }
 }
 

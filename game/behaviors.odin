@@ -13,10 +13,10 @@ turn_random_move :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 	free_directions := get_free_directions(self.position)
 
 	if move_direction, not_empty := rand.choice_bit_set(free_directions); not_empty {
-		handle := new_entity_handle(game.current_world, self^)
+		handle := new_entity_handle(&game.current_world, self^)
 		add_event(timeline, event_entity_move(handle, move_direction))
 	} else if !not_empty {
-		handle := new_entity_handle(game.current_world, self^)
+		handle := new_entity_handle(&game.current_world, self^)
 		add_event(timeline, event_lunge(handle, move_direction, 0.1, 0.1))
 	}
 
@@ -31,7 +31,7 @@ turn_aggressive :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 		return true
 	}
 
-	self_handle := new_entity_handle(game.current_world, self^)
+	self_handle := new_entity_handle(&game.current_world, self^)
 
 	// Attack if Player is in adjacent.
 	player := get_entity(game.player)

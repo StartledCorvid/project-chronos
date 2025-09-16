@@ -97,24 +97,26 @@ Object_Data :: struct {
 // +---------------------------------------------------------------------------+
 
 
-// Creates a new World.
-new_world :: proc(world_data: World_Data, allocator := context.allocator, loc := #caller_location) -> ^World {
-	world := new(World, allocator, loc)
-
+init_world :: proc(world: ^World, world_data: World_Data) {
 	world.tile_texture = get_texture(world_data.tile_texture)
 	world.world_size = world_data.world_size
 
 	for id in 0..<MAX_ENTITIES {
 		sa.append(&world._inactive_entities, id)
 	}
-
-	return world
 }
 
 
-free_world :: proc(world: ^World, allocator := context.allocator, loc := #caller_location) {
-	assert(world != nil, "Nil World pointer.", loc)
-	free(world, allocator, loc)
+deinit_world :: proc(world: ^World, loc := #caller_location) {
+	for entity_id in sa.slice(&world._active_entities) {
+		handle := new_entity_handle(world, entity_id)
+
+		assert(entity_handle_valid(handle), "Invalid Entity ID in active Entitites.", loc)
+
+		free_entity(handle, loc)
+	}
+
+	world.world_size = 0
 }
 
 
@@ -165,7 +167,7 @@ get_free_directions :: proc(origin: World_Coords) -> bit_set[Direction] {
     free_directions: bit_set[Direction]
     for direction in Direction {
         potential_position := origin + DIRECTIONS[direction]
-        is_free := world_space_empty(game.current_world, potential_position)
+        is_free := world_space_empty(&game.current_world, potential_position)
 
         if is_free do free_directions += { direction }
     }
