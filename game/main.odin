@@ -3,7 +3,6 @@ package game
 import "core:log"
 import "core:os"
 import "core:mem"
-// import "core:strings"
 import rl "vendor:raylib"
 
 
@@ -81,7 +80,7 @@ main :: proc() {
 		// -- Input.
 
 		// -- Processing.
-		tick_game(&game)
+		tick(&game)
 
 		// -- Rendering.
         rl.BeginTextureMode(target_texture)
@@ -89,21 +88,15 @@ main :: proc() {
 
 		rl.BeginMode2D(game.camera)
 
-		draw_game(&game)
+		draw(&game)
 
 		rl.EndMode2D()
-		ui_game(&game)
+		ui(&game)
 
         rl.EndTextureMode()
 
         draw_screen(target_texture)
 	}
-}
-
-
-tick_gameplay :: proc(delta_time: f32, fight: ^Fight, world: ^World) {
-	fight_tick(fight, delta_time)
-	world_tick(world, delta_time)
 }
 
 

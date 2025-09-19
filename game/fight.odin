@@ -124,7 +124,7 @@ new_round :: proc(fight: ^Fight, loc := #caller_location) {
 
 
 // Calls for a processing tick of the Fight.
-fight_tick :: proc(fight: ^Fight, delta_time: f32, loc := #caller_location) {
+tick_fight :: proc(fight: ^Fight, delta_time: f32, loc := #caller_location) {
     assert(fight != nil, "Nil Fight pointer.", loc)
 
     switch fight.phase {
@@ -138,10 +138,10 @@ fight_tick :: proc(fight: ^Fight, delta_time: f32, loc := #caller_location) {
         processing_tick(fight, delta_time)
     case .Player_Lose:
         deinit_fight(fight)
-        game.state = .Lose_Screen
+        game_change_state(&game, .Lose_Screen)
     case .Player_Win:
         game.won_games += 1
-        game.state = .Win_Screen
+        game_change_state(&game, .Win_Screen)
     }
 }
 
@@ -156,6 +156,7 @@ turn_tick :: proc(fight: ^Fight) {
     assert(character.base.on_turn != nil, "Character has no behavior set.")
     if character.base.on_turn(entity, &fight.timeline) {
         fight_change_phase(fight, .Processing)
+        character.queued_ability = new_ability(.None)
     }
 }
 

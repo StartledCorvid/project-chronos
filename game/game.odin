@@ -12,6 +12,7 @@ Handling of the overall game state.
 
 game: Game
 
+
 Game_State :: enum {
     Not_Init,
     Main_Menu,
@@ -37,9 +38,11 @@ Game :: struct {
     character_types: [Character_Type]Character_Data,
     textures: [Texture_Name]rl.Texture,
     particles: [Particle_Name]Particle,
+    abilities: [Ability_Name]Ability_Info,
 }
 
 
+// Initializes the Game. Can only be called once.
 init_game :: proc(allocator := context.allocator, loc := #caller_location) {
     if game.state != .Not_Init {
         log.error("Trying to initialize Game, but it is already initialized.", loc)
@@ -51,11 +54,19 @@ init_game :: proc(allocator := context.allocator, loc := #caller_location) {
     game.state = .Main_Menu
     game.textures = load_textures()
     game.particles = load_particles()
+    game.abilities = load_abilities()
     game.character_types = load_character_types()
 
     game.camera = rl.Camera2D{
         zoom = 1.0,
     }
+}
+
+
+// Deinitializes the Game, clearing all state and data.
+deinit_game :: proc(allocator := context.allocator, loc := #caller_location) {
+    assert(game.state != .Not_Init, "Game not initialized.", loc)
+    game_change_state(&game, .Not_Init)
 }
 
 
@@ -84,7 +95,7 @@ start_fight :: proc(game: ^Game) {
     }
     game.player = new_character(&game.current_world, game.player_type)
 
-    game.state = .Gameplay
+    game_change_state(game, .Gameplay)
 }
 
 
@@ -96,12 +107,7 @@ reset_game :: proc(game: ^Game, player_type: Character_Type) {
     deinit_fight(&game.current_fight)
 
     // game.player = new_character(&game.current_world, player_type)
-    game.state = .Gameplay
-}
-
-
-deinit_game :: proc(allocator := context.allocator, loc := #caller_location) {
-    assert(game.state != .Not_Init, "Game not initialized.", loc)
+    game_change_state(game, .Gameplay)
 }
 
 
@@ -120,81 +126,95 @@ load_world :: proc(game: ^Game, world_data: World_Data, allocator := context.all
 }
 
 
-return_to_main_menu :: proc(game: ^Game) {
-    game.state = .Main_Menu
+// Changes the game's state to the given one.
+game_change_state :: proc(game: ^Game, state: Game_State, loc := #caller_location) {
+    assert(game != nil, "Nil Game pointer.", loc)
+    assert(game.state != .Not_Init, "Game not initialized.", loc)
 
-    deinit_world(&game.current_world)
-    deinit_fight(&game.current_fight)
+    game.state = state
+
+    log.infof("Changed Game state to %v.", state)
 }
 
 
+// +-------------------------------------------------------------------------------------+
+// |                                  !PROCESSING CALLS!                                 |
+// +-------------------------------------------------------------------------------------+
 
-tick_game :: proc(game: ^Game) {
+
+// Calls a processing tick for the game.
+tick :: proc(game: ^Game) {
     delta_time := rl.GetFrameTime()
 
     switch game.state {
     case .Not_Init:
-    case .Main_Menu:
-        tick_main_menu(delta_time)
-    case .Gameplay:
-        tick_gameplay(delta_time, &game.current_fight, &game.current_world)
-    case .Win_Screen:
-        if rl.IsMouseButtonPressed(.LEFT) {
-            if game.won_games < len(FIGHTS) {
-                start_fight(game)
-            } else {
-                game.state = .Win_Game
-            }
-        }
-    case .Lose_Screen:
-        if rl.IsMouseButtonPressed(.LEFT) {
-            return_to_main_menu(game)
-        }
-    case .Win_Game:
-        if rl.IsMouseButtonPressed(.LEFT) {
-            return_to_main_menu(game)
-        }
-    case .Quit:
-        rl.CloseWindow()
+    case .Main_Menu:   tick_main_menu(delta_time)
+    case .Gameplay:    tick_gameplay(delta_time, &game.current_fight, &game.current_world)
+    case .Win_Screen:  tick_win_screen(delta_time, game)
+    case .Lose_Screen: tick_lose_screen(delta_time, game)
+    case .Win_Game:    tick_win_game(delta_time, game)
+    case .Quit:        rl.CloseWindow()
     }
 }
 
 
-draw_game :: proc(game: ^Game) {
+// Calls a draw tick for the game.
+draw :: proc(game: ^Game) {
     switch game.state {
     case .Not_Init:
-    case .Main_Menu:
-    case .Gameplay:
-        // TODO: Process animations. Maybe make a general tick method that does both.
-        //       Or handle in the draw call.
-        world_draw(&game.current_world)
-    case .Win_Screen:
-        world_draw(&game.current_world)
-    case .Lose_Screen:
-    case .Win_Game:
+    case .Main_Menu:   draw_main_menu(game)
+    case .Gameplay:    draw_gameplay(game)
+    case .Win_Screen:  draw_win_screen(game)
+    case .Lose_Screen: draw_lose_screen(game)
+    case .Win_Game:    draw_win_game(game)
     case .Quit:
     }
 }
 
 
-ui_game :: proc(game: ^Game) {
+// Calls a UI draw tick for the game.
+ui :: proc(game: ^Game) {
     switch game.state {
     case .Not_Init:
-    case .Main_Menu:
-        ui_main_menu()
-    case .Gameplay:
-        ui_fight_draw_turn_timeline(game.current_fight)
-
-        if entity_handle_valid(game.player) {
-            draw_player_ui(game.player)
-        }
-    case .Win_Screen:
-        rl.DrawText("Win! Click to Continue", 0, 0, 8, rl.GREEN)
-    case .Lose_Screen:
-        rl.DrawText("Lose! Click to Continue", 0, 0, 8, rl.GREEN)
-    case .Win_Game:
-        rl.DrawText("You have won the game!", 0, 0, 8, rl.GREEN)
-        rl.DrawText("Click to continue.", 0, 8, 8, rl.WHITE)
+    case .Main_Menu:   ui_main_menu(game)
+    case .Gameplay:    ui_gameplay(game)
+    case .Win_Screen:  ui_win_screen(game)
+    case .Lose_Screen: ui_lose_screen(game)
+    case .Win_Game:    ui_win_game(game)
     case .Quit:
     }
 }
+
+
+// -------------------------------- !END PROCESSING CALLS! -------------------------------
+
+
+// +-------------------------------------------------------------------------------------+
+// |                                    !GAMEPLAY!                                       |
+// +-------------------------------------------------------------------------------------+
+
+
+// Processing tick for the Gameplay state of the game.
+tick_gameplay :: proc(delta_time: f32, fight: ^Fight, world: ^World) {
+    tick_fight(fight, delta_time)
+    tick_world(world, delta_time)
+}
+
+
+// Rendering tick for the Gameplay state of the game.
+draw_gameplay :: proc(game: ^Game) {
+    draw_world(&game.current_world)
+}
+
+
+// UI rendering tick for the Gameplay state of the game.
+ui_gameplay :: proc(game: ^Game) {
+    ui_fight_draw_turn_timeline(game.current_fight)
+
+    if entity_handle_valid(game.player) {
+        draw_player_ui(game.player)
+    }
+}
+
+
+// ----------------------------------- !END GAMEPLAY! ------------------------------------

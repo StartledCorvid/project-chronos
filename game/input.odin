@@ -33,6 +33,9 @@ input_map := Input_Map{
 	attack_down  = { .DOWN,  .KEY_NULL },
 	attack_right = { .RIGHT, .KEY_NULL },
 	attack_left  = { .LEFT,  .KEY_NULL },
+
+	ability_a    = { .Q, .KEY_NULL },
+	ability_b    = { .E, .KEY_NULL },
 }
 
 
@@ -55,6 +58,9 @@ Action_Code :: enum {
 	Attack_Down,
 	Attack_Right,
 	Attack_Left,
+
+	Ability_A,
+	Ability_B,
 }
 
 
@@ -70,6 +76,9 @@ Input_Map :: struct {
 	attack_down:  [2]rl.KeyboardKey,
 	attack_right: [2]rl.KeyboardKey,
 	attack_left:  [2]rl.KeyboardKey,
+
+	ability_a: [2]rl.KeyboardKey,
+	ability_b: [2]rl.KeyboardKey,
 }
 
 
@@ -93,6 +102,9 @@ default_input_map :: proc() {
 		attack_down  = { .DOWN,  .KEY_NULL },
 		attack_right = { .RIGHT, .KEY_NULL },
 		attack_left  = { .LEFT,  .KEY_NULL },
+
+		ability_a    = { .Q, .KEY_NULL },
+		ability_b    = { .E, .KEY_NULL },
 	}
 }
 
@@ -201,6 +213,9 @@ action_code_to_map_keys :: proc(action_code: Action_Code) -> [2]rl.KeyboardKey {
 	case .Attack_Down:  return input_map.attack_down
 	case .Attack_Right: return input_map.attack_right
 	case .Attack_Left:  return input_map.attack_left
+
+	case .Ability_A: return input_map.ability_a
+	case .Ability_B: return input_map.ability_b
 	}
 
 	return { .KEY_NULL, .KEY_NULL }

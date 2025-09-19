@@ -138,6 +138,21 @@ world_to_screen :: proc(grid_position: World_Coords) -> rl.Vector2 {
 }
 
 
+world_get_entity_at :: proc(world: ^World, position: World_Coords, loc := #caller_location) -> Entity_Handle {
+	for entity_id in sa.slice(&world._active_entities) {
+		entity := world.entities[entity_id]
+
+		assert(.Valid in entity.flags, "An invalid Entity somehow got in the active list.", loc)
+
+		if entity.position == position {
+			return new_entity_handle(world, entity)
+		}
+	}
+
+	return Entity_Handle{}
+}
+
+
 // Checks if the given coordinates are free, or if a solid Entity is already there.
 world_space_empty :: proc(world: ^World, coords: World_Coords, loc := #caller_location) -> bool {
 	if coords.x >= i32(world.world_size) ||
@@ -158,6 +173,53 @@ world_space_empty :: proc(world: ^World, coords: World_Coords, loc := #caller_lo
 	}
 
 	return true
+}
+
+
+world_get_entities_in_path :: proc(world: ^World, start: World_Coords, direction: Direction, distance: int) -> [dynamic]Entity_Handle {
+	entities: [dynamic]Entity_Handle
+
+	end_pos := start
+	for _ in 0..<distance {
+		new_pos := end_pos + DIRECTIONS[direction]
+
+		world_size := i32(world.world_size)
+		if new_pos.x >= world_size || new_pos.y >= world_size {
+			break
+		}
+
+		handle_at_pos := world_get_entity_at(world, new_pos)
+		if entity_handle_valid(handle_at_pos) {
+			append(&entities, handle_at_pos)
+		}
+
+		end_pos = new_pos
+	}
+
+	return entities
+}
+
+
+// Checks the path in the direction of the given direction and returns the closest
+// available point on that path that is not blocked.
+// O ---> X --> Will return the point just before X.
+world_path_free :: proc(world: ^World, start: World_Coords, direction: Direction, distance: int, pass_through: bool = false) -> World_Coords {
+	end_pos := start
+	for _ in 0..<distance {
+		new_pos := end_pos + DIRECTIONS[direction]
+
+		world_size := i32(world.world_size)
+		if new_pos.x >= world_size || new_pos.y >= world_size {
+			return end_pos
+		}
+
+		if !pass_through && !world_space_empty(world, new_pos) {
+			return end_pos
+		}
+
+		end_pos = new_pos
+	}
+	return end_pos
 }
 
 
@@ -184,16 +246,16 @@ get_free_directions :: proc(origin: World_Coords) -> bit_set[Direction] {
 
 
 // Calls a processing tick on all the Entities in the World.
-world_tick :: proc(world: ^World, delta_time: f32, loc := #caller_location) {
+tick_world :: proc(world: ^World, delta_time: f32, loc := #caller_location) {
 	for entity_id in sa.slice(&world._active_entities) {
 		handle := new_entity_handle(world, entity_id)
-		entity_tick(handle, delta_time)
+		tick_entity(handle, delta_time)
 	}
 }
 
 
 // Draws the contents of the World.
-world_draw :: proc(world: ^World) {
+draw_world :: proc(world: ^World) {
 	// Draw background.
 	for x in 0..<world.world_size {
 		for y in 0..<world.world_size {
@@ -205,7 +267,7 @@ world_draw :: proc(world: ^World) {
 	// Draw entities.
 	for entity_id in sa.slice(&world._active_entities) {
 		entity_handle := new_entity_handle(world, entity_id)
-		entity_draw(entity_handle)
+		draw_entity(entity_handle)
 	}
 }
 

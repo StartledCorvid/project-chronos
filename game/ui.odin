@@ -15,7 +15,12 @@ window_to_screen :: proc(window_pos: rl.Vector2) -> rl.Vector2 {
     relative_x := window_pos.x / f32(rl.GetRenderWidth())
     relative_y := window_pos.y / f32(rl.GetRenderHeight())
 
-    return { RES_X * relative_x, RES_Y * relative_y, } - game.camera.offset
+    return { RES_X * relative_x, RES_Y * relative_y, }
+}
+
+
+window_to_world :: proc(window_pos: rl.Vector2) -> rl.Vector2 {
+    return window_to_screen(window_pos) - game.camera.offset
 }
 
 

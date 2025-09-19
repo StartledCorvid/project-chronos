@@ -1,4 +1,10 @@
 package game
+
+
+import "core:math/rand"
+import sa "core:container/small_array"
+
+
 /*
 # Overivew
 Definitions for specific actions that can be taken by Entities.
@@ -10,9 +16,6 @@ Definitions for specific actions that can be taken by Entities.
 */
 
 
-import sa "core:container/small_array"
-
-
 // +-------------------------------------------------------------------------------------+
 // |                                   !DEFINITIONS!                                     |
 // +-------------------------------------------------------------------------------------+
@@ -20,13 +23,49 @@ import sa "core:container/small_array"
 
 // The different types of Event that can be executed.
 Event_Type :: union {
+    Event_Deal_Damage,
     Event_Entity_Move,
     Event_Basic_Attack,
     Event_Lunge,
+    Event_Shake,
 }
 
 
 // ---------------------------------- !END DEFINITIONS! ----------------------------------
+
+
+// +-------------------------------------------------------------------------------------+
+// |                                    !DEAL DAMAGE!                                    |
+// +-------------------------------------------------------------------------------------+
+
+
+// An Event that deals damage to a target.
+Event_Deal_Damage :: struct {
+    damage: int,
+    target: Entity_Handle,
+}
+
+
+// Creates an Event_Deal_damage Event.
+event_deal_damage :: proc(owner: Entity_Handle, damage: int, target: Entity_Handle) -> Event {
+    event := create_event(owner)
+    event.type = Event_Deal_Damage{
+        damage = damage,
+        target = target,
+    }
+
+    // on_tick -->
+    event.on_tick = proc(e: ^Event, delta_time: f32) {
+        damage_event := e.type.(Event_Deal_Damage)
+        damage_character(damage_event.target, i32(damage_event.damage))
+        stop_event(e)
+    } // <-- on_tick 
+
+    return event
+}
+
+
+// ---------------------------------- !END DEAL DAMAGE! ----------------------------------
 
 
 // +-------------------------------------------------------------------------------------+
@@ -182,6 +221,50 @@ event_lunge :: proc(owner: Entity_Handle, direction: Direction, distance: f32, t
 
 
 // ------------------------------------- !END LUNGE! -------------------------------------
+
+
+// +-------------------------------------------------------------------------------------+
+// |                                       !SHAKE!                                       |
+// +-------------------------------------------------------------------------------------+
+
+
+// An Event that plays a simple animation consisting of the Entity
+// shaking around.
+Event_Shake :: struct {
+    intensity: f32, // The farthest the character can move.
+    time: f32,      // The amount of time the shaking takes.
+}
+
+
+// Creates an Event_Lunge Event.
+event_shake :: proc(owner: Entity_Handle, intensity: f32, t: f32 = 0.25) -> Event {
+    event := create_event(owner)
+    event.type = Event_Shake{
+        intensity = intensity,
+        time = t,
+    }
+
+    // on_tick -->
+    event.on_tick = proc(e: ^Event, delta_time: f32) {
+        event_shake := e.type.(Event_Shake)
+        entity := get_entity(e.owner)
+        
+        entity.offset = {
+            rand.float32() * event_shake.intensity,
+            rand.float32() * event_shake.intensity,
+        }
+
+        if e.duration >= event_shake.time {
+            entity.offset = { 0, 0 }
+            stop_event(e)
+        }
+    } // <-- on_tick 
+
+    return event
+}
+
+
+// ------------------------------------- !END SHAKE! -------------------------------------
 
 
 // +-------------------------------------------------------------------------------------+

@@ -1,6 +1,7 @@
 package game
 
 import "core:log"
+import rl "vendor:raylib"
 
 
 /*
@@ -64,12 +65,16 @@ Character_Data :: struct {
 	animator: Animator,
 
 	on_turn: proc(self: ^Entity, timeline: ^Timeline) -> bool,
+
+	ability_a: Ability_Name,
+	ability_b: Ability_Name,
 }
 
 
 // Represents an Entity that can move around and can participate in Combat.
 Character :: struct {
 	hit_points: i32,
+	queued_ability: Ability,
 	// TODO: Modifiers.
 	// TODO: Conditions.
 	base: ^Character_Data,
@@ -107,6 +112,8 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 				loop_count = -1,
 			}),
 			on_turn = player_turn,
+
+			ability_a = .Bash,
 		},
 
 		.Goblin = {
@@ -195,6 +202,51 @@ new_character :: proc(world: ^World, character_type: Character_Type, allocator :
 
 
 // ---------------------------------- !END OPERATIONS! -----------------------------------
+
+
+// +-------------------------------------------------------------------------------------+
+// |                                     !ENGINE!                                        |
+// +-------------------------------------------------------------------------------------+
+
+
+// Handle special ticks for a Character Entity.
+tick_character :: proc(self: ^Entity, char: ^Character) {
+
+}
+
+
+// Handles special drawing calls for a Character Entity.
+draw_character :: proc(handle: Entity_Handle) {
+	self := get_entity(handle)
+	character := &self.type.(Character)
+
+	// Draw the healthbar if the mouse is over the character.
+	screen_position := world_to_screen(self.position)
+
+    mouse_pos := window_to_world(rl.GetMousePosition())
+    character_box := rl.Rectangle{
+        width = WORLD_UNITS,
+        height = WORLD_UNITS,
+        x = screen_position.x,
+        y = screen_position.y,
+    }
+
+    if rl.CheckCollisionPointRec(mouse_pos, character_box) {
+        start_pos := world_to_screen(self.position)
+        health_percentage := f32(character.hit_points) / f32(get_max_hp(character.base.stats)) 
+        ui_draw_bar(start_pos, { 16, 1 }, health_percentage, rl.RED, rl.BLACK)
+    }
+
+    ability_is_valid := ability_valid(character.queued_ability)
+
+    // Draw Ability preview, if selected.
+    if ability_is_valid {//} && character.queued_ability.base.draw_preview != nil {
+    	character.queued_ability.base.draw_preview(&character.queued_ability, handle)
+    }
+}
+
+
+// ----------------------------------- !END ENGINE! --------------------------------------
 
 
 // +-------------------------------------------------------------------------------------+

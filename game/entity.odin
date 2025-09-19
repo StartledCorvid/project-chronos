@@ -1,4 +1,11 @@
 package game
+
+
+import "core:log"
+import sa "core:container/small_array"
+import rl "vendor:raylib"
+
+
 /*
 # Overview
 An Entity is a world object. This can be the player, an enemy, or a box. Basically
@@ -9,10 +16,6 @@ anything that can be spawned in the world.
 2. Add the new struct type to the Entity_Type union below.
 3. Put an entry in the switch in `entity_tick` below.
 */
-
-import "core:log"
-import sa "core:container/small_array"
-import rl "vendor:raylib"
 
 
 // +-------------------------------------------------------------------------------------+
@@ -212,21 +215,20 @@ free_entity :: proc(handle: Entity_Handle, loc := #caller_location) {
 
 
 // Does a processing tick on an Entity.
-entity_tick :: proc(handle: Entity_Handle, delta_time: f32) {
+tick_entity :: proc(handle: Entity_Handle, delta_time: f32) {
     entity := get_entity(handle)
     animator_tick(&entity.animator, delta_time)
     
-    switch type in entity.type {
-    case Character:
+    switch &type in entity.type {
+    case Character: tick_character(entity, &type)
     case Object:
-    case Particle:
-        particle_tick(entity)
+    case Particle:  tick_particle(entity)
     }
 }
 
 
 // Draws the given Entity.
-entity_draw :: proc(handle: Entity_Handle) {
+draw_entity :: proc(handle: Entity_Handle) {
     entity := get_entity(handle)
 
     screen_position := world_to_screen(entity.position) + entity.offset
@@ -244,20 +246,11 @@ entity_draw :: proc(handle: Entity_Handle) {
     atlas := get_texture(entity.animator.current_animation.atlas.texture)
     rl.DrawTexturePro(atlas, frame_rect, screen_rect, { 0, 0 }, 0, rl.WHITE)
 
-    // Draw the healthbar if the mouse is over the character.
-    if character, ok := entity.type.(Character); ok {
-        mouse_pos := window_to_screen(rl.GetMousePosition())
-        character_box := rl.Rectangle{
-            width = WORLD_UNITS,
-            height = WORLD_UNITS,
-            x = screen_position.x,
-            y = screen_position.y,
-        }
-        if rl.CheckCollisionPointRec(mouse_pos, character_box) {
-            start_pos := world_to_screen(entity.position)
-            health_percentage := f32(character.hit_points) / f32(get_max_hp(character.base.stats)) 
-            ui_draw_bar(start_pos, { 16, 1 }, health_percentage, rl.RED, rl.BLACK)
-        }
+    switch type in entity.type {
+    case Character:
+        draw_character(handle)
+    case Object:
+    case Particle:
     }
 }
 

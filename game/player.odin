@@ -1,5 +1,6 @@
 package game
 
+import "core:log"
 import rl "vendor:raylib"
 import "core:fmt"
 
@@ -18,6 +19,13 @@ Mainly handles the management of the Player's turn.
 // Called every tick that it is the Player's turn.
 player_turn :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 	handle := new_entity_handle(&game.current_world, self^)
+	character, character_ok := &self.type.(Character)
+	assert(character_ok, "Not a Character.")
+
+	// If there is a queued ability, focus on that.
+	if ability_valid(character.queued_ability) {
+		return false
+	}
 
 	// Movement.
 	if move_action := query_player_move(self); valid_event(move_action) {
@@ -31,6 +39,9 @@ player_turn :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 		add_event(timeline, event_basic_attack(handle, direction, 1)) // TODO: Handle variant damage.
 		return true
 	}
+
+	// Abilities.
+	query_player_ability(character)
 
 	return false
 }
@@ -70,6 +81,21 @@ query_player_attack :: proc() -> (Direction, bool) {
 	}
 
 	return .Down, false
+}
+
+
+// Checks if the player is inputting an Ability.
+@(private="file")
+query_player_ability :: proc(character: ^Character) {
+	if is_action_pressed(.Ability_A) && character.base.ability_a != .None {
+		character.queued_ability = new_ability(character.base.ability_a)
+		log.infof("Queued ability %v.", character.base.ability_a)
+	}
+
+	if is_action_pressed(.Ability_B) && character.base.ability_b != .None {
+		character.queued_ability = new_ability(character.base.ability_b)
+		log.infof("Queued ability %v.", character.base.ability_b)
+	}
 }
 
 
