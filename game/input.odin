@@ -34,8 +34,9 @@ input_map := Input_Map{
 	attack_right = { .RIGHT, .KEY_NULL },
 	attack_left  = { .LEFT,  .KEY_NULL },
 
-	ability_a    = { .Q, .KEY_NULL },
-	ability_b    = { .E, .KEY_NULL },
+	ability_a      = { .Q, .KEY_NULL },
+	ability_b      = { .E, .KEY_NULL },
+	cancel_ability = { .ESCAPE, .KEY_NULL },
 }
 
 
@@ -61,6 +62,7 @@ Action_Code :: enum {
 
 	Ability_A,
 	Ability_B,
+	Cancel_Ability,
 }
 
 
@@ -79,6 +81,7 @@ Input_Map :: struct {
 
 	ability_a: [2]rl.KeyboardKey,
 	ability_b: [2]rl.KeyboardKey,
+	cancel_ability: [2]rl.KeyboardKey,
 }
 
 
@@ -103,8 +106,9 @@ default_input_map :: proc() {
 		attack_right = { .RIGHT, .KEY_NULL },
 		attack_left  = { .LEFT,  .KEY_NULL },
 
-		ability_a    = { .Q, .KEY_NULL },
-		ability_b    = { .E, .KEY_NULL },
+		ability_a      = { .Q, .KEY_NULL },
+		ability_b      = { .E, .KEY_NULL },
+		cancel_ability = { .ESCAPE, .KEY_NULL },
 	}
 }
 
@@ -214,8 +218,9 @@ action_code_to_map_keys :: proc(action_code: Action_Code) -> [2]rl.KeyboardKey {
 	case .Attack_Right: return input_map.attack_right
 	case .Attack_Left:  return input_map.attack_left
 
-	case .Ability_A: return input_map.ability_a
-	case .Ability_B: return input_map.ability_b
+	case .Ability_A:      return input_map.ability_a
+	case .Ability_B:      return input_map.ability_b
+	case .Cancel_Ability: return input_map.cancel_ability
 	}
 
 	return { .KEY_NULL, .KEY_NULL }

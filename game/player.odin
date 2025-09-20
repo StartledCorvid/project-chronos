@@ -17,14 +17,14 @@ Mainly handles the management of the Player's turn.
 
 
 // Called every tick that it is the Player's turn.
-player_turn :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
+turn_tick_player :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 	handle := new_entity_handle(&game.current_world, self^)
 	character, character_ok := &self.type.(Character)
 	assert(character_ok, "Not a Character.")
 
 	// If there is a queued ability, focus on that.
-	if ability_valid(character.queued_ability) {
-		return false
+	if character.queued_ability_slot != nil {
+		return query_confirm_ability(character.queued_ability_slot, self)
 	}
 
 	// Movement.
@@ -42,6 +42,63 @@ player_turn :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 
 	// Abilities.
 	query_player_ability(character)
+
+	return false
+}
+
+
+@(private="file")
+query_confirm_ability :: proc(ability_slot: ^Ability_Slot, entity: ^Entity) -> bool {
+	character := &entity.type.(Character)
+	if ability_slot == nil || !ability_slot_valid(ability_slot^) || is_action_pressed(.Cancel_Ability) {
+		// TODO: Display message or something.
+		character.queued_ability_slot = nil
+		return false
+	}
+
+	// Swap ability.
+	if ability_slot == &character.ability_slots[0] && is_action_pressed(.Ability_B) {
+		character.queued_ability_slot = &character.ability_slots[1]
+		return false
+	} else if ability_slot == &character.ability_slots[1] && is_action_pressed(.Ability_A) {
+		character.queued_ability_slot = &character.ability_slots[0]
+		return false
+	}
+
+	// Check for confirmation.
+	confirmation: Ability_Confirmation
+
+	ability_info := get_ability_info(ability_slot.ability)
+	switch ability_info.confirmation_type {
+	case Direction:
+		if is_action_pressed(.Attack_Down) || is_action_pressed(.Move_Down) {
+			confirmation = Direction.Down
+		} else if is_action_pressed(.Attack_Up) || is_action_pressed(.Move_Up) {
+			confirmation = Direction.Up
+		} else if is_action_pressed(.Attack_Left) || is_action_pressed(.Move_Left) {
+			confirmation = Direction.Left
+		} else if is_action_pressed(.Attack_Right) || is_action_pressed(.Move_Right) {
+			confirmation = Direction.Right
+		}
+
+	case bool:
+		if ability_slot == &character.ability_slots[0] && is_action_pressed(.Ability_A) {
+			confirmation = true
+		} else if ability_slot == &character.ability_slots[1] && is_action_pressed(.Ability_B) {
+			confirmation = true
+		}
+
+	case:
+		panicf("Unrecognized Confirmation_Type '%v' given to Ability_Info '%v'",
+			ability_info.confirmation_type, ability_info.name)
+	}
+
+	if confirmation != nil {
+		log.infof("Confirmed ability '%v'.", ability_info.name)
+		use_ability(ability_slot, entity, confirmation)
+		character.queued_ability_slot = nil
+		return true
+	}
 
 	return false
 }
@@ -87,14 +144,14 @@ query_player_attack :: proc() -> (Direction, bool) {
 // Checks if the player is inputting an Ability.
 @(private="file")
 query_player_ability :: proc(character: ^Character) {
-	if is_action_pressed(.Ability_A) && character.base.ability_a != .None {
-		character.queued_ability = new_ability(character.base.ability_a)
-		log.infof("Queued ability %v.", character.base.ability_a)
+	if is_action_pressed(.Ability_A) {
+		character.queued_ability_slot = &character.ability_slots[0]
+		log.infof("Queued ability %v.", character.base.abilities[0])
 	}
 
-	if is_action_pressed(.Ability_B) && character.base.ability_b != .None {
-		character.queued_ability = new_ability(character.base.ability_b)
-		log.infof("Queued ability %v.", character.base.ability_b)
+	if is_action_pressed(.Ability_B) {
+		character.queued_ability_slot = &character.ability_slots[1]
+		log.infof("Queued ability %v.", character.base.abilities[1])
 	}
 }
 
@@ -108,7 +165,7 @@ query_player_ability :: proc(character: ^Character) {
 
 
 // Draws the user interface for the player info.
-draw_player_ui :: proc(handle: Entity_Handle, loc := #caller_location) {
+ui_player :: proc(handle: Entity_Handle, loc := #caller_location) {
 	player := get_entity(handle)
 	character, ok := player.type.(Character)
 	assert(ok, "Entity is not a Character.", loc)

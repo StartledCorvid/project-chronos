@@ -58,7 +58,7 @@ Event :: struct {
 
 
 // Updates the Timeline forward a frame, if it has an Event queued up.
-timeline_tick :: proc(timeline: ^Timeline, delta_time: f32) {
+tick_timeline :: proc(timeline: ^Timeline, delta_time: f32) {
     if len(timeline.events) <= 0 {
         return
     }

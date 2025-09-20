@@ -133,9 +133,9 @@ tick_fight :: proc(fight: ^Fight, delta_time: f32, loc := #caller_location) {
         new_round(fight)
         fight_change_phase(fight, .Turn)
     case .Turn:
-        turn_tick(fight)
+        tick_fight_turn(fight)
     case .Processing:
-        processing_tick(fight, delta_time)
+        tick_fight_processing(fight, delta_time)
     case .Player_Lose:
         deinit_fight(fight)
         game_change_state(&game, .Lose_Screen)
@@ -147,7 +147,7 @@ tick_fight :: proc(fight: ^Fight, delta_time: f32, loc := #caller_location) {
 
 
 // Asks the Character whose turn it currently is to decide what to do.
-turn_tick :: proc(fight: ^Fight) {
+tick_fight_turn :: proc(fight: ^Fight) {
     assert(len(fight.turn_order) > 0, "Trying processing a turn when no Characters active.")
 
     entity := get_entity(fight.current_character)
@@ -156,14 +156,13 @@ turn_tick :: proc(fight: ^Fight) {
     assert(character.base.on_turn != nil, "Character has no behavior set.")
     if character.base.on_turn(entity, &fight.timeline) {
         fight_change_phase(fight, .Processing)
-        character.queued_ability = new_ability(.None)
     }
 }
 
 
 // Does a processing tick, playing out the results of an turn choice.
-processing_tick :: proc(fight: ^Fight, delta_time: f32) {
-    timeline_tick(&fight.timeline, delta_time)
+tick_fight_processing :: proc(fight: ^Fight, delta_time: f32) {
+    tick_timeline(&fight.timeline, delta_time)
     if len(fight.timeline.events) <= 0 {
         fight_next_turn(fight)
         fight_change_phase(fight, .Turn)

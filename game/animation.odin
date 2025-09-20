@@ -72,7 +72,7 @@ animator_pause :: proc(animator: ^Animator) {
 
 
 // Has the given `Animator` pass a tick, given the amount of time since last frame.
-animator_tick :: proc(animator: ^Animator, delta_time: f32, loc := #caller_location) {
+tick_animator :: proc(animator: ^Animator, delta_time: f32, loc := #caller_location) {
 	assert(animator != nil, "Nil Animator pointer.", loc)
 	if !animator.play {
 		return

@@ -20,6 +20,11 @@ Ability_Name :: enum {
 }
 
 
+Ability_Type :: union {
+    Ability_Bash,
+}
+
+
 load_abilities :: proc() -> [Ability_Name]Ability_Info {
     return {
         .None = {},
@@ -28,23 +33,30 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
             description = "Move in a straight line and deal damage to the enemy hit.",
 
             cooldown = 2,
+            confirmation_type = Direction,
             type = Ability_Bash{
                 damage = 1,
-                distance = -1,
+                distance = 5,
                 pass_through = false,
             },  
 
-            on_use = proc(self: ^Ability, user: Entity_Handle) {
-                entity, _, ability := get_ability_info(self, user, Ability_Bash)
+            on_use = proc(self: Ability_Slot, confirmation: Ability_Confirmation, user: ^Entity) {
+                ability := unwrap_ability_slot(self, Ability_Bash)
+                direction := confirmation.(Direction)
+                world_size := int(game.current_world.world_size)
 
-                bash_distance := ability.distance < 0 ? int(game.current_world.world_size) : ability.distance
-                
-                end_pos := entity.position
+                bash_distance := ability.distance <= 0 ? world_size : ability.distance
+
+                user_handle := new_entity_handle(&game.current_world, user^)
+                timeline := &game.current_fight.timeline
+
+                end_pos := user.position
+
                 for _ in 0..<bash_distance {
-                    new_pos := end_pos + DIRECTIONS[ability.direction]
+                    new_pos := end_pos + DIRECTIONS[direction]
 
-                    world_size := i32(game.current_world.world_size)
-                    if new_pos.x >= world_size || new_pos.y >= world_size {
+                    if new_pos.x >= i32(world_size) || new_pos.y >= i32(world_size) {
+                        add_event(timeline, event_lunge(user_handle, direction, 0.5, 0.1))
                         break
                     }
 
@@ -53,47 +65,51 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
                     }
 
                     end_pos = new_pos
+                    add_event(timeline, event_entity_move(user_handle, direction, 0.1))
                 }
 
-                timeline := &game.current_fight.timeline
-                add_event(timeline, event_entity_move(user, ability.direction, 0.1))
-
-                if target := world_get_entity_at(&game.current_world, end_pos); entity_handle_valid(target) {
-                    add_event(timeline, event_lunge(user, ability.direction, 0.5, 0.05))
-                    add_event(timeline, event_deal_damage(user, ability.damage, target))
+                if target := world_get_entity_at(&game.current_world, end_pos + DIRECTIONS[direction]); entity_handle_valid(target) {
+                    add_event(timeline, event_lunge(user_handle, direction, 0.5, 0.1))
+                    add_event(timeline, event_deal_damage(user_handle, ability.damage, target))
                 }
-
-                self.cooldown_time = self.base.cooldown
             },
 
-            draw_preview = proc(self: ^Ability, user: Entity_Handle) {
-                entity, _, ability := get_ability_info(self, user, Ability_Bash)
+            draw_preview = proc(self: Ability_Slot, user: Entity) {
+                ability := unwrap_ability_slot(self, Ability_Bash)
 
                 bash_distance := ability.distance < 0 ? int(game.current_world.world_size) : ability.distance
 
-                current_pos := entity.position 
-                for _ in 0..<bash_distance {
-                    new_pos := current_pos + DIRECTIONS[ability.direction]
+                current_pos := user.position
+                for direction in DIRECTIONS {
+                    for _ in 0..<bash_distance {
+                        new_pos := current_pos + direction
 
-                    world_size := i32(game.current_world.world_size)
-                    if new_pos.x >= world_size || new_pos.y >= world_size {
-                        break
+                        world_size := i32(game.current_world.world_size)
+                        if new_pos.x >= world_size || new_pos.y >= world_size {
+                            break
+                        }
+
+                        screen_pos := world_to_screen(new_pos)
+                        rl.DrawRectangleV(screen_pos, { WORLD_UNITS, WORLD_UNITS }, { 255, 0, 0, 125 })
+
+                        if !ability.pass_through && !world_space_empty(&game.current_world, new_pos) {
+                            break
+                        }
+
+                        current_pos = new_pos
                     }
-
-                    screen_pos := world_to_screen(new_pos)
-                    rl.DrawRectangleV(screen_pos, { WORLD_UNITS, WORLD_UNITS }, { 255, 0, 0, 125 })
-
-                    if !ability.pass_through && !world_space_empty(&game.current_world, new_pos) {
-                        break
-                    }
-
-                    current_pos = new_pos
                 }
             },
 
-            can_use = ability_cooled_down,
+            ai_can_use = ability_slot_cooled,
         },
     }
+}
+
+
+Ability_Confirmation :: union {
+    Direction,
+    bool,
 }
 
 
@@ -102,72 +118,71 @@ Ability_Info :: struct {
     description: string,
 
     cooldown: int,
+    confirmation_type: typeid,
     type: Ability_Type,
 
-    on_use:       proc(self: ^Ability, user: Entity_Handle),
-    can_use:      proc(self: ^Ability, user: Entity_Handle) -> bool,
-    draw_preview: proc(self: ^Ability, user: Entity_Handle),
+    on_use:       proc(self: Ability_Slot, confirmation: Ability_Confirmation, user: ^Entity),
+    ai_can_use:   proc(self: Ability_Slot, user: Entity) -> bool,
+    draw_preview: proc(self: Ability_Slot, user: Entity),
 }
 
 
-Ability :: struct {
-    base: ^Ability_Info,
-    cooldown_time: int,
-}
-
-
-Ability_Type :: union {
-    Ability_Bash,
+Ability_Slot :: struct {
+    ability: Ability_Name,
+    cooldown: int,
 }
 
 
 Ability_Bash :: struct {
-    direction: Direction, // The direction of the bash attack.
-    damage: int,          // The damage done when it hits an Entity.
-    distance: int,        // -1 is as far as possible.
-    pass_through: bool,   // If true, will not stop once it hits a solid Entity.
+    damage: int,        // The damage done when it hits an Entity.
+    distance: int,      // -1 is as far as possible.
+    pass_through: bool, // If true, will not stop once it hits a solid Entity.
 
     move_speed: f32,
 }
 
 
-ability_valid :: proc(ability: Ability) -> bool {
-    return ability.base != nil && ability.base != &game.abilities[.None]
+// Gets a copy of the Ability_Info with the given name.
+get_ability_info :: proc(ability_name: Ability_Name) -> Ability_Info {
+    return game.abilities[ability_name]
 }
 
 
-// Creates a new instance of an Ability.
-new_ability :: proc(ability_name: Ability_Name) -> Ability {
-    return {
-        base = &game.abilities[ability_name],
-        cooldown_time = 0,
+// Returns true if there is an Ability set in the given Ability_Slot.
+ability_slot_valid :: proc(slot: Ability_Slot) -> bool {
+    return slot.ability != .None
+}
+
+
+// Clears an Ability slot.
+clear_ability_slot :: proc(slot: ^Ability_Slot, loc := #caller_location) {
+    assert(slot != nil, "Nil Ability_Slot pointer.", loc)
+    slot.ability = .None
+}
+
+
+// Returns true if the Ability within an Ability_Slot is cooled down.
+ability_slot_cooled :: proc(slot: Ability_Slot, _: Entity = {}) -> bool {
+    return ability_slot_valid(slot) && slot.cooldown <= 0
+}
+
+
+// Uses the ability in the given Ability_Slot, if it has one.
+use_ability :: proc(ability_slot: ^Ability_Slot, user: ^Entity, confirmation: Ability_Confirmation) {
+    if ability_slot.ability == .None {
+        return
     }
-}
 
+    ability_info := get_ability_info(ability_slot.ability)
 
-@(private="file")
-ability_cooled_down :: proc(self: ^Ability, _: Entity_Handle) -> bool {
-    return self.cooldown_time <= 0
+    ability_info.on_use(ability_slot^, confirmation, user)
+    ability_slot.cooldown = ability_info.cooldown
 }
 
 
 // Gets the information needed for an Ability.
 @(private="file")
-get_ability_info :: proc(ability: ^Ability, user_handle: Entity_Handle, $T: typeid) -> (^Entity, Character, T) {
-    entity := get_entity(user_handle)
-    if entity == nil {
-        panic("Trying to use an Ability using an Entity that is not valid.")
-    }
-
-    ability, ability_ok := ability.base.type.(T)
-    if !ability_ok {
-        panic("Ability is not of right type.")
-    }
-
-    character, char_ok := entity.type.(Character)
-    if !char_ok {
-        panic("Entity is not of type Character.")
-    }
-
-    return entity, character, ability
+unwrap_ability_slot :: proc(ability_slot: Ability_Slot, $T: typeid) -> T {
+    ability_info := get_ability_info(ability_slot.ability)
+    return ability_info.type.(T)
 }

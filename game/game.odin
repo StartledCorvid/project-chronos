@@ -212,7 +212,7 @@ ui_gameplay :: proc(game: ^Game) {
     ui_fight_draw_turn_timeline(game.current_fight)
 
     if entity_handle_valid(game.player) {
-        draw_player_ui(game.player)
+        ui_player(game.player)
     }
 }
 

@@ -217,7 +217,7 @@ free_entity :: proc(handle: Entity_Handle, loc := #caller_location) {
 // Does a processing tick on an Entity.
 tick_entity :: proc(handle: Entity_Handle, delta_time: f32) {
     entity := get_entity(handle)
-    animator_tick(&entity.animator, delta_time)
+    tick_animator(&entity.animator, delta_time)
     
     switch &type in entity.type {
     case Character: tick_character(entity, &type)
@@ -247,8 +247,7 @@ draw_entity :: proc(handle: Entity_Handle) {
     rl.DrawTexturePro(atlas, frame_rect, screen_rect, { 0, 0 }, 0, rl.WHITE)
 
     switch type in entity.type {
-    case Character:
-        draw_character(handle)
+    case Character: draw_character(entity)
     case Object:
     case Particle:
     }
