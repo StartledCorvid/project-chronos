@@ -129,15 +129,6 @@ random_world_point :: proc(world: World) -> World_Coords {
 }
 
 
-// Converts world coordinates to screen coordinates.
-world_to_screen :: proc(grid_position: World_Coords) -> rl.Vector2 {
-	return {
-		f32(grid_position.x) * WORLD_UNITS,
-		f32(grid_position.y) * WORLD_UNITS,
-	}
-}
-
-
 world_get_entity_at :: proc(world: ^World, position: World_Coords, loc := #caller_location) -> Entity_Handle {
 	for entity_id in sa.slice(&world._active_entities) {
 		entity := world.entities[entity_id]
@@ -237,6 +228,15 @@ get_free_directions :: proc(origin: World_Coords) -> bit_set[Direction] {
 }
 
 
+// Converts a grid coordinate to its point in the world.
+grid_to_world_point :: proc(grid_coordinates: World_Coords) -> World_Coords {
+	return {
+		grid_coordinates.x * WORLD_UNITS,
+		grid_coordinates.y * WORLD_UNITS,
+	}
+}
+
+
 // -------------------------------- !END GENERAL! ------------------------------
 
 
@@ -259,8 +259,8 @@ draw_world :: proc(world: ^World) {
 	// Draw background.
 	for x in 0..<world.world_size {
 		for y in 0..<world.world_size {
-			position := world_to_screen({ i32(x), i32(y) })
-			rl.DrawTextureV(world.tile_texture, position, rl.WHITE)
+			position := grid_to_world_point({ i32(x), i32(y) })
+			rl.DrawTextureV(world.tile_texture, to_vector2(position), rl.WHITE)
 		}
 	}
 

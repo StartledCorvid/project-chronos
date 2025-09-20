@@ -231,12 +231,12 @@ tick_entity :: proc(handle: Entity_Handle, delta_time: f32) {
 draw_entity :: proc(handle: Entity_Handle) {
     entity := get_entity(handle)
 
-    screen_position := world_to_screen(entity.position) + entity.offset
+    world_point := grid_to_world_point(entity.position) + to_vector2i(entity.offset)
 
     frame_rect := entity.animator.current_animation.current_frame
     screen_rect := rl.Rectangle{
-        x = screen_position.x,
-        y = screen_position.y,
+        x = f32(world_point.x),
+        y = f32(world_point.y),
 
         // TODO: Scale instead of having low resolution?
         width = frame_rect.width,

@@ -278,7 +278,7 @@ ui_fight_draw_turn_timeline :: proc(fight: Fight) {
     TIMELINE_HEIGHT :: 2
     TIMELINE_PADDING_Y :: 2
     TIMELINE_ENTRY_SPACING :: 2
-    MID_SCREEN :: f32(RES_X) / 2.0
+    MID_SCREEN :: f32(RENDER_WIDTH) / 2.0
 
     start_pos := MID_SCREEN - (f32(TIMELINE_WIDTH) / 2.0)
     rl.DrawRectangleV({ start_pos, TIMELINE_PADDING_Y + (TIMELINE_HEIGHT / 2) }, { TIMELINE_WIDTH, TIMELINE_HEIGHT }, rl.BLACK)

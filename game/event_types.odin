@@ -102,9 +102,9 @@ event_entity_move :: proc(owner: Entity_Handle, direction: Direction, t: f32 = 0
         }
 
         t := e.duration / move_action.time
-        target_pos := world_to_screen(move_direction)
+        target_pos := grid_to_world_point(move_direction)
         new_pos := lerp(Vector2{ 0, 0 },
-                        target_pos,
+                        to_vector2(target_pos),
                         t)
 
         entity.offset = new_pos
@@ -201,7 +201,7 @@ event_lunge :: proc(owner: Entity_Handle, direction: Direction, distance: f32, t
 
         half_time := lunge_action.time / 2.0
         start_pos := Vector2{ 0, 0 }
-        end_pos := world_to_screen(attack_direction) * lunge_action.distance
+        end_pos := to_vector2(grid_to_world_point(attack_direction)) * lunge_action.distance
 
         if e.duration < half_time {
             t := e.duration / half_time

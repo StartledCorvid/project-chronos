@@ -228,18 +228,18 @@ draw_character :: proc(self: ^Entity) {
 	character := self.type.(Character)
 
 	// Draw the healthbar if the mouse is over the character.
-	screen_position := world_to_screen(self.position)
+	world_pos := to_vector2(grid_to_world_point(self.position))
 
-    mouse_pos := window_to_world(rl.GetMousePosition())
+    mouse_pos := to_vector2(screen_to_world_point(rl.GetMousePosition()))
     character_box := rl.Rectangle{
         width = WORLD_UNITS,
         height = WORLD_UNITS,
-        x = screen_position.x,
-        y = screen_position.y,
+        x = f32(world_pos.x),
+        y = f32(world_pos.y),
     }
 
     if rl.CheckCollisionPointRec(mouse_pos, character_box) {
-        start_pos := world_to_screen(self.position)
+        start_pos := world_pos
         health_percentage := f32(character.hit_points) / f32(get_max_hp(character.base.stats)) 
         ui_draw_bar(start_pos, { 16, 1 }, health_percentage, rl.RED, rl.BLACK)
     }

@@ -15,8 +15,8 @@ import rl "vendor:raylib"
 WINDOW_WIDTH :: 1280
 WINDOW_HEIGHT :: 720
 
-RES_X :: 320
-RES_Y :: 180
+RENDER_WIDTH :: 320
+RENDER_HEIGHT :: 180
 
 PANEL_SIZE :: 64
 
@@ -63,11 +63,11 @@ main :: proc() {
 
 	rl.SetTargetFPS(TARGET_FPS)
 	rl.SetExitKey(.KEY_NULL)
-	rl.SetWindowMinSize(RES_X, RES_Y)
+	rl.SetWindowMinSize(RENDER_WIDTH, RENDER_HEIGHT)
 
 	rl.SetConfigFlags({ .VSYNC_HINT })
 
-    target_texture := rl.LoadRenderTexture(RES_X, RES_Y)
+    target_texture := rl.LoadRenderTexture(RENDER_WIDTH, RENDER_HEIGHT)
     defer rl.UnloadRenderTexture(target_texture)
     rl.SetTextureFilter(target_texture.texture, .POINT)
 
@@ -104,7 +104,7 @@ draw_screen :: proc(target_texture: rl.RenderTexture) {
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.BLACK)
 
-    scale := min(f32(rl.GetScreenWidth()) / RES_X, f32(rl.GetScreenHeight()) / RES_Y)
+    scale := min(f32(rl.GetScreenWidth()) / RENDER_WIDTH, f32(rl.GetScreenHeight()) / RENDER_HEIGHT)
 	source_rect := rl.Rectangle{ 
 		x = 0,
 		y = 0,
@@ -113,10 +113,10 @@ draw_screen :: proc(target_texture: rl.RenderTexture) {
 	}
 
 	dest_rect := rl.Rectangle{
-		x = (f32(rl.GetScreenWidth()) - (f32(RES_X) * scale)) * 0.5,
-		y = (f32(rl.GetScreenHeight()) - (f32(RES_Y) * scale)) * 0.5,
-		width = RES_X * scale,
-		height = RES_Y * scale,
+		x = (f32(rl.GetScreenWidth()) - (f32(RENDER_WIDTH) * scale)) * 0.5,
+		y = (f32(rl.GetScreenHeight()) - (f32(RENDER_HEIGHT) * scale)) * 0.5,
+		width = RENDER_WIDTH * scale,
+		height = RENDER_HEIGHT * scale,
 	}
 
 	rl.DrawTexturePro(texture = target_texture.texture,

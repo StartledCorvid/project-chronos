@@ -50,13 +50,15 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
                 user_handle := new_entity_handle(&game.current_world, user^)
                 timeline := &game.current_fight.timeline
 
+                MOVE_TIME     :: 0.08
+                OVERSTEP_TIME :: 0.1
                 end_pos := user.position
 
                 for _ in 0..<bash_distance {
                     new_pos := end_pos + DIRECTIONS[direction]
 
                     if new_pos.x >= i32(world_size) || new_pos.y >= i32(world_size) {
-                        add_event(timeline, event_lunge(user_handle, direction, 0.5, 0.1))
+                        add_event(timeline, event_lunge(user_handle, direction, 0.5, OVERSTEP_TIME))
                         break
                     }
 
@@ -65,11 +67,11 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
                     }
 
                     end_pos = new_pos
-                    add_event(timeline, event_entity_move(user_handle, direction, 0.1))
+                    add_event(timeline, event_entity_move(user_handle, direction, MOVE_TIME))
                 }
 
                 if target := world_get_entity_at(&game.current_world, end_pos + DIRECTIONS[direction]); entity_handle_valid(target) {
-                    add_event(timeline, event_lunge(user_handle, direction, 0.5, 0.1))
+                    add_event(timeline, event_lunge(user_handle, direction, 0.5, OVERSTEP_TIME))
                     add_event(timeline, event_deal_damage(user_handle, ability.damage, target))
                 }
             },
@@ -89,8 +91,8 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
                             break
                         }
 
-                        screen_pos := world_to_screen(new_pos)
-                        rl.DrawRectangleV(screen_pos, { WORLD_UNITS, WORLD_UNITS }, { 255, 0, 0, 125 })
+                        screen_pos := grid_to_world_point(new_pos)
+                        rl.DrawRectangleV(to_vector2(screen_pos), { WORLD_UNITS, WORLD_UNITS }, { 255, 0, 0, 125 })
 
                         if !ability.pass_through && !world_space_empty(&game.current_world, new_pos) {
                             break

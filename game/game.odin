@@ -120,8 +120,8 @@ load_world :: proc(game: ^Game, world_data: World_Data, allocator := context.all
 
     half_size := f32(game.current_world.world_size * WORLD_UNITS) / 2.0
     game.camera.offset = {
-        (RES_X / 2) - half_size,
-        (RES_Y / 2) - half_size,
+        (RENDER_WIDTH / 2) - half_size,
+        (RENDER_HEIGHT / 2) - half_size,
     }
 }
 
