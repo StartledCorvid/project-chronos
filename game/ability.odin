@@ -92,7 +92,7 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
                         }
 
                         screen_pos := grid_to_world_point(new_pos)
-                        rl.DrawRectangleV(to_vector2(screen_pos), { WORLD_UNITS, WORLD_UNITS }, { 255, 0, 0, 125 })
+                        rl.DrawRectangleV(to_vector2(screen_pos), { WORLD_UNITS, WORLD_UNITS }, { 0, 255, 0, 255 })
 
                         if !ability.pass_through && !world_space_empty(&game.current_world, new_pos) {
                             break

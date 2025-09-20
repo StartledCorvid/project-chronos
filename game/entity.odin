@@ -238,7 +238,6 @@ draw_entity :: proc(handle: Entity_Handle) {
         x = f32(world_point.x),
         y = f32(world_point.y),
 
-        // TODO: Scale instead of having low resolution?
         width = frame_rect.width,
         height = frame_rect.height,
     }

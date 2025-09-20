@@ -102,14 +102,14 @@ deinit_fight :: proc(fight: ^Fight) {
 
 // Starts a new Round in the Fight.
 new_round :: proc(fight: ^Fight, loc := #caller_location) {
-    world := game.current_world
+    world := &game.current_world
     clear(&fight.turn_order)
 
     for entity_id in sa.slice(&world._active_entities) {
         entity := world.entities[entity_id]
 
         if _, ok := entity.type.(Character); ok {
-            handle := new_entity_handle(&world, entity_id)
+            handle := new_entity_handle(world, entity_id)
             append(&fight.turn_order, handle)
         }
     }
