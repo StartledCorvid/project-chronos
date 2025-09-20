@@ -36,7 +36,7 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
             confirmation_type = Direction,
             type = Ability_Bash{
                 damage = 1,
-                distance = 5,
+                distance = 0,
                 pass_through = false,
             },  
 
@@ -79,24 +79,27 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
             draw_preview = proc(self: Ability_Slot, user: Entity) {
                 ability := unwrap_ability_slot(self, Ability_Bash)
 
-                bash_distance := ability.distance < 0 ? int(game.current_world.world_size) : ability.distance
+                world_size := int(game.current_world.world_size)
+                bash_distance := ability.distance <= 0 ? world_size : ability.distance
 
-                current_pos := user.position
                 for direction in DIRECTIONS {
+                    current_pos := user.position
+
                     for _ in 0..<bash_distance {
                         new_pos := current_pos + direction
 
-                        world_size := i32(game.current_world.world_size)
-                        if new_pos.x >= world_size || new_pos.y >= world_size {
+                        if new_pos.x >= i32(world_size) || new_pos.y >= i32(world_size) || new_pos.x < 0 || new_pos.y < 0 {
                             break
                         }
 
                         screen_pos := grid_to_world_point(new_pos)
-                        rl.DrawRectangleV(to_vector2(screen_pos), { WORLD_UNITS, WORLD_UNITS }, { 0, 255, 0, 255 })
 
                         if !ability.pass_through && !world_space_empty(&game.current_world, new_pos) {
+                            rl.DrawRectangleV(to_vector2(screen_pos), { WORLD_UNITS, WORLD_UNITS }, { 255, 0, 0, 125 })
                             break
                         }
+
+                        rl.DrawRectangleV(to_vector2(screen_pos), { WORLD_UNITS, WORLD_UNITS }, { 0, 255, 0, 125 })
 
                         current_pos = new_pos
                     }
