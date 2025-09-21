@@ -54,6 +54,13 @@ Character_Type :: enum {
 }
 
 
+// A list of Character_Types that the player can play as.
+@(rodata)
+PLAYER_CHARACTERS := [?]Character_Type{
+	.Fighter,
+}
+
+
 // A definition of a specific Character type.
 Character_Data :: struct {
 	display_name: string,

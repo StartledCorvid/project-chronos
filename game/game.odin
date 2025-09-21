@@ -27,6 +27,7 @@ Game_State :: enum {
 // Holds the global values of the game.
 Game :: struct {
     state: Game_State,
+    main_menu: Main_Menu,
     current_world: World,
     current_fight: Fight,
     camera: rl.Camera2D,
@@ -60,6 +61,11 @@ init_game :: proc(allocator := context.allocator, loc := #caller_location) {
     game.camera = rl.Camera2D{
         zoom = 1.0,
     }
+
+    // Yes, this is redundant, but the game.state needs to NOT be .Not_Init before
+    // calling, and setting it above is the easiest way to do that AND initialize
+    // the main menu correctly.
+    open_main_menu(&game)
 }
 
 

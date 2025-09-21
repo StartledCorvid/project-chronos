@@ -40,41 +40,7 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
                 pass_through = false,
             },  
 
-            on_use = proc(self: Ability_Slot, confirmation: Ability_Confirmation, user: ^Entity) {
-                ability := unwrap_ability_slot(self, Ability_Bash)
-                direction := confirmation.(Direction)
-                world_size := int(game.current_world.world_size)
-
-                bash_distance := ability.distance <= 0 ? world_size : ability.distance
-
-                user_handle := new_entity_handle(&game.current_world, user^)
-                timeline := &game.current_fight.timeline
-
-                MOVE_TIME     :: 0.08
-                OVERSTEP_TIME :: 0.1
-                end_pos := user.position
-
-                for _ in 0..<bash_distance {
-                    new_pos := end_pos + DIRECTIONS[direction]
-
-                    if new_pos.x >= i32(world_size) || new_pos.y >= i32(world_size) {
-                        add_event(timeline, event_lunge(user_handle, direction, 0.5, OVERSTEP_TIME))
-                        break
-                    }
-
-                    if !ability.pass_through && !world_space_empty(&game.current_world, new_pos) {
-                        break
-                    }
-
-                    end_pos = new_pos
-                    add_event(timeline, event_entity_move(user_handle, direction, MOVE_TIME))
-                }
-
-                if target := world_get_entity_at(&game.current_world, end_pos + DIRECTIONS[direction]); entity_handle_valid(target) {
-                    add_event(timeline, event_lunge(user_handle, direction, 0.5, OVERSTEP_TIME))
-                    add_event(timeline, event_deal_damage(user_handle, ability.damage, target))
-                }
-            },
+            on_use = on_use_bash,
 
             draw_preview = proc(self: Ability_Slot, user: Entity) {
                 ability := unwrap_ability_slot(self, Ability_Bash)
@@ -106,7 +72,24 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
                 }
             },
 
-            ai_can_use = ability_slot_cooled,
+            ai_can_use = proc(self: Ability_Slot, user: Entity) -> bool {
+                // Don't use if not cooled down.
+                if !ability_slot_cooled(self) {
+                    return false
+                }
+
+                // Don't use if a melee is available.
+                player :=  get_entity(game.player)
+                for direction in DIRECTIONS {
+                    test_position := user.position + direction
+                    if player.position == test_position {
+                        return false
+                    }
+                }
+
+                
+                return true
+            },
         },
     }
 }
@@ -127,8 +110,8 @@ Ability_Info :: struct {
     type: Ability_Type,
 
     on_use:       proc(self: Ability_Slot, confirmation: Ability_Confirmation, user: ^Entity),
-    ai_can_use:   proc(self: Ability_Slot, user: Entity) -> bool,
     draw_preview: proc(self: Ability_Slot, user: Entity),
+    ai_can_use:   proc(self: Ability_Slot, user: Entity) -> bool,
 }
 
 
@@ -190,4 +173,41 @@ use_ability :: proc(ability_slot: ^Ability_Slot, user: ^Entity, confirmation: Ab
 unwrap_ability_slot :: proc(ability_slot: Ability_Slot, $T: typeid) -> T {
     ability_info := get_ability_info(ability_slot.ability)
     return ability_info.type.(T)
+}
+
+
+on_use_bash :: proc(self: Ability_Slot, confirmation: Ability_Confirmation, user: ^Entity) {
+    ability := unwrap_ability_slot(self, Ability_Bash)
+    direction := confirmation.(Direction)
+    world_size := int(game.current_world.world_size)
+
+    bash_distance := ability.distance <= 0 ? world_size : ability.distance
+
+    user_handle := new_entity_handle(&game.current_world, user^)
+    timeline := &game.current_fight.timeline
+
+    MOVE_TIME     :: 0.08
+    OVERSTEP_TIME :: 0.1
+    end_pos := user.position
+
+    for _ in 0..<bash_distance {
+        new_pos := end_pos + DIRECTIONS[direction]
+
+        if new_pos.x >= i32(world_size) || new_pos.y >= i32(world_size) || new_pos.x < 0 || new_pos.y < 0 {
+            add_event(timeline, event_lunge(user_handle, direction, 0.5, OVERSTEP_TIME))
+            break
+        }
+
+        if !ability.pass_through && !world_space_empty(&game.current_world, new_pos) {
+            break
+        }
+
+        end_pos = new_pos
+        add_event(timeline, event_entity_move(user_handle, direction, MOVE_TIME))
+    }
+
+    if target := world_get_entity_at(&game.current_world, end_pos + DIRECTIONS[direction]); entity_handle_valid(target) {
+        add_event(timeline, event_lunge(user_handle, direction, 0.5, OVERSTEP_TIME))
+        add_event(timeline, event_deal_damage(user_handle, ability.damage, target))
+    }
 }
