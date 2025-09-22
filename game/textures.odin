@@ -19,14 +19,18 @@ Texture_Name :: enum {
     Tile_Dirt,
 
     Fighter,
+    Wizard,
     Goblin,
     Spider,
 
     Icon_Fighter,
+    Icon_Wizard,
     Icon_Goblin,
     Icon_Spider,
 
     Puff,
+    Fireball,
+    Fire_Explode,
 }
 
 
@@ -36,14 +40,18 @@ load_textures :: proc() -> [Texture_Name]rl.Texture {
         .Tile_Dirt = rl.LoadTexture("res/images/dirt_tile.png"),
 
         .Fighter = rl.LoadTexture("res/images/fighter.png"),
-        .Goblin = rl.LoadTexture("res/images/goblin.png"),
-        .Spider = rl.LoadTexture("res/images/spider.png"),
+        .Wizard  = rl.LoadTexture("res/images/wizard.png"),
+        .Goblin  = rl.LoadTexture("res/images/goblin.png"),
+        .Spider  = rl.LoadTexture("res/images/spider.png"),
 
         .Icon_Fighter = rl.LoadTexture("res/images/fighter.png"), // TODO: Make icon.
-        .Icon_Goblin = rl.LoadTexture("res/images/icon_goblin.png"),
-        .Icon_Spider = rl.LoadTexture("res/images/icon_spider.png"),
+        .Icon_Wizard  = rl.LoadTexture("res/images/icon_fighter.png"),
+        .Icon_Goblin  = rl.LoadTexture("res/images/icon_goblin.png"),
+        .Icon_Spider  = rl.LoadTexture("res/images/icon_spider.png"),
 
-        .Puff = rl.LoadTexture("res/images/puff.png"),
+        .Puff         = rl.LoadTexture("res/images/puff.png"),
+        .Fireball     = rl.LoadTexture("res/images/fireball.png"),
+        .Fire_Explode = rl.LoadTexture("res/images/fire_explode.png"),
     }
 }
 

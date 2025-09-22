@@ -223,6 +223,7 @@ tick_entity :: proc(handle: Entity_Handle, delta_time: f32) {
     case Character: tick_character(entity, &type)
     case Object:
     case Particle:  tick_particle(entity)
+    case:
     }
 }
 

@@ -208,12 +208,13 @@ fight_next_turn :: proc(fight: ^Fight) {
     fight.current_character = fight.turn_order[fight.current_turn]
 
     for !entity_handle_valid(fight.current_character) {
+        fight.current_turn += 1
+
         if fight.current_turn >= len(fight.turn_order) {
             new_round(fight)
             return
         }
 
-        fight.current_turn += 1
         fight.current_character = fight.turn_order[fight.current_turn]
     }
 

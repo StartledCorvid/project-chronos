@@ -28,6 +28,7 @@ Event_Type :: union {
     Event_Basic_Attack,
     Event_Lunge,
     Event_Shake,
+    Event_Destroy_Entity,
 }
 
 
@@ -287,3 +288,37 @@ event_particle :: proc(owner: Entity_Handle, atlas: Texture_Atlas, t: f32 = 1.0,
 
 
 // ----------------------------------- !END PARTICLE! ------------------------------------
+
+
+// +-------------------------------------------------------------------------------------+
+// |                                  !DESTROY ENTITY!                                   |
+// +-------------------------------------------------------------------------------------+
+
+
+// Data for destroying an Entity.
+Event_Destroy_Entity :: struct {
+    entity: Entity_Handle,
+}
+
+
+// Creates an event that calls for a specific Entity to be freed, if it is still valid.
+event_destroy_entity :: proc(owner: Entity_Handle, entity_to_destroy: Entity_Handle) -> Event {
+    event := create_event(owner)
+    event.type = Event_Destroy_Entity{
+        entity = entity_to_destroy,
+    }
+
+    // on_tick -->
+    event.on_tick = proc(e: ^Event, delta_time: f32) {
+        destroy_entity_event := e.type.(Event_Destroy_Entity)
+        if entity_handle_valid(destroy_entity_event.entity) {
+            free_entity(destroy_entity_event.entity)
+        }
+        stop_event(e)
+    } // <-- on_tick 
+
+    return event
+}
+
+
+// -------------------------------- !END DESTROY ENTITY! ---------------------------------

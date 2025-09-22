@@ -80,8 +80,7 @@ Object_Flag :: enum {
 
 // An object that can appear in the world.
 Object :: struct {
-	flags: bit_set[Object_Flag],
-	position: World_Coords,
+	animator: Animator,
 }
 
 Object_Data :: struct {

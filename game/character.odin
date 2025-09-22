@@ -13,6 +13,11 @@ Handling of a participant in combat. This includes different prefabs for enemies
 1. Add an entry to the Character_Type enum.
 2. Add an entry in the load_character_types procedure below.
 
+
+# Creating a New Player Character Type
+1. Do that above to create a new character type.
+2. Add the type's Character_Type enum entry to the PLAYER_CHARACTERS array.
+
 # Adding a New Stat Type
 1. Add a new entry to the Stat enum.
 */
@@ -48,6 +53,7 @@ Stat :: enum {
 // Different types of Characters by name.
 Character_Type :: enum {
 	Fighter,
+	Wizard,
 
 	Goblin,
 	Spider,
@@ -58,6 +64,7 @@ Character_Type :: enum {
 @(rodata)
 PLAYER_CHARACTERS := [?]Character_Type{
 	.Fighter,
+	.Wizard,
 }
 
 
@@ -121,6 +128,29 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 			on_turn = turn_tick_player,
 
 			abilities = { .Bash, .None },
+		},
+
+		.Wizard = {
+			display_name = "Wizard",
+			description = "Fireball.",
+			icon = .Icon_Wizard,
+			stats = {
+				.Speed     = 6,
+				.Strength  = 2,
+				.Magic     = 10,
+				.Agility   = 5,
+				.Toughness = 4,
+			},
+			animator = basic_character_animator({
+				atlas = new_texture_atlas(.Wizard, { 1, 1 }),
+				starting_frame = 0,
+				ending_frame = 0,
+				fps = 1,
+				loop_count = -1,
+			}),
+			on_turn = turn_tick_player,
+
+			abilities = { .Fireball, .None },
 		},
 
 		.Goblin = {
