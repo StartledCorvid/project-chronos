@@ -44,7 +44,7 @@ load_particles :: proc() -> [Particle_Name]Particle {
         .Fire_Explode = {
             animation = {
                 atlas = new_texture_atlas(.Fire_Explode, { 5, 1}),
-                fps = 5, // TODO: If this goes over the count, it doesn't work
+                fps = 12,
                 loop_count = 1,
                 starting_frame = 0,
                 ending_frame = 4,
@@ -71,7 +71,7 @@ new_custom_particle :: proc(location: World_Coords, particle: Particle, layer: i
     mut_particle := particle
 
     total_frames := (mut_particle.animation.ending_frame - mut_particle.animation.starting_frame) + 1
-    seconds_per_cycle := f32(total_frames / mut_particle.animation.fps)
+    seconds_per_cycle := f32(total_frames) / f32(mut_particle.animation.fps)
 
     mut_particle._total_lifespan = f32(mut_particle.animation.loop_count) * seconds_per_cycle
     entity.type = mut_particle
