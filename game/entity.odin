@@ -62,6 +62,7 @@ Entity :: struct {
     id: int,
     flags: bit_set[Entity_Flag],
 
+    layer: int,
     animator: Animator,
     type: Entity_Type,
 

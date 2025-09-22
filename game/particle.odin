@@ -44,7 +44,7 @@ load_particles :: proc() -> [Particle_Name]Particle {
         .Fire_Explode = {
             animation = {
                 atlas = new_texture_atlas(.Fire_Explode, { 5, 1}),
-                fps = 1,
+                fps = 5, // TODO: If this goes over the count, it doesn't work
                 loop_count = 1,
                 starting_frame = 0,
                 ending_frame = 4,
@@ -60,12 +60,13 @@ new_particle :: proc {
 }
 
 
-new_custom_particle :: proc(location: World_Coords, particle: Particle, loc := #caller_location) -> Entity_Handle {
+new_custom_particle :: proc(location: World_Coords, particle: Particle, layer: int = 0, loc := #caller_location) -> Entity_Handle {
     handle := new_entity(&game.current_world)
     entity := get_entity(handle)
 
     entity.position = location
     entity.offset = particle.start_offset
+    entity.layer = layer
 
     mut_particle := particle
 
@@ -77,12 +78,13 @@ new_custom_particle :: proc(location: World_Coords, particle: Particle, loc := #
 
     animation_play(&entity.animator, particle.animation)
 
+    log.debugf("Created particle '%v'.", particle)
     return handle
 }
 
 
-new_template_particle :: proc(location: World_Coords, particle: Particle_Name, loc := #caller_location) -> Entity_Handle {
-    return new_custom_particle(location, game.particles[particle], loc)
+new_template_particle :: proc(location: World_Coords, particle: Particle_Name, layer: int = 0, loc := #caller_location) -> Entity_Handle {
+    return new_custom_particle(location, game.particles[particle], layer, loc)
 }
 
 
@@ -91,6 +93,7 @@ tick_particle :: proc(self: ^Entity) {
     self.offset = lerp(self.offset, particle.end_offset, self.animator._t / particle._total_lifespan)
     handle := new_entity_handle(&game.current_world, self^)
     if !self.animator.play {
+        log.debugf("Freed particle with texture '%v'.", particle.animation.atlas.texture)
         free_entity(handle)
     }
 }

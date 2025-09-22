@@ -26,6 +26,8 @@ turn_random_move :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 
 // Chases down the Player and attacks if in range.
 turn_aggressive :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
+	character := self.type.(Character)
+
 	// If no player, do mothing.
 	if !entity_handle_valid(game.player) {
 		return true
@@ -37,7 +39,7 @@ turn_aggressive :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 	player := get_entity(game.player)
 	if dir, adjacent := is_adjacent(self.position, player.position); adjacent {
 		add_event(timeline, event_lunge(self_handle, dir, 0.5, 0.15))
-		add_event(timeline, event_basic_attack(self_handle, dir, 1)) // TODO: Calculate damage better.
+		add_event(timeline, event_basic_attack(self_handle, dir, get_melee_damage(character.base.stats))) // TODO: Calculate damage better.
 		return true
 	}
 

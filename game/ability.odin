@@ -279,6 +279,7 @@ on_use_projectile :: proc(self: Ability_Slot, confirmation: Ability_Confirmation
 
     MOVE_TIME :: 0.08
 
+    // TODO: Set animator via ability data.
     projectile_handle := new_entity(&game.current_world)
     entity := get_entity(projectile_handle)
     entity.animator = {
@@ -299,7 +300,8 @@ on_use_projectile :: proc(self: Ability_Slot, confirmation: Ability_Confirmation
 
         if new_pos.x >= i32(world_size) || new_pos.y >= i32(world_size) || new_pos.x < 0 || new_pos.y < 0 {
             add_event(timeline, event_destroy_entity(user_handle, projectile_handle))
-            new_particle(current_pos * WORLD_UNITS, Particle_Name.Fire_Explode)
+            // TODO: Set optional on_destroy particle in ability data.
+            add_event(timeline, event_create_particle(user_handle, .Fire_Explode, current_pos))
             break
         }
 
@@ -307,10 +309,12 @@ on_use_projectile :: proc(self: Ability_Slot, confirmation: Ability_Confirmation
 
         if target := world_get_entity_at(&game.current_world, new_pos); entity_handle_valid(target) {
             add_event(timeline, event_deal_damage(user_handle, ability.damage, target))
-            new_particle(new_pos * WORLD_UNITS, Particle_Name.Fire_Explode)
+            new_particle(new_pos, Particle_Name.Fire_Explode, 1)
 
             if !ability.pass_through {
                 add_event(timeline, event_destroy_entity(user_handle, projectile_handle))
+                // TODO: Set optional on_destroy particle in ability data.
+                add_event(timeline, event_create_particle(user_handle, .Fire_Explode, new_pos))
                 break
             }
         }

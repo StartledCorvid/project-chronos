@@ -29,6 +29,7 @@ Event_Type :: union {
     Event_Lunge,
     Event_Shake,
     Event_Destroy_Entity,
+    Event_Create_Particle,
 }
 
 
@@ -322,3 +323,50 @@ event_destroy_entity :: proc(owner: Entity_Handle, entity_to_destroy: Entity_Han
 
 
 // -------------------------------- !END DESTROY ENTITY! ---------------------------------
+
+
+// +-------------------------------------------------------------------------------------+
+// |                                  !CREATE PARTICLE!                                  |
+// +-------------------------------------------------------------------------------------+
+
+
+// Data for the particle to create.
+Event_Create_Particle :: struct {
+    particle: Particle_Name,
+    location: World_Coords,
+    // Should the timeline wait for the particle to finish before continuing to
+    // the next event?
+    wait_for_finish: bool,
+
+    _created_particle: Entity_Handle,
+}
+
+
+// Creates an event that calls for a particle to be created.
+event_create_particle :: proc(owner: Entity_Handle, particle: Particle_Name, location: World_Coords, wait_for_finish: bool = false) -> Event {
+    event := create_event(owner)
+    event.type = Event_Create_Particle{
+        particle = particle,
+        location = location,
+        wait_for_finish = wait_for_finish,
+    }
+
+    event.on_start = proc(e: ^Event) {
+        create_particle_event := e.type.(Event_Create_Particle)
+        create_particle_event._created_particle = new_particle(create_particle_event.location, create_particle_event.particle)
+    }
+
+    // on_tick -->
+    event.on_tick = proc(e: ^Event, delta_time: f32) {
+        create_particle_event := e.type.(Event_Create_Particle)
+
+        if !entity_handle_valid(create_particle_event._created_particle) || !create_particle_event.wait_for_finish {
+            stop_event(e)
+        }
+    } // <-- on_tick 
+
+    return event
+}
+
+
+// -------------------------------- !END CREATE PARTICLE! --------------------------------

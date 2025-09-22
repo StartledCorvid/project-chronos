@@ -36,7 +36,7 @@ turn_tick_player :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 	// Attacks.
 	if direction, pressed := query_player_attack(); pressed {
 		add_event(timeline, event_lunge(handle, direction, 0.5, 0.15))
-		add_event(timeline, event_basic_attack(handle, direction, 1)) // TODO: Handle variant damage.
+		add_event(timeline, event_basic_attack(handle, direction, get_melee_damage(character.base.stats)))
 		return true
 	}
 

@@ -306,6 +306,11 @@ get_max_hp :: proc(stats: Stat_Block) -> i32 {
 }
 
 
+get_melee_damage :: proc(stats: Stat_Block) -> i32 {
+	return max(1, stats[.Strength])
+}
+
+
 // Damages the given Character, killing it if its health reaches 0.
 damage_character :: proc(handle: Entity_Handle, damage: i32, loc := #caller_location) {
 	entity := get_entity(handle, loc)
