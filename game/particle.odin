@@ -14,6 +14,7 @@ Handles the Particle system.
 
 Particle_Name :: enum {
     Puff,
+    Fireball,
     Fire_Explode,
 }
 
@@ -38,6 +39,16 @@ load_particles :: proc() -> [Particle_Name]Particle {
                 loop_count = 1,
                 starting_frame = 0,
                 ending_frame = 5,
+            },
+        },
+
+        .Fireball = {
+            animation = {
+                atlas = new_texture_atlas(.Fireball, { 3, 1 }),
+                starting_frame = 0,
+                ending_frame = 2,
+                fps = 9,
+                loop_count = -1,
             },
         },
 

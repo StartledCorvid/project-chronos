@@ -50,6 +50,13 @@ Stat :: enum {
 }
 
 
+// A modifier to a value using a Stat.
+Modifier :: struct {
+	stat: Stat,
+	multiplier: f32,
+}
+
+
 // Different types of Characters by name.
 Character_Type :: enum {
 	Fighter,
@@ -96,6 +103,12 @@ Character :: struct {
 
 
 // ------------------------------------- !END TYPES! -------------------------------------
+
+
+// Takes a Stat_Block and gets a value from a modifier of it.
+modifier_value :: proc(stat_block: Stat_Block, modifier: Modifier) -> f32 {
+	return f32(stat_block[modifier.stat]) * modifier.multiplier
+}
 
 
 // +-------------------------------------------------------------------------------------+
@@ -284,10 +297,7 @@ draw_character :: proc(self: ^Entity) {
     // Draw Ability preview, if selected.
     if character.queued_ability_slot != nil {
     	ability_info := get_ability_info(character.queued_ability_slot.ability)
-
-    	if ability_info.draw_preview != nil {
-    		ability_info.draw_preview(character.queued_ability_slot^, self^)
-    	}
+    	draw_ability_preview(self^, ability_info)
     }
 }
 

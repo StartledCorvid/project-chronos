@@ -44,8 +44,8 @@ load_textures :: proc() -> [Texture_Name]rl.Texture {
         .Goblin  = rl.LoadTexture("res/images/goblin.png"),
         .Spider  = rl.LoadTexture("res/images/spider.png"),
 
-        .Icon_Fighter = rl.LoadTexture("res/images/fighter.png"), // TODO: Make icon.
-        .Icon_Wizard  = rl.LoadTexture("res/images/icon_fighter.png"),
+        .Icon_Fighter = rl.LoadTexture("res/images/icon_fighter.png"),
+        .Icon_Wizard  = rl.LoadTexture("res/images/icon_wizard.png"),
         .Icon_Goblin  = rl.LoadTexture("res/images/icon_goblin.png"),
         .Icon_Spider  = rl.LoadTexture("res/images/icon_spider.png"),
 
