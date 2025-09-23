@@ -341,7 +341,6 @@ ability_projectile :: proc(self: Ability_Slot, confirmation: Ability_Confirmatio
 
         if target := world_get_entity_at(&game.current_world, new_pos); entity_handle_valid(target) {
             add_event(timeline, event_deal_damage(user_handle, actual_damage, target))
-            new_particle(new_pos, Particle_Name.Fire_Explode, 1)
 
             if !ability.pass_through {
                 add_event(timeline, event_destroy_entity(user_handle, projectile_handle))
