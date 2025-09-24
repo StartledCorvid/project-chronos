@@ -29,6 +29,7 @@ Texture_Name :: enum {
     Icon_Spider,
 
     Icon_Bash,
+    Icon_Push_Burst,
     Icon_Fireball,
 
     Puff,
@@ -40,24 +41,25 @@ Texture_Name :: enum {
 load_textures :: proc() -> [Texture_Name]rl.Texture {
     defer log.infof("Loaded %v Textures.", len(Texture_Name))
     return [Texture_Name]rl.Texture{
-        .Tile_Dirt     = rl.LoadTexture("res/images/dirt_tile.png"),
+        .Tile_Dirt       = rl.LoadTexture("res/images/dirt_tile.png"),
 
-        .Fighter       = rl.LoadTexture("res/images/fighter.png"),
-        .Wizard        = rl.LoadTexture("res/images/wizard.png"),
-        .Goblin        = rl.LoadTexture("res/images/goblin.png"),
-        .Spider        = rl.LoadTexture("res/images/spider.png"),
+        .Fighter         = rl.LoadTexture("res/images/fighter.png"),
+        .Wizard          = rl.LoadTexture("res/images/wizard.png"),
+        .Goblin          = rl.LoadTexture("res/images/goblin.png"),
+        .Spider          = rl.LoadTexture("res/images/spider.png"),
 
-        .Icon_Fighter  = rl.LoadTexture("res/images/icon_fighter.png"),
-        .Icon_Wizard   = rl.LoadTexture("res/images/icon_wizard.png"),
-        .Icon_Goblin   = rl.LoadTexture("res/images/icon_goblin.png"),
-        .Icon_Spider   = rl.LoadTexture("res/images/icon_spider.png"),
+        .Icon_Fighter    = rl.LoadTexture("res/images/icon_fighter.png"),
+        .Icon_Wizard     = rl.LoadTexture("res/images/icon_wizard.png"),
+        .Icon_Goblin     = rl.LoadTexture("res/images/icon_goblin.png"),
+        .Icon_Spider     = rl.LoadTexture("res/images/icon_spider.png"),
 
-        .Icon_Bash     = rl.LoadTexture("res/images/icon_bash.png"),
-        .Icon_Fireball = rl.LoadTexture("res/images/icon_fireball.png"),
+        .Icon_Bash       = rl.LoadTexture("res/images/icon_bash.png"),
+        .Icon_Push_Burst = rl.LoadTexture("res/images/icon_push_burst.png"),
+        .Icon_Fireball   = rl.LoadTexture("res/images/icon_fireball.png"),
 
-        .Puff          = rl.LoadTexture("res/images/puff.png"),
-        .Fireball      = rl.LoadTexture("res/images/fireball.png"),
-        .Fire_Explode  = rl.LoadTexture("res/images/fire_explode.png"),
+        .Puff            = rl.LoadTexture("res/images/puff.png"),
+        .Fireball        = rl.LoadTexture("res/images/fireball.png"),
+        .Fire_Explode    = rl.LoadTexture("res/images/fire_explode.png"),
     }
 }
 

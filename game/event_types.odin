@@ -30,6 +30,7 @@ Event_Type :: union {
     Event_Shake,
     Event_Destroy_Entity,
     Event_Create_Particle,
+    Event_Branch,
 }
 
 
@@ -370,3 +371,46 @@ event_create_particle :: proc(owner: Entity_Handle, particle: Particle_Name, loc
 
 
 // -------------------------------- !END CREATE PARTICLE! --------------------------------
+
+
+// +-------------------------------------------------------------------------------------+
+// |                                       !BRANCH!                                      |
+// +-------------------------------------------------------------------------------------+
+
+
+// Data for an event that waits for a few sub-timelines to finish.
+Event_Branch :: struct {
+    timelines: [dynamic]Timeline,
+}
+
+
+// Creates an event that calls for a particle to be created.
+event_branch :: proc(owner: Entity_Handle, timeline_count: int) -> Event {
+    event := create_event(owner)
+    event.type = Event_Branch{
+        timelines = make([dynamic]Timeline, timeline_count),
+    }
+
+    // on_tick -->
+    event.on_tick = proc(e: ^Event, delta_time: f32) {
+        data := e.type.(Event_Branch)
+
+        still_running := false
+        for &timeline in data.timelines {
+            if len(timeline.events) > 0 {
+                still_running = true
+                tick_timeline(&timeline, delta_time)
+            }
+        }
+
+        if !still_running {
+            delete(data.timelines)
+            stop_event(e)
+        }
+    } // <-- on_tick
+
+    return event
+}
+
+
+// ------------------------------------- !END BRANCH! ------------------------------------

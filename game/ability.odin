@@ -20,13 +20,14 @@ Defines an interface for abilities.
 Ability_Name :: enum {
     None,
     Bash,
-
+    Push_Burst,
     Fireball,
 }
 
 
 Ability_Type :: union {
     Ability_Bash,
+    Ability_Push_Burst,
     Ability_Projectile,
 }
 
@@ -57,12 +58,28 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
             ai_can_use = ai_only_use_if_no_melee,
         },
 
+        .Push_Burst = {
+            name = "Push Burst",
+            description = "Pushes away adjacent enemies, dealing damage on collisions.",
+            icon = .Icon_Bash,
+
+            cooldown = 5,
+            confirmation_type = bool,
+            type = Ability_Push_Burst{
+                push_distance = 1,
+                damage = 0,
+                damage_on_collide = 1,
+            },
+
+            ai_can_use = ai_only_use_if_no_melee,
+        },
+
         .Fireball = {
             name = "Fireball",
             description = "Did I ask how big the room was?",
             icon = .Icon_Fireball,
 
-            cooldown = 2,
+            cooldown = 1,
             confirmation_type = Direction,
             type = Ability_Projectile{
                 damage = 1,
@@ -100,7 +117,7 @@ Ability_Info :: struct {
     confirmation_type: typeid,
     type: Ability_Type,
 
-    ai_can_use:   proc(self: Ability_Slot, user: Entity) -> bool,
+    ai_can_use:   proc(self: Ability_Slot, user: Entity) -> bool, // TODO: Return weight.
 }
 
 
@@ -145,6 +162,7 @@ use_ability :: proc(ability_slot: ^Ability_Slot, user: ^Entity, confirmation: Ab
 
     switch type in ability_info.type {
     case Ability_Bash:       ability_bash(ability_slot^, confirmation, user)
+    case Ability_Push_Burst: ability_push_burst(ability_slot^, confirmation, user)
     case Ability_Projectile: ability_projectile(ability_slot^, confirmation, user)
     }
 
@@ -157,6 +175,8 @@ draw_ability_preview :: proc(self: Entity, ability_info: Ability_Info) {
     switch ability in ability_info.type {
     case Ability_Bash:
         draw_directional_ability_preview(self, ability.distance, ability.pass_through)
+    case Ability_Push_Burst:
+        draw_directional_ability_preview(self, 1, false) // TODO: Project push movement.
     case Ability_Projectile:
         draw_directional_ability_preview(self, ability.range, ability.pass_through)
     }
@@ -356,3 +376,36 @@ ability_projectile :: proc(self: Ability_Slot, confirmation: Ability_Confirmatio
 
 
 // ---------------------------------- !END PROJECTILE! -----------------------------------
+
+
+// +-------------------------------------------------------------------------------------+
+// |                                    !PUSH BURST!                                     |
+// +-------------------------------------------------------------------------------------+
+
+
+// Data for an Ability that shoots a projectile in a straight line.
+Ability_Push_Burst :: struct {
+    push_distance: i32,
+    damage_on_collide: int,
+
+    damage: int,
+
+}
+
+
+// Schedules the events needed to use an Ability_Projectile.
+ability_push_burst :: proc(self: Ability_Slot, confirmation: Ability_Confirmation, user: ^Entity) {
+    ability := unwrap_ability_slot(self, Ability_Push_Burst)
+    direction := confirmation.(Direction)
+    world_size := int(game.current_world.world_size)
+    user_handle := new_entity_handle(&game.current_world, user^)
+
+    timeline := &game.current_fight.timeline
+
+    character := user.type.(Character)
+    
+    
+}
+
+
+// ---------------------------------- !END PUSH BURST! -----------------------------------
