@@ -1,5 +1,6 @@
 package game
 
+import "core:fmt"
 import rl "vendor:raylib"
 
 /*
@@ -36,6 +37,7 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
         .Bash = {
             name = "Bash",
             description = "Move in a straight line and deal damage to the enemy hit.",
+            icon = .Icon_Bash,
 
             cooldown = 2,
             confirmation_type = Direction,
@@ -75,6 +77,7 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
         .Fireball = {
             name = "Fireball",
             description = "Did I ask how big the room was?",
+            icon = .Icon_Fireball,
 
             cooldown = 2,
             confirmation_type = Direction,
@@ -124,6 +127,7 @@ Ability_Confirmation :: union {
 Ability_Info :: struct {
     name: string,
     description: string,
+    icon: Texture_Name,
 
     cooldown: int,
     confirmation_type: typeid,
@@ -177,7 +181,7 @@ use_ability :: proc(ability_slot: ^Ability_Slot, user: ^Entity, confirmation: Ab
     case Ability_Projectile: ability_projectile(ability_slot^, confirmation, user)
     }
 
-    ability_slot.cooldown = ability_info.cooldown
+    ability_slot.cooldown = ability_info.cooldown + 1
 }
 
 
@@ -188,6 +192,34 @@ draw_ability_preview :: proc(self: Entity, ability_info: Ability_Info) {
         draw_directional_ability_preview(self, ability.distance, ability.pass_through)
     case Ability_Projectile:
         draw_directional_ability_preview(self, ability.range, ability.pass_through)
+    }
+}
+
+
+// Draws the icon for an Ability_Slot at the given location on the screen.
+ui_draw_ability_slot :: proc(ability_slot: Ability_Slot, position: Vector2) {
+    rl.DrawRectangleV(position, 18, rl.BLACK)
+
+    ability_cooled := ability_slot.cooldown <= 0
+
+    tint := rl.WHITE
+    if !ability_cooled {
+        tint = rl.GRAY
+    }
+
+    ability_info := game.abilities[ability_slot.ability]
+    icon := get_texture(ability_info.icon)
+
+    icon_position := Vector2{
+        (16 - f32(icon.width)) / 2,
+        (16 - f32(icon.height)) / 2,
+    }
+    rl.DrawTextureV(icon, position + icon_position, tint)
+
+    if !ability_cooled {
+        cooldown_text := fmt.ctprintf("%v", ability_slot.cooldown)
+        // TODO: Center text.
+        rl.DrawText(cooldown_text, i32(position.x), i32(position.y), 8, rl.WHITE)
     }
 }
 

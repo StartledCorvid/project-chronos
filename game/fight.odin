@@ -166,6 +166,11 @@ tick_fight_processing :: proc(fight: ^Fight, delta_time: f32) {
     if len(fight.timeline.events) <= 0 {
         fight_next_turn(fight)
         fight_change_phase(fight, .Turn)
+
+        character := &get_entity(fight.current_character).type.(Character)
+        for &slot in character.ability_slots {
+            slot.cooldown = max(0, slot.cooldown - 1)
+        }
     }
 
     if !entity_handle_valid(game.player) {

@@ -144,12 +144,12 @@ query_player_attack :: proc() -> (Direction, bool) {
 // Checks if the player is inputting an Ability.
 @(private="file")
 query_player_ability :: proc(character: ^Character) {
-	if is_action_pressed(.Ability_A) {
+	if is_action_pressed(.Ability_A) && ability_slot_cooled(character.ability_slots[0]) {
 		character.queued_ability_slot = &character.ability_slots[0]
 		log.infof("Queued ability %v.", character.base.abilities[0])
 	}
 
-	if is_action_pressed(.Ability_B) {
+	if is_action_pressed(.Ability_B) && ability_slot_cooled(character.ability_slots[1]) {
 		character.queued_ability_slot = &character.ability_slots[1]
 		log.infof("Queued ability %v.", character.base.abilities[1])
 	}
@@ -178,6 +178,15 @@ ui_player :: proc(handle: Entity_Handle, loc := #caller_location) {
 
 	health_text := fmt.ctprintf("%v/%v", current_health, max_health)
 	rl.DrawText(health_text, i32(health_bar_dim.x), 0, 8, rl.RED)
+
+
+	if character.ability_slots[0].ability != .None {
+		ui_draw_ability_slot(character.ability_slots[0], { 2, RENDER_HEIGHT - 20 })
+	}
+
+	if character.ability_slots[1].ability != .None {
+		ui_draw_ability_slot(character.ability_slots[1], { 22, RENDER_HEIGHT - 20 })
+	}
 }
 
 
