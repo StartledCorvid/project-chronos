@@ -1,4 +1,13 @@
 package game
+
+import "core:strings"
+import "core:fmt"
+import rl "vendor:raylib"
+import "core:encoding/json"
+import "core:log"
+import "core:os"
+import "vfiles"
+
 /*
 # Overview
 Handles player input. Essentially a wrapper for Raylib input to map to
@@ -9,12 +18,6 @@ game Action_Codes instead.
 2. Add an entry to Input_Map that lines up with the action.
 3. Add to the switch in action_code_to_map_keys.
 */
-
-import rl "vendor:raylib"
-import "core:encoding/json"
-import "core:log"
-import "core:os"
-import "vfiles"
 
 
 // +-------------------------------------------------------------------------------------+
@@ -158,6 +161,39 @@ save_input_map :: proc(file: string) -> bool {
 
 	log.infof("Successfully saved Input Map to '%v'.", file)
 	return true
+}
+
+
+// Gets the inputs of an Action_Code as a string.
+input_string :: proc(action_code: Action_Code, allocator := context.allocator, loc := #caller_location) -> string {
+	keys := action_code_to_map_keys(action_code)
+
+	prompt: string
+
+	has_a := keys[0] != .KEY_NULL
+	has_b := keys[1] != .KEY_NULL
+
+	if has_a && !has_b {
+		prompt = fmt.tprintf("%v", keys[0])
+	} else if !has_a && has_b {
+		prompt = fmt.tprintf("%v", keys[1])
+	} else if has_a && has_b {
+		prompt = fmt.tprintf("%v / %v", keys[0], keys[1])
+	} else {
+		prompt = fmt.tprintf("%v err", action_code)
+	}
+
+	// defer delete(prompt)
+	return strings.clone(prompt, allocator, loc)
+}
+
+
+// Gets the inputs of an Action_Code as a cstring.
+input_cstring :: proc(action_code: Action_Code, allocator := context.allocator, loc := #caller_location) -> cstring {
+	prompt := input_string(action_code)
+	defer delete(prompt)
+
+	return strings.clone_to_cstring(prompt, allocator, loc)
 }
 
 

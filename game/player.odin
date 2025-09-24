@@ -181,10 +181,14 @@ ui_player :: proc(handle: Entity_Handle, loc := #caller_location) {
 
 
 	if character.ability_slots[0].ability != .None {
+		prompt := input_cstring(.Ability_A)
+		rl.DrawText(prompt, 2, RENDER_HEIGHT - 30, 8, rl.WHITE)
 		ui_draw_ability_slot(character.ability_slots[0], { 2, RENDER_HEIGHT - 20 })
 	}
 
 	if character.ability_slots[1].ability != .None {
+		prompt := input_cstring(.Ability_B)
+		rl.DrawText(prompt, 22, RENDER_HEIGHT - 30, 8, rl.WHITE)
 		ui_draw_ability_slot(character.ability_slots[1], { 22, RENDER_HEIGHT - 20 })
 	}
 }

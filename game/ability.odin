@@ -54,24 +54,7 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
                 move_speed = 0.1,
             },
 
-            ai_can_use = proc(self: Ability_Slot, user: Entity) -> bool {
-                // Don't use if not cooled down.
-                if !ability_slot_cooled(self) {
-                    return false
-                }
-
-                // Don't use if a melee is available.
-                player :=  get_entity(game.player)
-                for direction in DIRECTIONS {
-                    test_position := user.position + direction
-                    if player.position == test_position {
-                        return false
-                    }
-                }
-
-                
-                return true
-            },
+            ai_can_use = ai_only_use_if_no_melee,
         },
 
         .Fireball = {
@@ -96,23 +79,7 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
                 hit_particle = .Fire_Explode,
             },
 
-            ai_can_use = proc(self: Ability_Slot, user: Entity) -> bool {
-                // Don't use if not cooled down.
-                if !ability_slot_cooled(self) {
-                    return false
-                }
-
-                // Don't use if a melee is available.
-                player :=  get_entity(game.player)
-                for direction in DIRECTIONS {
-                    test_position := user.position + direction
-                    if player.position == test_position {
-                        return false
-                    }
-                }
-
-                return true
-            },
+            ai_can_use = ai_only_use_if_no_melee,
         },
     }
 }

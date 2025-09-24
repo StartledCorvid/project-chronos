@@ -90,6 +90,25 @@ get_closest_direction_to_target :: proc(start, target: World_Coords, directions:
 }
 
 
+ai_only_use_if_no_melee :: proc(self: Ability_Slot, user: Entity) -> bool {
+    // Don't use if not cooled down.
+    if !ability_slot_cooled(self) {
+        return false
+    }
+
+    // Don't use if a melee is available.
+    player :=  get_entity(game.player)
+    for direction in DIRECTIONS {
+        test_position := user.position + direction
+        if player.position == test_position {
+            return false
+        }
+    }
+
+    return true
+}
+
+
 square_distance :: proc(a, b: World_Coords) -> f32 {
 	x := f32(a.x - b.x)
 	y := f32(a.y - b.y)
