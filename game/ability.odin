@@ -27,6 +27,7 @@ Ability_Name :: enum {
 
 Ability_Type :: union {
     Ability_Bash,
+    Ability_Push,
     Ability_Push_Burst,
     Ability_Projectile,
 }
@@ -67,8 +68,11 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
             confirmation_type = bool,
             type = Ability_Push_Burst{
                 push_distance = 1,
-                damage = 0,
                 damage_on_collide = 1,
+
+                damage = 0,
+
+                move_speed = 0.5,
             },
 
             ai_can_use = ai_only_use_if_no_melee,
@@ -159,11 +163,13 @@ use_ability :: proc(ability_slot: ^Ability_Slot, user: ^Entity, confirmation: Ab
     }
 
     ability_info := get_ability_info(ability_slot.ability)
+    timeline := &game.current_fight.timeline
 
     switch type in ability_info.type {
-    case Ability_Bash:       ability_bash(ability_slot^, confirmation, user)
-    case Ability_Push_Burst: ability_push_burst(ability_slot^, confirmation, user)
-    case Ability_Projectile: ability_projectile(ability_slot^, confirmation, user)
+    case Ability_Bash:       ability_bash(type, confirmation, user, timeline)
+    case Ability_Push:       ability_push(type, confirmation, user, timeline)
+    case Ability_Push_Burst: ability_push_burst(type, confirmation, user, timeline)
+    case Ability_Projectile: ability_projectile(type, confirmation, user, timeline)
     }
 
     ability_slot.cooldown = ability_info.cooldown + 1
@@ -175,6 +181,8 @@ draw_ability_preview :: proc(self: Entity, ability_info: Ability_Info) {
     switch ability in ability_info.type {
     case Ability_Bash:
         draw_directional_ability_preview(self, ability.distance, ability.pass_through)
+    case Ability_Push:
+        // TODO: Project push.
     case Ability_Push_Burst:
         draw_directional_ability_preview(self, 1, false) // TODO: Project push movement.
     case Ability_Projectile:
@@ -267,18 +275,16 @@ Ability_Bash :: struct {
 
 
 // Schedules the events needed to use an Ability_Bash.
-ability_bash :: proc(self: Ability_Slot, confirmation: Ability_Confirmation, user: ^Entity) {
-    ability := unwrap_ability_slot(self, Ability_Bash)
+ability_bash :: proc(self: Ability_Bash, confirmation: Ability_Confirmation, user: ^Entity, timeline: ^Timeline) {
     direction := confirmation.(Direction)
     world_size := int(game.current_world.world_size)
 
-    bash_distance := ability.distance <= 0 ? world_size : ability.distance
+    bash_distance := self.distance <= 0 ? world_size : self.distance
 
     user_handle := new_entity_handle(&game.current_world, user^)
-    timeline := &game.current_fight.timeline
 
     character := user.type.(Character)
-    actual_damage := ability.damage + int(modifier_value(character.base.stats, ability.damage_modifier))
+    actual_damage := self.damage + int(modifier_value(character.base.stats, self.damage_modifier))
 
     OVERSTEP_TIME :: 0.1
     end_pos := user.position
@@ -291,12 +297,12 @@ ability_bash :: proc(self: Ability_Slot, confirmation: Ability_Confirmation, use
             break
         }
 
-        if !ability.pass_through && !world_space_empty(&game.current_world, new_pos) {
+        if !self.pass_through && !world_space_empty(&game.current_world, new_pos) {
             break
         }
 
         end_pos = new_pos
-        add_event(timeline, event_entity_move(user_handle, direction, ability.move_speed))
+        add_event(timeline, event_entity_move(user_handle, direction, self.move_speed))
     }
 
     if target := world_get_entity_at(&game.current_world, end_pos + DIRECTIONS[direction]); entity_handle_valid(target) {
@@ -329,20 +335,17 @@ Ability_Projectile :: struct {
 
 
 // Schedules the events needed to use an Ability_Projectile.
-ability_projectile :: proc(self: Ability_Slot, confirmation: Ability_Confirmation, user: ^Entity) {
-    ability := unwrap_ability_slot(self, Ability_Projectile)
+ability_projectile :: proc(self: Ability_Projectile, confirmation: Ability_Confirmation, user: ^Entity, timeline: ^Timeline) {
     direction := confirmation.(Direction)
     world_size := int(game.current_world.world_size)
     user_handle := new_entity_handle(&game.current_world, user^)
 
-    projectile_distance := ability.range <= 0 ? world_size : ability.range
-
-    timeline := &game.current_fight.timeline
+    projectile_distance := self.range <= 0 ? world_size : self.range
 
     character := user.type.(Character)
-    actual_damage := ability.damage + int(modifier_value(character.base.stats, ability.damage_modifier))
+    actual_damage := self.damage + int(modifier_value(character.base.stats, self.damage_modifier))
 
-    projectile_handle := new_particle(user.position, ability.projectile_particle)
+    projectile_handle := new_particle(user.position, self.projectile_particle)
 
     current_pos := user.position
     for _ in 0..<projectile_distance {
@@ -350,21 +353,21 @@ ability_projectile :: proc(self: Ability_Slot, confirmation: Ability_Confirmatio
 
         if new_pos.x >= i32(world_size) || new_pos.y >= i32(world_size) || new_pos.x < 0 || new_pos.y < 0 {
             add_event(timeline, event_destroy_entity(user_handle, projectile_handle))
-            if ability.hit_particle != nil {
-                add_event(timeline, event_create_particle(user_handle, ability.hit_particle.?, current_pos))
+            if self.hit_particle != nil {
+                add_event(timeline, event_create_particle(user_handle, self.hit_particle.?, current_pos))
             }
             break
         }
 
-        add_event(timeline, event_entity_move(projectile_handle, direction, ability.projectile_speed))
+        add_event(timeline, event_entity_move(projectile_handle, direction, self.projectile_speed))
 
         if target := world_get_entity_at(&game.current_world, new_pos); entity_handle_valid(target) {
             add_event(timeline, event_deal_damage(user_handle, actual_damage, target))
 
-            if !ability.pass_through {
+            if !self.pass_through {
                 add_event(timeline, event_destroy_entity(user_handle, projectile_handle))
-                if ability.hit_particle != nil {
-                    add_event(timeline, event_create_particle(user_handle, ability.hit_particle.?, new_pos))
+                if self.hit_particle != nil {
+                    add_event(timeline, event_create_particle(user_handle, self.hit_particle.?, new_pos))
                 }
                 break
             }
@@ -379,32 +382,147 @@ ability_projectile :: proc(self: Ability_Slot, confirmation: Ability_Confirmatio
 
 
 // +-------------------------------------------------------------------------------------+
+// |                                       !PUSH!                                        |
+// +-------------------------------------------------------------------------------------+
+
+
+// Data for an Ability that pushes an adjacent target and damages it if it collides with
+// another Entity or the edge of the map.
+Ability_Push :: struct {
+    push_distance: int,
+    damage_on_collide: int,
+
+    damage: int,
+    damage_modifier: Modifier,
+
+    direction: Direction,
+    move_speed: f32,
+
+    push_animation: bool,
+}
+
+
+// Schedules the events needed to use an Ability_Push.
+ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, user: ^Entity, timeline: ^Timeline) {
+    direction := confirmation.(Direction)
+
+    world_size := int(game.current_world.world_size)
+    push_distance := self.push_distance > 0 ? self.push_distance : world_size
+
+    user_handle := new_entity_handle(&game.current_world, user^)
+    character := user.type.(Character)
+    
+    found_targets: [dynamic]Entity_Handle
+    defer delete(found_targets)
+
+
+    lunge_time := self.move_speed / 2
+    actual_damage := self.damage + int(modifier_value(character.base.stats, self.damage_modifier))
+
+    // Do little shove animation, if configured.
+    if self.push_animation {
+        add_event(timeline, event_lunge(user_handle, direction, 0.5, lunge_time))
+    }
+
+    // Get Entity to push. If there is not one present, end the ability.
+    pushed_entity := world_get_entity_at(&game.current_world, user.position + DIRECTIONS[direction])
+    if !entity_handle_valid(pushed_entity) {
+        return
+    }
+
+    // Deal damage to pushed Entity.
+    add_event(timeline, event_deal_damage(user_handle, actual_damage, pushed_entity))
+
+    push_pos := user.position
+
+    // Schedule events for pushing entity.
+    for _ in 0..<push_distance {
+        new_pos := push_pos + DIRECTIONS[direction]
+
+        // Hit world edge.
+        if outside_of_world(game.current_world, new_pos) {
+            add_event(timeline, event_lunge(user_handle, direction, 0.5, lunge_time))
+            add_event(timeline, event_deal_damage(user_handle, self.damage_on_collide, pushed_entity))
+            break
+        }
+
+        // Hit an Entity.
+        if !world_space_empty(&game.current_world, new_pos) {
+            add_event(timeline, event_lunge(user_handle, direction, 0.5, lunge_time))
+            add_event(timeline, event_deal_damage(user_handle, self.damage_on_collide, pushed_entity))
+            break
+        }
+
+        push_pos = new_pos
+        add_event(timeline, event_entity_move(pushed_entity, direction, self.move_speed))
+    }
+}
+
+
+// ------------------------------------- !END PUSH! --------------------------------------
+
+
+// +-------------------------------------------------------------------------------------+
 // |                                    !PUSH BURST!                                     |
 // +-------------------------------------------------------------------------------------+
 
 
 // Data for an Ability that shoots a projectile in a straight line.
 Ability_Push_Burst :: struct {
-    push_distance: i32,
+    push_distance: int,
     damage_on_collide: int,
 
     damage: int,
+    damage_modifier: Modifier,
 
+    move_speed: f32,
 }
 
 
 // Schedules the events needed to use an Ability_Projectile.
-ability_push_burst :: proc(self: Ability_Slot, confirmation: Ability_Confirmation, user: ^Entity) {
-    ability := unwrap_ability_slot(self, Ability_Push_Burst)
-    direction := confirmation.(Direction)
-    world_size := int(game.current_world.world_size)
+ability_push_burst :: proc(self: Ability_Push_Burst, _: Ability_Confirmation, user: ^Entity, timeline: ^Timeline) {
     user_handle := new_entity_handle(&game.current_world, user^)
-
-    timeline := &game.current_fight.timeline
-
-    character := user.type.(Character)
     
-    
+    found_targets: [dynamic]Entity_Handle
+    defer delete(found_targets)
+
+    // Get adjacent entities.
+    adjacent_entities: [Direction]Entity_Handle
+    for direction in Direction {
+        pos := user.position + DIRECTIONS[direction]
+        entity_handle := world_get_entity_at(&game.current_world, pos)
+
+        if entity_handle_valid(entity_handle) {
+            adjacent_entities[direction] = entity_handle
+        }
+    }
+
+    // Push each adjacent enemy away.
+    event := event_branch(user_handle, 4)
+    branch := &event.type.(Event_Branch)
+
+    for direction in Direction {
+        if !entity_handle_valid(adjacent_entities[direction]) {
+            continue
+        }
+
+        push := Ability_Push{
+            push_distance = self.push_distance,
+            damage_on_collide = self.damage_on_collide,
+
+            damage = self.damage,
+            damage_modifier = self.damage_modifier,
+
+            direction = direction,
+            move_speed = self.move_speed,
+
+            push_animation = false,
+        }
+
+        ability_push(push, direction, user, &branch.timelines[direction])
+    }
+
+    add_event(timeline, event)
 }
 
 

@@ -128,6 +128,16 @@ random_world_point :: proc(world: World) -> World_Coords {
 }
 
 
+
+// Returns true if the given point is outside of the given world's coordinates.
+outside_of_world :: proc(world: World, pos: Vector2i) -> bool {
+	return pos.x >= i32(world.world_size) ||
+	       pos.y >= i32(world.world_size) ||
+	       pos.x < 0 ||
+	       pos.y < 0
+}
+
+
 world_get_entity_at :: proc(world: ^World, position: World_Coords, loc := #caller_location) -> Entity_Handle {
 	for entity_id in sa.slice(&world._active_entities) {
 		entity := world.entities[entity_id]

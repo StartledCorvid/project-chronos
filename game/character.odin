@@ -140,7 +140,7 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 			}),
 			on_turn = turn_tick_player,
 
-			abilities = { .Bash, .None },
+			abilities = { .Bash, .Push_Burst },
 		},
 
 		.Wizard = {
