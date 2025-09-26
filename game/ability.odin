@@ -69,10 +69,11 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
             type = Ability_Push_Burst{
                 push_distance = 2,
                 damage_on_collide = 1,
+                collide_particle = .Puff,
 
                 damage = 0,
 
-                move_speed = 0.1,
+                move_speed = 0.2,
             },
 
             ai_can_use = ai_only_use_if_no_melee,
@@ -104,6 +105,10 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
         },
     }
 }
+
+
+ABILITY_PREVIEW_RED   :: rl.Color{ 255, 0, 0, 125 }
+ABILITY_PREVIEW_GREEN :: rl.Color{0, 255, 0, 125 }
 
 
 Ability_Confirmation :: union {
@@ -182,9 +187,9 @@ draw_ability_preview :: proc(self: Entity, ability_info: Ability_Info) {
     case Ability_Bash:
         draw_directional_ability_preview(self, ability.distance, ability.pass_through)
     case Ability_Push:
-        // TODO: Project push.
+        draw_preview_push(self, ability.push_distance)
     case Ability_Push_Burst:
-        draw_directional_ability_preview(self, 1, false) // TODO: Project push movement.
+        draw_preview_push(self, ability.push_distance)
     case Ability_Projectile:
         draw_directional_ability_preview(self, ability.range, ability.pass_through)
     }
@@ -237,20 +242,68 @@ draw_directional_ability_preview :: proc(user: Entity, distance: int, pass_throu
         for _ in 0..<actual_distance {
             new_pos := current_pos + direction
 
-            if new_pos.x >= i32(world_size) || new_pos.y >= i32(world_size) || new_pos.x < 0 || new_pos.y < 0 {
+            if outside_of_world(game.current_world, new_pos) {
                 break
             }
 
             screen_pos := grid_to_world_point(new_pos)
 
             if !pass_through && !world_space_empty(&game.current_world, new_pos) {
-                rl.DrawRectangleV(to_vector2(screen_pos), { WORLD_UNITS, WORLD_UNITS }, { 255, 0, 0, 125 })
+                rl.DrawRectangleV(to_vector2(screen_pos), { WORLD_UNITS, WORLD_UNITS }, ABILITY_PREVIEW_RED)
                 break
             }
 
-            rl.DrawRectangleV(to_vector2(screen_pos), { WORLD_UNITS, WORLD_UNITS }, { 0, 255, 0, 125 })
+            rl.DrawRectangleV(to_vector2(screen_pos), { WORLD_UNITS, WORLD_UNITS }, ABILITY_PREVIEW_GREEN)
 
             current_pos = new_pos
+        }
+    }
+}
+
+
+draw_preview_push :: proc(user: Entity, distance: int, collide_texture := Texture_Name.Icon_Collide) {
+    world_size    := int(game.current_world.world_size)
+    push_distance := distance <= 0 ? world_size : distance
+    collide_icon  := get_texture(collide_texture)
+
+    for direction in DIRECTIONS {
+        target_location := user.position + direction
+        if outside_of_world(game.current_world, target_location) {
+            continue
+        }
+
+        // Draw target rectangle.
+        target_screen_pos := to_vector2(grid_to_world_point(target_location))
+        rl.DrawRectangleV(target_screen_pos, { WORLD_UNITS, WORLD_UNITS }, ABILITY_PREVIEW_RED)
+
+        target_handle := world_get_entity_at(&game.current_world, target_location)
+        if !entity_handle_valid(target_handle) {
+            continue
+        }
+
+        push_pos := target_location
+
+        // Draw push path.
+        for _ in 0..<push_distance {
+            next_pos := push_pos + direction
+            target_screen_pos = to_vector2(grid_to_world_point(next_pos))
+
+            // Hit world edge.
+            if outside_of_world(game.current_world, next_pos) {
+                collide_space := to_vector2(grid_to_world_point(push_pos))
+                rl.DrawTextureV(collide_icon, collide_space, rl.WHITE)
+                break
+            }
+
+            // Hits an Entity.
+            if !world_space_empty(&game.current_world, next_pos) {
+                rl.DrawRectangleV(target_screen_pos, { WORLD_UNITS, WORLD_UNITS }, ABILITY_PREVIEW_RED)
+                rl.DrawTextureV(collide_icon, target_screen_pos, rl.WHITE)
+                break
+            }
+
+            rl.DrawRectangleV(target_screen_pos, { WORLD_UNITS, WORLD_UNITS }, ABILITY_PREVIEW_GREEN)
+            push_pos = next_pos
         }
     }
 }
@@ -292,7 +345,7 @@ ability_bash :: proc(self: Ability_Bash, confirmation: Ability_Confirmation, use
     for _ in 0..<bash_distance {
         new_pos := end_pos + DIRECTIONS[direction]
 
-        if new_pos.x >= i32(world_size) || new_pos.y >= i32(world_size) || new_pos.x < 0 || new_pos.y < 0 {
+        if outside_of_world(game.current_world, new_pos) {
             add_event(timeline, event_lunge(user_handle, direction, 0.5, OVERSTEP_TIME))
             break
         }
@@ -351,7 +404,7 @@ ability_projectile :: proc(self: Ability_Projectile, confirmation: Ability_Confi
     for _ in 0..<projectile_distance {
         new_pos := current_pos + DIRECTIONS[direction]
 
-        if new_pos.x >= i32(world_size) || new_pos.y >= i32(world_size) || new_pos.x < 0 || new_pos.y < 0 {
+        if outside_of_world(game.current_world, new_pos) {
             add_event(timeline, event_destroy_entity(user_handle, projectile_handle))
             if self.hit_particle != nil {
                 add_event(timeline, event_create_particle(user_handle, self.hit_particle.?, current_pos))
@@ -391,6 +444,7 @@ ability_projectile :: proc(self: Ability_Projectile, confirmation: Ability_Confi
 Ability_Push :: struct {
     push_distance: int,
     damage_on_collide: int,
+    collide_particle: Maybe(Particle_Name),
 
     damage: int,
     damage_modifier: Modifier,
@@ -399,6 +453,7 @@ Ability_Push :: struct {
     move_speed: f32,
 
     push_animation: bool,
+    push_particle: Maybe(Particle_Name),
 }
 
 
@@ -429,6 +484,9 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
 
     // Deal damage to pushed Entity.
     add_event(timeline, event_deal_damage(user_handle, actual_damage, pushed_handle))
+    if self.push_particle != nil {
+        add_event(timeline, event_create_particle(user_handle, self.push_particle.?, pushed_entity.position))
+    }
 
     push_pos := pushed_entity.position
 
@@ -439,14 +497,26 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
         // Hit world edge.
         if outside_of_world(game.current_world, new_pos) {
             add_event(timeline, event_lunge(pushed_handle, direction, 0.5, lunge_time))
+            
+            if self.collide_particle != nil {
+                add_event(timeline, event_create_particle(user_handle, self.collide_particle.?, push_pos))
+            }
+
             add_event(timeline, event_deal_damage(user_handle, self.damage_on_collide, pushed_handle))
             break
         }
 
         // Hit an Entity.
         if !world_space_empty(&game.current_world, new_pos) {
+            hit_entity := world_get_entity_at(&game.current_world, new_pos)
             add_event(timeline, event_lunge(pushed_handle, direction, 0.5, lunge_time))
+
+            if self.collide_particle != nil {
+                add_event(timeline, event_create_particle(user_handle, self.collide_particle.?, push_pos))
+            }
+
             add_event(timeline, event_deal_damage(user_handle, self.damage_on_collide, pushed_handle))
+            add_event(timeline, event_lunge(hit_entity, direction, 0.5, lunge_time))
             break
         }
 
@@ -468,11 +538,13 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
 Ability_Push_Burst :: struct {
     push_distance: int,
     damage_on_collide: int,
+    collide_particle: Maybe(Particle_Name),
 
     damage: int,
     damage_modifier: Modifier,
 
     move_speed: f32,
+    push_particle: Maybe(Particle_Name),
 }
 
 
@@ -506,6 +578,7 @@ ability_push_burst :: proc(self: Ability_Push_Burst, _: Ability_Confirmation, us
         push := Ability_Push{
             push_distance = self.push_distance,
             damage_on_collide = self.damage_on_collide,
+            collide_particle = self.collide_particle,
 
             damage = self.damage,
             damage_modifier = self.damage_modifier,
@@ -514,6 +587,7 @@ ability_push_burst :: proc(self: Ability_Push_Burst, _: Ability_Confirmation, us
             move_speed = self.move_speed,
 
             push_animation = false,
+            push_particle = self.push_particle,
         }
 
         ability_push(push, direction, user, &branch.timelines[direction])

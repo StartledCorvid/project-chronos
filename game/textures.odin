@@ -33,6 +33,7 @@ Texture_Name :: enum {
     Icon_Bash,
     Icon_Push_Burst,
     Icon_Fireball,
+    Icon_Collide,
 
     Puff,
     Fireball,
@@ -56,6 +57,7 @@ load_textures :: proc() -> [Texture_Name]rl.Texture {
         .Icon_Goblin     = rl.LoadTexture("res/images/icon_goblin.png"),
         .Icon_Spider     = rl.LoadTexture("res/images/icon_spider.png"),
         .Icon_Minotaur   = rl.LoadTexture("res/images/icon_minotaur.png"),
+        .Icon_Collide    = rl.LoadTexture("res/images/icon_collide.png"),
 
         .Icon_Bash       = rl.LoadTexture("res/images/icon_bash.png"),
         .Icon_Push_Burst = rl.LoadTexture("res/images/icon_push_burst.png"),

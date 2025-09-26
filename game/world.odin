@@ -128,7 +128,6 @@ random_world_point :: proc(world: World) -> World_Coords {
 }
 
 
-
 // Returns true if the given point is outside of the given world's coordinates.
 outside_of_world :: proc(world: World, pos: Vector2i) -> bool {
 	return pos.x >= i32(world.world_size) ||
