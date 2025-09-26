@@ -22,11 +22,13 @@ Texture_Name :: enum {
     Wizard,
     Goblin,
     Spider,
+    Minotaur,
 
     Icon_Fighter,
     Icon_Wizard,
     Icon_Goblin,
     Icon_Spider,
+    Icon_Minotaur,
 
     Icon_Bash,
     Icon_Push_Burst,
@@ -47,11 +49,13 @@ load_textures :: proc() -> [Texture_Name]rl.Texture {
         .Wizard          = rl.LoadTexture("res/images/wizard.png"),
         .Goblin          = rl.LoadTexture("res/images/goblin.png"),
         .Spider          = rl.LoadTexture("res/images/spider.png"),
+        .Minotaur        = rl.LoadTexture("res/images/minotaur.png"),
 
         .Icon_Fighter    = rl.LoadTexture("res/images/icon_fighter.png"),
         .Icon_Wizard     = rl.LoadTexture("res/images/icon_wizard.png"),
         .Icon_Goblin     = rl.LoadTexture("res/images/icon_goblin.png"),
         .Icon_Spider     = rl.LoadTexture("res/images/icon_spider.png"),
+        .Icon_Minotaur   = rl.LoadTexture("res/images/icon_minotaur.png"),
 
         .Icon_Bash       = rl.LoadTexture("res/images/icon_bash.png"),
         .Icon_Push_Burst = rl.LoadTexture("res/images/icon_push_burst.png"),

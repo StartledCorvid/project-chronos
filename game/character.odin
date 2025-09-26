@@ -64,6 +64,7 @@ Character_Type :: enum {
 
 	Goblin,
 	Spider,
+	Minotaur,
 }
 
 
@@ -99,6 +100,8 @@ Character :: struct {
 	// TODO: Modifiers.
 	// TODO: Conditions.
 	base: ^Character_Data,
+
+	triggers: Triggers,
 }
 
 
@@ -207,6 +210,38 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 			}),
 			on_turn = turn_aggressive,
 		},
+
+		.Minotaur = {
+			display_name = "Minotaur",
+			description = "Bull.",
+			icon = .Icon_Minotaur,
+			stats = {
+				.Speed     = 7,
+				.Strength  = 10,
+				.Magic     = 0,
+				.Agility   = 4,
+				.Toughness = 8,
+			},
+			animator = basic_character_animator({
+				atlas = new_texture_atlas(.Minotaur, { 1, 1 }),
+				starting_frame = 0,
+				ending_frame = 0,
+				fps = 1,
+				loop_count = -1,
+			}),
+			on_turn = turn_aggressive,
+
+			abilities = { .Bash, .None },
+		},
+	}
+}
+
+
+character_deinit :: proc(character: ^Character, loc := #caller_location) {
+	assert(character != nil, "Nil Character pointer.", loc)
+
+	for &reason in character.triggers {
+		clear(&reason)
 	}
 }
 

@@ -193,6 +193,10 @@ free_entity :: proc(handle: Entity_Handle, loc := #caller_location) {
     freed_entity._generation += 1
     freed_entity.flags -= { .Valid }
 
+    if character, ok := &freed_entity.type.(Character); ok {
+        character_deinit(character)
+    }
+
     // Remove from active Entity list.
     sa.unordered_remove(&handle.world._active_entities, freed_entity._active_id, loc)
 

@@ -67,12 +67,12 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
             cooldown = 5,
             confirmation_type = bool,
             type = Ability_Push_Burst{
-                push_distance = 1,
+                push_distance = 2,
                 damage_on_collide = 1,
 
                 damage = 0,
 
-                move_speed = 0.5,
+                move_speed = 0.1,
             },
 
             ai_can_use = ai_only_use_if_no_melee,
@@ -411,10 +411,6 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
 
     user_handle := new_entity_handle(&game.current_world, user^)
     character := user.type.(Character)
-    
-    found_targets: [dynamic]Entity_Handle
-    defer delete(found_targets)
-
 
     lunge_time := self.move_speed / 2
     actual_damage := self.damage + int(modifier_value(character.base.stats, self.damage_modifier))
@@ -425,15 +421,16 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
     }
 
     // Get Entity to push. If there is not one present, end the ability.
-    pushed_entity := world_get_entity_at(&game.current_world, user.position + DIRECTIONS[direction])
-    if !entity_handle_valid(pushed_entity) {
+    pushed_handle := world_get_entity_at(&game.current_world, user.position + DIRECTIONS[direction])
+    if !entity_handle_valid(pushed_handle) {
         return
     }
+    pushed_entity := get_entity(pushed_handle)
 
     // Deal damage to pushed Entity.
-    add_event(timeline, event_deal_damage(user_handle, actual_damage, pushed_entity))
+    add_event(timeline, event_deal_damage(user_handle, actual_damage, pushed_handle))
 
-    push_pos := user.position
+    push_pos := pushed_entity.position
 
     // Schedule events for pushing entity.
     for _ in 0..<push_distance {
@@ -441,20 +438,20 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
 
         // Hit world edge.
         if outside_of_world(game.current_world, new_pos) {
-            add_event(timeline, event_lunge(user_handle, direction, 0.5, lunge_time))
-            add_event(timeline, event_deal_damage(user_handle, self.damage_on_collide, pushed_entity))
+            add_event(timeline, event_lunge(pushed_handle, direction, 0.5, lunge_time))
+            add_event(timeline, event_deal_damage(user_handle, self.damage_on_collide, pushed_handle))
             break
         }
 
         // Hit an Entity.
         if !world_space_empty(&game.current_world, new_pos) {
-            add_event(timeline, event_lunge(user_handle, direction, 0.5, lunge_time))
-            add_event(timeline, event_deal_damage(user_handle, self.damage_on_collide, pushed_entity))
+            add_event(timeline, event_lunge(pushed_handle, direction, 0.5, lunge_time))
+            add_event(timeline, event_deal_damage(user_handle, self.damage_on_collide, pushed_handle))
             break
         }
 
         push_pos = new_pos
-        add_event(timeline, event_entity_move(pushed_entity, direction, self.move_speed))
+        add_event(timeline, event_entity_move(pushed_handle, direction, self.move_speed))
     }
 }
 
