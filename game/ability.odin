@@ -87,6 +87,7 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
             cooldown = 1,
             confirmation_type = Direction,
             type = Ability_Projectile{
+                use_sound = .Hit_0,
                 damage = 1,
                 damage_modifier = {
                     stat = .Magic,
@@ -375,6 +376,8 @@ ability_bash :: proc(self: Ability_Bash, confirmation: Ability_Confirmation, use
 
 // Data for an Ability that shoots a projectile in a straight line.
 Ability_Projectile :: struct {
+    use_sound: Maybe(Sound_Name),
+    
     damage: int,
     damage_modifier: Modifier,
 
@@ -399,6 +402,10 @@ ability_projectile :: proc(self: Ability_Projectile, confirmation: Ability_Confi
     actual_damage := self.damage + int(modifier_value(character.base.stats, self.damage_modifier))
 
     projectile_handle := new_particle(user.position, self.projectile_particle)
+
+    if self.use_sound != nil {
+        add_event(timeline, event_play_sound(user_handle, self.use_sound.?))
+    }
 
     current_pos := user.position
     for _ in 0..<projectile_distance {
@@ -497,7 +504,7 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
         // Hit world edge.
         if outside_of_world(game.current_world, new_pos) {
             add_event(timeline, event_lunge(pushed_handle, direction, 0.5, lunge_time))
-            
+
             if self.collide_particle != nil {
                 add_event(timeline, event_create_particle(user_handle, self.collide_particle.?, push_pos))
             }

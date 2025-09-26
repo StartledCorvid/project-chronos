@@ -3,6 +3,7 @@ package game
 
 import "core:math/rand"
 import sa "core:container/small_array"
+import rl "vendor:raylib"
 
 
 /*
@@ -31,6 +32,7 @@ Event_Type :: union {
     Event_Destroy_Entity,
     Event_Create_Particle,
     Event_Branch,
+    Event_Play_Sound,
 }
 
 
@@ -414,3 +416,37 @@ event_branch :: proc(owner: Entity_Handle, timeline_count: int) -> Event {
 
 
 // ------------------------------------- !END BRANCH! ------------------------------------
+
+
+// +-------------------------------------------------------------------------------------+
+// |                                     !PLAY SOUND!                                    |
+// +-------------------------------------------------------------------------------------+
+
+
+// Data for an event that triggers a sound to play.
+Event_Play_Sound :: struct {
+    sound: Sound_Name,
+    // TODO: Pitch, volume, etc.
+    // TODO: Wait for end bool.
+}
+
+
+// Creates an event that calls for a particle to be created.
+event_play_sound :: proc(owner: Entity_Handle, sound: Sound_Name) -> Event {
+    event := create_event(owner)
+    event.type = Event_Play_Sound{
+        sound = sound,
+    }
+
+    // on_tick -->
+    event.on_tick = proc(e: ^Event, delta_time: f32) {
+        data := e.type.(Event_Play_Sound)
+        rl.PlaySound(game.sounds[data.sound])
+        stop_event(e)
+    } // <-- on_tick
+
+    return event
+}
+
+
+// ----------------------------------- !END PLAY SOUND! ----------------------------------

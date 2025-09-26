@@ -61,6 +61,12 @@ main :: proc() {
 	rl.InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
 	defer rl.CloseWindow()
 
+	rl.InitAudioDevice()
+	if !rl.IsAudioDeviceReady() {
+		panic("Raylib could not init audio device.")
+	}
+	defer rl.CloseAudioDevice()
+
 	rl.SetTargetFPS(TARGET_FPS)
 	rl.SetExitKey(.KEY_NULL)
 	rl.SetWindowMinSize(RENDER_WIDTH, RENDER_HEIGHT)

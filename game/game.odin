@@ -40,6 +40,7 @@ Game :: struct {
     textures: [Texture_Name]rl.Texture,
     particles: [Particle_Name]Particle,
     abilities: [Ability_Name]Ability_Info,
+    sounds: [Sound_Name]rl.Sound,
 }
 
 
@@ -54,6 +55,7 @@ init_game :: proc(allocator := context.allocator, loc := #caller_location) {
 
     game.state = .Main_Menu
     game.textures = load_textures()
+    game.sounds = load_sounds()
     game.particles = load_particles()
     game.abilities = load_abilities()
     game.character_types = load_character_types()
