@@ -95,13 +95,14 @@ Character_Data :: struct {
 // Represents an Entity that can move around and can participate in Combat.
 Character :: struct {
 	hit_points: i32,
+	base: ^Character_Data,
+
 	ability_slots: [2]Ability_Slot,
 	queued_ability_slot: ^Ability_Slot,
 	// TODO: Modifiers.
 	// TODO: Conditions.
-	base: ^Character_Data,
 
-	triggers: Triggers,
+	inventory: Inventory,
 }
 
 
@@ -239,10 +240,7 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 
 character_deinit :: proc(character: ^Character, loc := #caller_location) {
 	assert(character != nil, "Nil Character pointer.", loc)
-
-	for &reason in character.triggers {
-		clear(&reason)
-	}
+	inventory_deinit(&character.inventory)
 }
 
 
@@ -357,16 +355,31 @@ get_melee_damage :: proc(stats: Stat_Block) -> i32 {
 
 
 // Damages the given Character, killing it if its health reaches 0.
-damage_character :: proc(handle: Entity_Handle, damage: i32, loc := #caller_location) {
-	entity := get_entity(handle, loc)
+damage_character :: proc(attacker: Entity_Handle, target: Entity_Handle, damage: i32, loc := #caller_location) {
+	entity := get_entity(target, loc)
 	character, ok := &entity.type.(Character)
-	if !ok {
-		return
+	if !ok do return
+
+	if attacker_entity, attacker_ok := get_entity(attacker); attacker_ok {
+		trigger(&attacker_entity.trigger_hub, {
+			trigger	= .On_Hit,
+			target = attacker,
+			catalyst = attacker,
+			timeline = &game.current_fight.timeline,		
+		})
 	}
+
+	trigger(&entity.trigger_hub, {
+		trigger	= .When_Hit,
+		target = target,
+		catalyst = attacker,
+		timeline = &game.current_fight.timeline,
+	})
+
 	character.hit_points = max(0, character.hit_points - damage)
 
 	if character.hit_points <= 0 {
-		kill_combatant(handle)
+		kill_combatant(target)
 	}
 }
 

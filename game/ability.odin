@@ -109,7 +109,7 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
 
 
 ABILITY_PREVIEW_RED   :: rl.Color{ 255, 0, 0, 125 }
-ABILITY_PREVIEW_GREEN :: rl.Color{0, 255, 0, 125 }
+ABILITY_PREVIEW_GREEN :: rl.Color{ 0, 255, 0, 125 }
 
 
 Ability_Confirmation :: union {

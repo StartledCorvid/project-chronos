@@ -38,6 +38,9 @@ Texture_Name :: enum {
     Puff,
     Fireball,
     Fire_Explode,
+
+    Icon_Totem_Of_Speed,
+    Icon_Adventurers_Gear,
 }
 
 
@@ -66,6 +69,9 @@ load_textures :: proc() -> [Texture_Name]rl.Texture {
         .Puff            = rl.LoadTexture("res/images/puff.png"),
         .Fireball        = rl.LoadTexture("res/images/fireball.png"),
         .Fire_Explode    = rl.LoadTexture("res/images/fire_explode.png"),
+
+        .Icon_Totem_Of_Speed   = rl.LoadTexture("res/images/icon_totem_of_speed.png"),
+        .Icon_Adventurers_Gear = rl.LoadTexture("res/images/icon_adventurers_gear.png"),
     }
 }
 

@@ -88,6 +88,20 @@ screen_to_render_point :: proc(screen_point: Screen_Point) -> Render_Point {
 
 // ---------------------------------- !END CONVERSIONS! ----------------------------------
 
+
+// Returns a position that is the top left corner of something centered in `area_size`.
+// `centered_size` is the size of the element that is being centered. Offset is
+// the top left corner position of the area to center it on.
+ui_center_pos :: proc(offset: Vector2, area_size: Vector2, centered_size: Vector2) -> Vector2 {
+    relative_position := Vector2{
+        (area_size.x - centered_size.x) / 2,
+        (area_size.y - centered_size.y) / 2,
+    }
+
+    return offset + relative_position
+}
+
+
 // Draws a UI button. Returns true if it is clicked.
 ui_button :: proc(text: string, dimensions: Vector2, position: Vector2, rect_color: rl.Color, text_size: i32, text_color := rl.WHITE) -> bool {
     rect := rl.Rectangle{
@@ -102,4 +116,9 @@ ui_button :: proc(text: string, dimensions: Vector2, position: Vector2, rect_col
 
     mouse_pos := screen_to_render_point(rl.GetMousePosition())
     return rl.IsMouseButtonReleased(.LEFT) && rl.CheckCollisionPointRec(to_vector2(mouse_pos), rect)
+}
+
+
+ui_item_tooltip :: proc(item: Item, position: Vector2, icon_size: Vector2) {
+    rl.DrawRectangleV(position, icon_size, rl.GRAY)
 }

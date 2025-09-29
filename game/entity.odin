@@ -63,6 +63,7 @@ Entity :: struct {
     flags: bit_set[Entity_Flag],
 
     layer: int,
+    trigger_hub: Trigger_Hub,
     animator: Animator,
     type: Entity_Type,
 

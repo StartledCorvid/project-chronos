@@ -62,7 +62,7 @@ event_deal_damage :: proc(owner: Entity_Handle, damage: int, target: Entity_Hand
     // on_tick -->
     event.on_tick = proc(e: ^Event, delta_time: f32) {
         damage_event := e.type.(Event_Deal_Damage)
-        damage_character(damage_event.target, i32(damage_event.damage))
+        damage_character(e.owner, damage_event.target, i32(damage_event.damage))
         stop_event(e)
     } // <-- on_tick 
 
@@ -158,7 +158,7 @@ event_basic_attack :: proc(owner: Entity_Handle, direction: Direction, damage: i
             target := get_entity(handle)
 
             if target.position == entity.position + attack_direction {
-                damage_character(handle, attack_action.damage)
+                damage_character(e.owner, handle, attack_action.damage)
             }
         }
 

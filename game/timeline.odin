@@ -144,4 +144,16 @@ stop_event :: proc(event: ^Event, loc := #caller_location) {
 }
 
 
+// Gets the Event that is currently playing if one exists. If no Timeline is passed,
+// looks at the current Fight's.
+get_current_event :: proc(timeline: ^Timeline = nil) -> ^Event {
+    actual_timeline := timeline
+    if actual_timeline == nil {
+        actual_timeline = &game.current_fight.timeline
+    }
+
+    return actual_timeline.current_event
+}
+
+
 // ----------------------------------- !END TIMELINE! ------------------------------------

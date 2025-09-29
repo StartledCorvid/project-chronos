@@ -96,12 +96,9 @@ ui_main_menu_new_game :: proc(game: ^Game) {
         character_info := game.character_types[character_type]
         icon := get_texture(character_info.icon)
 
-        icon_position := Vector2{
-            (CHARACTER_BACKGROUND_SIZE - f32(icon.width)) / 2,
-            (CHARACTER_BACKGROUND_SIZE - f32(icon.height)) / 2,
-        }
+        icon_position := ui_center_pos(tl_corner, CHARACTER_BACKGROUND_SIZE, { f32(icon.width), f32(icon.height) })
 
-        rl.DrawTextureV(icon, tl_corner + icon_position, rl.WHITE)
+        rl.DrawTextureV(icon, icon_position, rl.WHITE)
 
         click_box := rl.Rectangle{
             width = CHARACTER_BACKGROUND_SIZE,

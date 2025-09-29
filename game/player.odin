@@ -22,6 +22,13 @@ turn_tick_player :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 	character, character_ok := &self.type.(Character)
 	assert(character_ok, "Not a Character.")
 
+	// TODO: Remove. Just a test.
+	if rl.IsKeyPressed(.P) {
+		add_relic(&character.inventory, .Relic_Totem_Of_Speed)
+		equip_gear(self, .Gear_Adventurers_Gear)
+		log.debugf("Added item.")
+	}
+
 	// If there is a queued ability, focus on that.
 	if character.queued_ability_slot != nil {
 		return query_confirm_ability(character.queued_ability_slot, self)
@@ -170,16 +177,30 @@ ui_player :: proc(handle: Entity_Handle, loc := #caller_location) {
 	character, ok := player.type.(Character)
 	assert(ok, "Entity is not a Character.", loc)
 
+	gear_offset: Vector2
+
+	// Draw equipped gear.
+	if character.inventory.gear != nil {
+		gear_offset = ui_item(character.inventory.gear.?, { 2, 2 })
+	} else {
+		gear_offset = { 8, 8 }
+	}
+
+	// Health bar.
+	health_bar_pos := Vector2{ gear_offset.x + 4, 2 }
 	health_bar_dim := Vector2{ 16, 8 }
 	current_health := f32(character.hit_points)
 	max_health := f32(get_max_hp(character.base.stats))
 
-	ui_draw_bar({ 0, 0 }, health_bar_dim, current_health / max_health, rl.RED, rl.BLACK)
+	ui_draw_bar(health_bar_pos, health_bar_dim, current_health / max_health, rl.RED, rl.BLACK)
 
 	health_text := fmt.ctprintf("%v/%v", current_health, max_health)
-	rl.DrawText(health_text, i32(health_bar_dim.x), 0, 8, rl.RED)
+	rl.DrawText(health_text, i32(health_bar_dim.x + health_bar_pos.x + 2), 2, 8, rl.RED)
 
+	// Relics
+	ui_relic_list(character.inventory, { 2, 10 }, 5)
 
+	// Ability slots.
 	if character.ability_slots[0].ability != .None {
 		prompt := input_cstring(.Ability_A)
 		rl.DrawText(prompt, 2, RENDER_HEIGHT - 30, 8, rl.WHITE)

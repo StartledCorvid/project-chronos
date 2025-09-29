@@ -1,5 +1,6 @@
 package game
 
+import "core:log"
 
 /*
 # Overview
@@ -7,58 +8,127 @@ Interface of a trigger for abilities and attacks. Actions are in charge of
 triggering these on their caster and enemies. Use the procs to create specific implementations
 of the interface.
 
-# Adding a New Trigger Reason
-1. Add an entry to the Trigger_Reason enum.
+# Adding a New Trigger
+1. Add an entry to the Trigger enum.
 */
 
-Trigger_Reason :: enum {
+Trigger :: enum {
     On_Hit,   // The Entity has hit something.
     When_Hit, // The Entity has been hit by something.
 }
 
 
-Trigger_Source :: int
+// Middle point for trigger logic. Used to direct Trigger_Sources to Trigger_Watchers.
+Trigger_Hub :: struct {
+    next_id: int,
+    watchers: [Trigger][dynamic]Trigger_Watcher,
+} 
 
-Trigger_List :: map[Trigger_Source]Trigger
-Triggers :: [Trigger_Reason]Trigger_List
+
+// Watches a type of Trigger_Reason on a specific Trigger_Hub. When that reason is
+// called, activates the Trigger.
+Trigger_Watcher :: struct {
+    trigger: Trigger,
+    on_trigger: proc(payload: Trigger_Payload),
+
+    _id: int,
+}
 
 
-// Interface for something that happens when a trigger is met.
-Trigger :: struct {
-    source: Trigger_Source,
+Trigger_Source :: struct {
+    trigger: Trigger,
     on_trigger: proc(payload: Trigger_Payload),
 }
 
+
+// Used to activate a Trigger. Fill out the information and then pass to `trigger_activate`
+// to activate a Trigger.
 Trigger_Payload :: struct {
+    trigger: Trigger,
     target: Entity_Handle,
     catalyst: Entity_Handle,
     timeline: ^Timeline,
 }
 
 
-get_trigger :: proc(trigger_reason: Trigger_Reason, character: ^Character, loc := #caller_location) -> []Trigger {
-    assert(character != nil, "Nil character pointer.", loc)
+// Activates a Trigger on the given Trigger_Hub.
+trigger :: proc(hub: ^Trigger_Hub, payload: Trigger_Payload, loc := #caller_location) {
+    assert(hub != nil, "Nil Trigger_Hub pointer.", loc)
 
-    return nil
+    for watcher in hub.watchers[payload.trigger] {
+        assert(watcher.on_trigger != nil, "Empty interface found on Trigger_Watcher.", loc)
+        watcher.on_trigger(payload)
+    }
 }
 
 
-// Triggers a slice of Triggers. The target is who the Trigger is attached to, and the
-// catalyst is an optional parameter for the Entity that caused the trigger to be done.
-// If left blank, will default to the target (if used). Timeline passes in a timeline
-// to use. If it is left nil, then it will use the current fight's timeline by default.
-do_trigger :: proc(triggers: []Trigger, payload: Trigger_Payload) {
-    actual_payload := payload
-    
-    if actual_payload.timeline == nil {
-        actual_payload.timeline = &game.current_fight.timeline
+// Registers a Trigger_Watcher on a Trigger_Hub using a Trigger_Source.
+// The Trigger_Watcher will be set up to watch for the given Trigger.
+// Returns the ID of the Trigger_Watcher.
+register_watcher :: proc(hub: ^Trigger_Hub, source: Trigger_Source, loc := #caller_location) -> int {
+    assert(hub != nil, "Nil Trigger_Hub pointer.", loc)
+    assert(source.on_trigger != nil, "Nil on_trigger proc.", loc)
+
+    new_watcher := Trigger_Watcher{
+        trigger = source.trigger,
+        on_trigger = source.on_trigger,
+
+        _id = hub.next_id,
     }
 
-    if !entity_handle_valid(actual_payload.catalyst) {
-        actual_payload.catalyst = actual_payload.target
+    assert(hub.next_id < max(int), "Exceeded max Trigger_Watcher ids. How.", loc)
+    hub.next_id += 1
+
+    append(&hub.watchers[source.trigger], new_watcher)
+    return new_watcher._id
+}
+
+
+// Removes a Trigger_Watcher from a Trigger_Hub.
+unregister_watcher :: proc{
+    unregister_watcher_id,
+    unregister_watcher_object,
+    unregister_watcher_source,
+}
+
+
+// Removes a Trigger_Watcher of the given type and ID from a Trigger_Hub.
+unregister_watcher_id :: proc(hub: ^Trigger_Hub, trigger: Trigger, id: int, loc := #caller_location) {
+    assert(hub != nil, "Nil Trigger_Hub pointer.", loc)
+
+    for watcher, index in hub.watchers[trigger] {
+        if watcher._id == id {
+            unordered_remove(&hub.watchers[trigger], index)
+            return
+        }
     }
 
-    for trigger in triggers {
-        trigger.on_trigger(actual_payload)
+    panic("Trying to remove a Trigger_Watcher using an ID that was not found.", loc)
+}
+
+
+// Removes the given Trigger_Watcher from the Trigger_Hub.
+unregister_watcher_object :: proc(hub: ^Trigger_Hub, watcher: Trigger_Watcher, loc := #caller_location) {
+    assert(hub != nil, "Nil Trigger_Hub pointer.", loc)
+    unregister_watcher_id(hub, watcher.trigger, watcher._id, loc)
+}
+
+
+// Removes the given Trigger_Watcher from the Trigger_Hub.
+unregister_watcher_source :: proc(hub: ^Trigger_Hub, source: Trigger_Source, loc := #caller_location) {
+    assert(hub != nil, "Nil Trigger_Hub pointer.", loc)
+
+    for watcher in hub.watchers[source.trigger] {
+        if compare_watcher_source(watcher, source) {
+            unregister_watcher(hub, watcher, loc)
+            return
+        }
     }
+
+    log.warnf("Couldn't find a Trigger_Watcher for Trigger_Source: %v", source)
+}
+
+
+compare_watcher_source :: proc(watcher: Trigger_Watcher, source: Trigger_Source) -> bool {
+    return watcher.trigger == source.trigger && watcher.on_trigger == source.on_trigger
 }
