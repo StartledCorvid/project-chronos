@@ -138,10 +138,10 @@ tick_fight :: proc(fight: ^Fight, delta_time: f32, loc := #caller_location) {
         tick_fight_processing(fight, delta_time)
     case .Player_Lose:
         deinit_fight(fight)
-        game_change_state(&game, .Lose_Screen)
+        game_change_screen(Screen_Lose{})
     case .Player_Win:
         game.won_games += 1
-        game_change_state(&game, .Win_Screen)
+        game_change_screen(Screen_Win{})
     }
 }
 

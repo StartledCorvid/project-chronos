@@ -1,5 +1,6 @@
 package game
 
+import "core:slice"
 import "core:log"
 import rl "vendor:raylib"
 
@@ -105,6 +106,7 @@ Item :: struct {
 
 	type: Item_Type,
 	rarity: Rarity,
+	value: int, // Higher value means that it is less likely to drop.
 
 	cost: u32,
 
@@ -251,3 +253,35 @@ ui_relic_list :: proc(inventory: Inventory, top_left_corner: Vector2, max_row: i
 	}
 }
 
+
+// Gets a list of items sorted by their value.
+get_drop_table :: proc() -> [len(ITEMS)]Item_Name {
+	table: [len(ITEMS)]Item_Name
+
+	// Populate the table with initial values.
+	index := 0
+	for _, item_name in ITEMS {
+		table[index] = item_name
+		index += 1
+	}
+
+	// Sort table.
+	slice.sort_by(table[:], proc(a, b: Item_Name) -> bool {
+		value_a := ITEMS[a].value
+		value_b := ITEMS[b].value
+		return value_a < value_b
+	})
+
+	// Check that the table is sorted correctly. Will only run in debug mode.
+	when ODIN_DEBUG {
+		last_value := ITEMS[table[0]].value
+		for item_name in table {
+			value := ITEMS[item_name].value
+			assert(value >= last_value)
+			last_value = value
+		}
+	}
+
+	log.debugf("Sorted drop table: %v", table)
+	return table
+}

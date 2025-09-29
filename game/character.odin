@@ -89,6 +89,10 @@ Character_Data :: struct {
 	on_turn: proc(self: ^Entity, timeline: ^Timeline) -> bool,
 
 	abilities: [2]Ability_Name,
+
+	default_gear: Item_Name,
+	default_relics: []Item_Name,
+	intrinsict_ability: Ability_Name,
 }
 
 
@@ -145,6 +149,8 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 			on_turn = turn_tick_player,
 
 			abilities = { .Bash, .Push_Burst },
+
+			default_gear = .Gear_Adventurers_Gear,
 		},
 
 		.Wizard = {

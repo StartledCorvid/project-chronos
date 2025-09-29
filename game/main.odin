@@ -86,17 +86,17 @@ main :: proc() {
 		// -- Input.
 
 		// -- Processing.
-		tick(&game)
+		tick()
 
 		// -- Rendering.
         rl.BeginTextureMode(target_texture)
 		rl.ClearBackground(rl.GRAY)
 
 		rl.BeginMode2D(game.camera)
-		draw(&game)
+		draw()
 
 		rl.EndMode2D()
-		ui(&game)
+		ui()
 
         rl.EndTextureMode()
 

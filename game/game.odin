@@ -26,8 +26,8 @@ Game_State :: enum {
 
 // Holds the global values of the game.
 Game :: struct {
-    state: Game_State,
-    main_menu: Main_Menu,
+    screen: Screen,
+
     current_world: World,
     current_fight: Fight,
     camera: rl.Camera2D,
@@ -46,14 +46,14 @@ Game :: struct {
 
 // Initializes the Game. Can only be called once.
 init_game :: proc(allocator := context.allocator, loc := #caller_location) {
-    if game.state != .Not_Init {
+    if game.screen != nil {
         log.error("Trying to initialize Game, but it is already initialized.", loc)
         return
     }
 
     game = Game{}
 
-    game.state = .Main_Menu
+    game.screen = Screen_Main_Menu{}
     game.textures = load_textures()
     game.sounds = load_sounds()
     game.particles = load_particles()
@@ -73,27 +73,29 @@ init_game :: proc(allocator := context.allocator, loc := #caller_location) {
 
 // Deinitializes the Game, clearing all state and data.
 deinit_game :: proc(allocator := context.allocator, loc := #caller_location) {
-    assert(game.state != .Not_Init, "Game not initialized.", loc)
-    game_change_state(&game, .Not_Init)
+    assert(game.screen != nil, "Game not initialized.", loc)
+    game_change_screen(nil)
 }
 
 
-start_new_game :: proc(game: ^Game, player_type: Character_Type) {
+// Starts a brand new game with the given player Character_Type.
+start_new_game :: proc(player_type: Character_Type) {
     game.won_games = 0
     game.player_type = player_type
 
-    start_fight(game)
+    start_fight()
 }
 
 
-start_fight :: proc(game: ^Game) {
+// Starts a fight.
+start_fight :: proc() {
     fight_data := rand.choice(FIGHTS[game.won_games][:])
     world_data := World_Data{
         tile_texture = fight_data.arena_tile,
         world_size = u32(fight_data.arena_size),
     }
 
-    load_world(game, world_data)
+    load_world(world_data)
 
     deinit_fight(&game.current_fight)
     init_fight(&game.current_fight, game.won_games)
@@ -103,25 +105,24 @@ start_fight :: proc(game: ^Game) {
     }
     game.player = new_character(&game.current_world, game.player_type)
 
-    game_change_state(game, .Gameplay)
+    game_change_screen(Screen_Gameplay{})
 }
 
 
 // Resets an existing Game struct to start a new run.
-reset_game :: proc(game: ^Game, player_type: Character_Type) {
+reset_game :: proc(player_type: Character_Type) {
     game.won_games = 0
 
     deinit_world(&game.current_world)
     deinit_fight(&game.current_fight)
 
     // game.player = new_character(&game.current_world, player_type)
-    game_change_state(game, .Gameplay)
+    game_change_screen(Screen_Gameplay{})
 }
 
 
-load_world :: proc(game: ^Game, world_data: World_Data, allocator := context.allocator, loc := #caller_location) {
-    assert(game.state != .Not_Init, "Game not initialized.", loc)
-    assert(game != nil, "Nil Game pointer.", loc)
+load_world :: proc(world_data: World_Data, allocator := context.allocator, loc := #caller_location) {
+    assert(game.screen != nil, "Game not initialized.", loc)
 
     deinit_world(&game.current_world)
     init_world(&game.current_world, world_data)
@@ -134,14 +135,31 @@ load_world :: proc(game: ^Game, world_data: World_Data, allocator := context.all
 }
 
 
-// Changes the game's state to the given one.
-game_change_state :: proc(game: ^Game, state: Game_State, loc := #caller_location) {
-    assert(game != nil, "Nil Game pointer.", loc)
-    assert(game.state != .Not_Init, "Game not initialized.", loc)
+// Changes the game's screen to the given one.
+game_change_screen :: proc(screen: Screen, loc := #caller_location) {
+    assert(game.screen != nil, "Game not initialized.", loc)
 
-    game.state = state
+    switch &screen in game.screen {
+    case Screen_Main_Menu: on_exit_screen_main_menu(&screen)
+    case Screen_Gameplay:  on_exit_screen_gameplay(&screen)
+    case Screen_Win:       on_exit_screen_win(&screen)
+    case Screen_Lose:      on_exit_screen_lose(&screen)
+    case Screen_Win_Game:  on_exit_screen_win_game(&screen)
+    case Screen_Quit:
+    }
 
-    log.infof("Changed Game state to %v.", state)
+    game.screen = screen
+
+    switch &screen in game.screen {
+    case Screen_Main_Menu: on_enter_screen_main_menu(&screen)
+    case Screen_Gameplay:  on_enter_screen_gameplay(&screen)
+    case Screen_Win:       on_enter_screen_win(&screen)
+    case Screen_Lose:      on_enter_screen_lose(&screen)
+    case Screen_Win_Game:  on_enter_screen_win_game(&screen)
+    case Screen_Quit:      rl.CloseWindow()
+    }
+
+    log.infof("Changed Game screen to %v.", typeid_of(type_of(screen)))
 }
 
 
@@ -151,78 +169,44 @@ game_change_state :: proc(game: ^Game, state: Game_State, loc := #caller_locatio
 
 
 // Calls a processing tick for the game.
-tick :: proc(game: ^Game) {
+tick :: proc() {
     delta_time := rl.GetFrameTime()
 
-    switch game.state {
-    case .Not_Init:
-    case .Main_Menu:   tick_main_menu(delta_time)
-    case .Gameplay:    tick_gameplay(delta_time, &game.current_fight, &game.current_world)
-    case .Win_Screen:  tick_win_screen(delta_time, game)
-    case .Lose_Screen: tick_lose_screen(delta_time, game)
-    case .Win_Game:    tick_win_game(delta_time, game)
-    case .Quit:        rl.CloseWindow()
+    switch &screen in game.screen {
+    case Screen_Main_Menu: tick_screen_main_menu(delta_time, &screen)
+    case Screen_Gameplay:  tick_screen_gameplay(delta_time, &screen)
+    case Screen_Win:       tick_screen_win(delta_time, &screen)
+    case Screen_Lose:      tick_screen_lose(delta_time, &screen)
+    case Screen_Win_Game:  tick_screen_win_game(delta_time, &screen)
+    case Screen_Quit:
     }
 }
 
 
 // Calls a draw tick for the game.
-draw :: proc(game: ^Game) {
-    switch game.state {
-    case .Not_Init:
-    case .Main_Menu:   draw_main_menu(game)
-    case .Gameplay:    draw_gameplay(game)
-    case .Win_Screen:  draw_win_screen(game)
-    case .Lose_Screen: draw_lose_screen(game)
-    case .Win_Game:    draw_win_game(game)
-    case .Quit:
+draw :: proc() {
+    switch &screen in game.screen {
+    case Screen_Main_Menu: draw_screen_main_menu(&screen)
+    case Screen_Gameplay:  draw_screen_gameplay(&screen)
+    case Screen_Win:       draw_screen_win(&screen)
+    case Screen_Lose:      draw_screen_lose(&screen)
+    case Screen_Win_Game:  draw_screen_win_game(&screen)
+    case Screen_Quit:
     }
 }
 
 
 // Calls a UI draw tick for the game.
-ui :: proc(game: ^Game) {
-    switch game.state {
-    case .Not_Init:
-    case .Main_Menu:   ui_main_menu(game)
-    case .Gameplay:    ui_gameplay(game)
-    case .Win_Screen:  ui_win_screen(game)
-    case .Lose_Screen: ui_lose_screen(game)
-    case .Win_Game:    ui_win_game(game)
-    case .Quit:
+ui :: proc() {
+    switch &screen in game.screen {
+    case Screen_Main_Menu: ui_screen_main_menu(&screen)
+    case Screen_Gameplay:  ui_screen_gameplay(&screen)
+    case Screen_Win:       ui_screen_win(&screen)
+    case Screen_Lose:      ui_screen_lose(&screen)
+    case Screen_Win_Game:  ui_screen_win_game(&screen)
+    case Screen_Quit:
     }
 }
 
 
 // -------------------------------- !END PROCESSING CALLS! -------------------------------
-
-
-// +-------------------------------------------------------------------------------------+
-// |                                    !GAMEPLAY!                                       |
-// +-------------------------------------------------------------------------------------+
-
-
-// Processing tick for the Gameplay state of the game.
-tick_gameplay :: proc(delta_time: f32, fight: ^Fight, world: ^World) {
-    tick_fight(fight, delta_time)
-    tick_world(world, delta_time)
-}
-
-
-// Rendering tick for the Gameplay state of the game.
-draw_gameplay :: proc(game: ^Game) {
-    draw_world(&game.current_world)
-}
-
-
-// UI rendering tick for the Gameplay state of the game.
-ui_gameplay :: proc(game: ^Game) {
-    ui_fight_draw_turn_timeline(game.current_fight)
-
-    if entity_handle_valid(game.player) {
-        ui_player(game.player)
-    }
-}
-
-
-// ----------------------------------- !END GAMEPLAY! ------------------------------------
