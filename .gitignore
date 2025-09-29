@@ -3,3 +3,4 @@ builds
 *.exe
 *.pbd
 *.log
+game/gen_content_*.odin
