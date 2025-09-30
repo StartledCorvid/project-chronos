@@ -1,6 +1,6 @@
 package game
 
-import "core:slice"
+import "core:math/rand"
 import "core:log"
 import rl "vendor:raylib"
 
@@ -18,6 +18,9 @@ I would recommend against this. You decided that keeping it as two things
 was design enough and would keep it simple. However, things are set up to
 where you would just need to add a new entry to the Item_Type enum below.
 */
+
+
+
 
 
 // The names of each Item in the game.
@@ -40,6 +43,7 @@ ITEMS := [Item_Name]Item {
 
 		type = .Relic,
 		rarity = .Common,
+		drop_weight = 10,
 
 		cost = 5,
 
@@ -59,6 +63,7 @@ ITEMS := [Item_Name]Item {
 
 		type = .Gear,
 		rarity = .Common,
+		drop_weight = 10,
 
 		cost = 5,
 
@@ -106,7 +111,7 @@ Item :: struct {
 
 	type: Item_Type,
 	rarity: Rarity,
-	value: int, // Higher value means that it is less likely to drop.
+	drop_weight: int, // Higher weight means more likely to drop.
 
 	cost: u32,
 
@@ -254,34 +259,49 @@ ui_relic_list :: proc(inventory: Inventory, top_left_corner: Vector2, max_row: i
 }
 
 
-// Gets a list of items sorted by their value.
-get_drop_table :: proc() -> [len(ITEMS)]Item_Name {
-	table: [len(ITEMS)]Item_Name
+// Gets a random weighted Item drop.
+get_drop :: proc() -> Item_Name {
+	max_weight := DROP_TABLE[len(DROP_TABLE) - 1].cumulative_weight
+	random_weight := rand.int_max(max_weight + 1)
 
-	// Populate the table with initial values.
-	index := 0
-	for _, item_name in ITEMS {
-		table[index] = item_name
-		index += 1
-	}
-
-	// Sort table.
-	slice.sort_by(table[:], proc(a, b: Item_Name) -> bool {
-		value_a := ITEMS[a].value
-		value_b := ITEMS[b].value
-		return value_a < value_b
-	})
-
-	// Check that the table is sorted correctly. Will only run in debug mode.
-	when ODIN_DEBUG {
-		last_value := ITEMS[table[0]].value
-		for item_name in table {
-			value := ITEMS[item_name].value
-			assert(value >= last_value)
-			last_value = value
+	for drop_entry in DROP_TABLE {
+		if drop_entry.cumulative_weight >= random_weight {
+			return drop_entry.item_name
 		}
 	}
 
-	log.debugf("Sorted drop table: %v", table)
+	panic("Somehow couldn't find the proper item to drop.")
+}
+
+
+@(private="file")
+Drop_Table :: [len(ITEMS)]Drop_Table_Entry
+
+
+@(private="file")
+Drop_Table_Entry :: struct {
+	item_name: Item_Name,
+	cumulative_weight: int,
+}
+
+
+@(private="file")
+DROP_TABLE := generate_drop_table()
+
+
+@(private="file")
+generate_drop_table :: proc() -> Drop_Table {
+	table: Drop_Table
+
+	cumulative_weight := 0
+	for item, item_name in ITEMS {
+		cumulative_weight += item.drop_weight
+
+		table[item_name] = Drop_Table_Entry{
+			cumulative_weight = cumulative_weight,
+			item_name = item_name,
+		}
+	}
+
 	return table
 }

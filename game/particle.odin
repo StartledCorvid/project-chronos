@@ -89,7 +89,6 @@ new_custom_particle :: proc(location: World_Coords, particle: Particle, layer: i
 
     animation_play(&entity.animator, particle.animation)
 
-    log.debugf("Created particle '%v'.", particle)
     return handle
 }
 
@@ -104,7 +103,6 @@ tick_particle :: proc(self: ^Entity) {
     self.offset = lerp(self.offset, particle.end_offset, self.animator._t / particle._total_lifespan)
     handle := new_entity_handle(&game.current_world, self^)
     if !self.animator.play {
-        log.debugf("Freed particle with texture '%v'.", particle.animation.atlas.texture)
         free_entity(handle)
     }
 }

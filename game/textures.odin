@@ -79,7 +79,6 @@ load_textures :: proc() -> [Texture_Name]rl.Texture {
 // Creates a new `Texture_Atlas`.
 new_texture_atlas :: proc(texture_name: Texture_Name, frame_count: Vector2i) -> Texture_Atlas {
     texture := get_texture(texture_name)
-    log.debugf("Info for %V: Count X: %v, Count Y: %v, width: %v, height: %v", texture_name, frame_count.x, frame_count.y, texture.width, texture.height)
     frame_size := Vector2i{
         texture.width / frame_count.x,
         texture.height / frame_count.y,

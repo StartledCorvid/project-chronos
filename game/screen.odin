@@ -1,7 +1,5 @@
 package game
 
-import "core:log"
-import "core:math/rand"
 import rl "vendor:raylib"
 
 
@@ -135,22 +133,15 @@ Screen_Win :: struct {
 on_enter_screen_win :: proc(screen: ^Screen_Win) {
     REWARD_COUNT :: 2
     MAX_OFFSET   :: 0.1 // Offset for the maximum reward index.
-
-    percentage_done    := f32(game.won_games) / f32(len(FIGHTS))
-    max_reward_percent := percentage_done + MAX_OFFSET
-
-    item_indices := len(ITEMS) - 1
-    percent_index := f32(item_indices) * max_reward_percent
-    max_reward_index := min(int(percent_index), item_indices)
-
-    sorted_items := get_drop_table()
     
-    for _ in 0..<REWARD_COUNT {
-        reward_index := rand.int_max(max_reward_index + 1)
-        reward_name := sorted_items[reward_index]
-        append(&screen.rewards, reward_name)
+    if game.won_games >= len(FIGHTS) {
+        game_change_screen(Screen_Win_Game{})
+        return
+    }
 
-        log.debugf("Generated reward %v.", reward_name)
+    for _ in 0..<REWARD_COUNT {
+        random_reward := get_drop()
+        append(&screen.rewards, random_reward)
     }
 }
 
@@ -163,13 +154,11 @@ on_exit_screen_win :: proc(screen: ^Screen_Win) {
 
 // Processing tick for the Win Screen state of the game.
 tick_screen_win :: proc(delta_time: f32, screen: ^Screen_Win) {
-    if rl.IsMouseButtonPressed(.LEFT) {
-        if game.won_games < len(FIGHTS) {
-            start_fight()
-        } else {
-            game_change_screen(Screen_Win_Game{})
-        }
-    }
+    // if rl.IsMouseButtonPressed(.LEFT) {
+    //     if game.won_games < len(FIGHTS) {
+    //         start_fight()
+    //     }
+    // }
 }
 
 
@@ -181,7 +170,31 @@ draw_screen_win :: proc(screen: ^Screen_Win) {
 
 // UI rendering tick for the Win Screen state of the game.
 ui_screen_win :: proc(screen: ^Screen_Win) {
-    rl.DrawText("Win! Click to Continue", 0, 0, 8, rl.GREEN)
+    HEADING_SIZE :: 8
+    PROMPT_SIZE :: 4
+    CENTER_OF_SCREEN :: Vector2i{ RENDER_WIDTH / 2, RENDER_HEIGHT / 2 }
+
+    rl.DrawRectangleV({ 0, 0 }, { RENDER_WIDTH, RENDER_HEIGHT }, { 0, 0, 0, 200 })
+
+    // Heading
+    {
+        text: cstring = "Fight Won!"
+        width := rl.MeasureText(text, HEADING_SIZE)
+        rl.DrawText(text, CENTER_OF_SCREEN.x - (width / 2), 2, HEADING_SIZE, rl.WHITE)
+    }
+
+    // Prompt
+    {
+        text: cstring = "Choose a Reward"
+        width := rl.MeasureText(text, PROMPT_SIZE)
+        rl.DrawText(text, CENTER_OF_SCREEN.x - (width / 2), 2 + HEADING_SIZE + 2, PROMPT_SIZE, rl.WHITE)
+    }
+
+    item_pos := CENTER_OF_SCREEN
+    for reward in screen.rewards {
+        icon_size := ui_item(reward, to_vector2(item_pos))
+        item_pos += to_vector2i(icon_size)
+    }
 }
 
 

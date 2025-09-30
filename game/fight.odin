@@ -77,7 +77,6 @@ Fight_Info :: struct {
 
 init_fight :: proc(fight: ^Fight, fight_index: i32) {
     characters := generate_fight(fight_index)
-    log.debugf("Generated fight: %v", characters)
 
     for character_type in characters {
         enemy := new_character(&game.current_world, character_type)
@@ -222,8 +221,6 @@ fight_next_turn :: proc(fight: ^Fight) {
 
         fight.current_character = fight.turn_order[fight.current_turn]
     }
-
-    log.debugf("Starting next turn for %v", get_entity(fight.current_character).id)
 }
 
 
