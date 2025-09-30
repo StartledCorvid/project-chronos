@@ -337,7 +337,9 @@ ability_bash :: proc(self: Ability_Bash, confirmation: Ability_Confirmation, use
 
     user_handle := new_entity_handle(&game.current_world, user^)
 
-    character := user.type.(Character)
+    character, ok := to_character(user)
+    assert(ok, "Not a Character.")
+
     actual_damage := self.damage + int(modifier_value(character.base.stats, self.damage_modifier))
 
     OVERSTEP_TIME :: 0.1
@@ -398,7 +400,9 @@ ability_projectile :: proc(self: Ability_Projectile, confirmation: Ability_Confi
 
     projectile_distance := self.range <= 0 ? world_size : self.range
 
-    character := user.type.(Character)
+    character, ok := to_character(user)
+    assert(ok, "Not a Character.")
+
     actual_damage := self.damage + int(modifier_value(character.base.stats, self.damage_modifier))
 
     projectile_handle := new_particle(user.position, self.projectile_particle)
@@ -472,7 +476,9 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
     push_distance := self.push_distance > 0 ? self.push_distance : world_size
 
     user_handle := new_entity_handle(&game.current_world, user^)
-    character := user.type.(Character)
+    
+    character, ok := to_character(user)
+    assert(ok, "Not a Character.")
 
     lunge_time := self.move_speed / 2
     actual_damage := self.damage + int(modifier_value(character.base.stats, self.damage_modifier))

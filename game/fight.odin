@@ -2,10 +2,8 @@ package game
 
 import "core:math/rand"
 import "core:log"
-// import "core:fmt"
 import "core:slice"
 import rl "vendor:raylib"
-// import "core:math/rand"
 import sa "core:container/small_array"
 
 
@@ -107,7 +105,7 @@ new_round :: proc(fight: ^Fight, loc := #caller_location) {
     for entity_id in sa.slice(&world._active_entities) {
         entity := world.entities[entity_id]
 
-        if _, ok := entity.type.(Character); ok {
+        if is_character(&entity) {
             handle := new_entity_handle(world, entity_id)
             append(&fight.turn_order, handle)
         }
@@ -150,7 +148,7 @@ tick_fight_turn :: proc(fight: ^Fight) {
     assert(len(fight.turn_order) > 0, "Trying processing a turn when no Characters active.")
 
     entity := get_entity(fight.current_character)
-    character := &entity.type.(Character)
+    character := to_character(entity)
 
     assert(character.base.on_turn != nil, "Character has no behavior set.")
     if character.base.on_turn(entity, &fight.timeline) {
@@ -166,7 +164,7 @@ tick_fight_processing :: proc(fight: ^Fight, delta_time: f32) {
         fight_next_turn(fight)
         fight_change_phase(fight, .Turn)
 
-        character := &get_entity(fight.current_character).type.(Character)
+        character := to_character(fight.current_character)
         for &slot in character.ability_slots {
             slot.cooldown = max(0, slot.cooldown - 1)
         }
@@ -236,11 +234,8 @@ fight_change_phase :: proc(fight: ^Fight, new_phase: Fight_Phase) {
 // Returns true if handle_a's Character speed is less than handle_b's Character speed.
 @(private="file")
 compare_character_speed :: proc(handle_a: Entity_Handle, handle_b: Entity_Handle) -> bool {
-    entity_a := get_entity(handle_a)
-    entity_b := get_entity(handle_b)
-
-    character_a, a_ok := entity_a.type.(Character)
-    character_b, b_ok := entity_b.type.(Character)
+    character_a, a_ok := to_character(handle_a)
+    character_b, b_ok := to_character(handle_b)
 
     assert(a_ok && b_ok, "One of the Entity_Handles points to an Entity that is not a Character.")
 
@@ -292,8 +287,8 @@ ui_fight_draw_turn_timeline :: proc(fight: Fight) {
         if index < fight.current_turn || !entity_handle_valid(handle) {
             continue
         }
-        entity := get_entity(handle)
-        character, ok := entity.type.(Character)
+
+        character, ok := to_character(handle)
         if !ok {
             log.errorf("An Entity that is not a Character got included in the Timeline.")
             continue

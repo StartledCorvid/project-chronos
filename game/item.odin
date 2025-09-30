@@ -167,7 +167,7 @@ equip_gear :: proc(entity: ^Entity, item_name: Item_Name, loc := #caller_locatio
 
 	unequip_gear(entity, loc)
 
-	character := &entity.type.(Character)
+	character := to_character(entity)
 	character.inventory.gear = item_name
 
 	item := ITEMS[item_name]
@@ -182,7 +182,7 @@ equip_gear :: proc(entity: ^Entity, item_name: Item_Name, loc := #caller_locatio
 // equipped. Panics if the Entity is not a Character. This overload is needed for Trigger
 // management.
 unequip_gear :: proc(entity: ^Entity, loc := #caller_location) {
-	character := &entity.type.(Character)
+	character := to_character(entity)
 
 	if character.inventory.gear != nil {
 		equipped_item := ITEMS[character.inventory.gear.?]

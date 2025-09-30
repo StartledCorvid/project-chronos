@@ -19,15 +19,8 @@ Mainly handles the management of the Player's turn.
 // Called every tick that it is the Player's turn.
 turn_tick_player :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 	handle := new_entity_handle(&game.current_world, self^)
-	character, character_ok := &self.type.(Character)
+	character, character_ok := to_character(self)
 	assert(character_ok, "Not a Character.")
-
-	// TODO: Remove. Just a test.
-	if rl.IsKeyPressed(.P) {
-		add_relic(&character.inventory, .Relic_Totem_Of_Speed)
-		equip_gear(self, .Gear_Adventurers_Gear)
-		log.debugf("Added item.")
-	}
 
 	// If there is a queued ability, focus on that.
 	if character.queued_ability_slot != nil {
@@ -56,7 +49,7 @@ turn_tick_player :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 
 @(private="file")
 query_confirm_ability :: proc(ability_slot: ^Ability_Slot, entity: ^Entity) -> bool {
-	character := &entity.type.(Character)
+	character := to_character(entity)
 	if ability_slot == nil || !ability_slot_valid(ability_slot^) || is_action_pressed(.Cancel_Ability) {
 		// TODO: Display message or something.
 		character.queued_ability_slot = nil
@@ -173,8 +166,7 @@ query_player_ability :: proc(character: ^Character) {
 
 // Draws the user interface for the player info.
 ui_player :: proc(handle: Entity_Handle, loc := #caller_location) {
-	player := get_entity(handle)
-	character, ok := player.type.(Character)
+	character, ok := to_character(handle, loc)
 	assert(ok, "Entity is not a Character.", loc)
 
 	gear_offset: Vector2

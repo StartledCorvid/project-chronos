@@ -286,7 +286,9 @@ new_character :: proc(world: ^World, character_type: Character_Type, allocator :
 	}
 	entity.animator = base.animator
 
-	character := &entity.type.(Character)
+	character, ok := to_character(entity)
+	assert(ok, "Not a Character.", loc)
+	
 	for ability_name, index in base.abilities {
 		character.ability_slots[index] = {
 			ability = ability_name,
@@ -295,6 +297,73 @@ new_character :: proc(world: ^World, character_type: Character_Type, allocator :
 	}
 
 	return handle
+}
+
+
+// Checks if the given Entity is a Character.
+is_character :: proc{
+	is_entity_character,
+	is_handle_character,
+}
+
+
+// Returns true if the given Entity pointer is a Character Entity.
+is_entity_character :: proc(entity: ^Entity, loc := #caller_location) -> bool {
+	assert(entity != nil, "Nil Entity pointer.", loc)
+
+	_, ok := entity.type.(Character)
+	return ok
+}
+
+
+// Returns true if the given Entity_Handle points to a Character Entity.
+is_handle_character :: proc(handle: Entity_Handle) -> bool {
+	entity := get_entity(handle)
+	return is_entity_character(entity)
+}
+
+
+// Safely gets a Character pointer from Entities.
+to_character :: proc{
+	get_character_from_entity,
+	get_character_from_handle,
+}
+
+
+// Gets a Character pointer from an Entity pointer. Handles the safe conversion. Returns
+// nil and false if the conversion was not successful.
+get_character_from_entity :: proc(entity: ^Entity, loc := #caller_location) -> (^Character, bool) #optional_ok {
+	assert(entity != nil, "Nil Entity pointer.", loc)
+
+	character, ok := &entity.type.(Character)
+	if !ok {
+		return nil, false
+	}
+
+	return character, true
+}
+
+
+// Gets a Character pointer from an Entity_Handle. Handles the safe conversion. Returns
+// nil and false if the conversion was not successful.
+get_character_from_handle :: proc(entity_handle: Entity_Handle, loc := #caller_location) -> (^Character, bool) #optional_ok {
+	entity, ok := get_entity(entity_handle)
+	if !ok {
+		return nil, false
+	}
+
+	return get_character_from_entity(entity, loc)
+}
+
+
+// Converts a Character pointer to a pointer to the Entity it is a part of. If the Character
+// is not part of an Entity, bad things will happen.
+character_to_entity :: proc(character: ^Character, loc := #caller_location) -> ^Entity {
+	assert(character != nil, "Nil Character pointer.", loc)
+
+	offset := offset_of(Entity, type)
+	entity := (^Entity)(uintptr(character) - uintptr(offset))
+	return entity
 }
 
 
@@ -362,9 +431,8 @@ get_melee_damage :: proc(stats: Stat_Block) -> i32 {
 
 // Damages the given Character, killing it if its health reaches 0.
 damage_character :: proc(attacker: Entity_Handle, target: Entity_Handle, damage: i32, loc := #caller_location) {
-	entity := get_entity(target, loc)
-	character, ok := &entity.type.(Character)
-	if !ok do return
+	entity    := get_entity(target, loc)
+	character := to_character(entity)
 
 	if attacker_entity, attacker_ok := get_entity(attacker); attacker_ok {
 		trigger(&attacker_entity.trigger_hub, {

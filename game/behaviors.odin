@@ -26,7 +26,8 @@ turn_random_move :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 
 // Chases down the Player and attacks if in range.
 turn_aggressive :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
-	character := self.type.(Character)
+	character, ok := to_character(self)
+	assert(ok, "Not a Character.")
 
 	// If no player, do mothing.
 	if !entity_handle_valid(game.player) {

@@ -194,7 +194,7 @@ free_entity :: proc(handle: Entity_Handle, loc := #caller_location) {
     freed_entity._generation += 1
     freed_entity.flags -= { .Valid }
 
-    if character, ok := &freed_entity.type.(Character); ok {
+    if character, ok := to_character(freed_entity); ok {
         character_deinit(character)
     }
 
