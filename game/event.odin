@@ -1,6 +1,5 @@
 package game
 
-import "core:log"
 import "core:math/rand"
 import rl "vendor:raylib"
 
@@ -391,7 +390,6 @@ event_offset_travel :: proc(entity_handle: Entity_Handle, start_pos: Maybe(Vecto
             entity.offset = new_pos
 
             if data._time_passed >= data.duration {
-                log.debugf("end_pos: %v", data.end_pos)
                 entity.offset = data.end_pos
                 event_finish(e)
             }
