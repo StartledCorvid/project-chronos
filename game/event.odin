@@ -8,8 +8,8 @@ import rl "vendor:raylib"
 # Overivew
 An Event is something that can be done in a Timeline. They are events in a sequence.
 
-# Creating a New Action
-1. Create a struct to hold special information (if needed).
+# Creating a New Event
+1. Create a struct for data that pertains to the Event.
 2. Add the struct to the Event_Type union.
 3. Make a helper creation proc in this file.
 */

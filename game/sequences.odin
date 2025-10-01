@@ -46,6 +46,5 @@ sequence_melee :: proc(timeline: ^Timeline, entity_handle: Entity_Handle, direct
     }
 
     // Lunge back.
-    // timeline_add(timeline, event_offset_travel(entity_handle, lunge, Vector2{ 0, 0 }, half_time, entity_handle))
     timeline_add(timeline, event_reset_offset(entity_handle, half_time, entity_handle))
 }
