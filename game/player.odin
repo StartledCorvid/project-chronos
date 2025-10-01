@@ -28,15 +28,15 @@ turn_tick_player :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 	}
 
 	// Movement.
-	if move_action := query_player_move(self); valid_event(move_action) {
-		add_event(timeline, move_action)
+	if move_action := query_player_move(self); move_action != nil {
+		timeline_add(timeline, move_action.?)
 		return true
 	}
 
 	// Attacks.
 	if direction, pressed := query_player_attack(); pressed {
-		add_event(timeline, event_lunge(handle, direction, 0.5, 0.15))
-		add_event(timeline, event_basic_attack(handle, direction, get_melee_damage(character.base.stats)))
+		damage := get_melee_damage(character.base.stats)
+		sequence_melee(timeline, handle, direction, damage, LUNGE_TIME)
 		return true
 	}
 
@@ -106,21 +106,21 @@ query_confirm_ability :: proc(ability_slot: ^Ability_Slot, entity: ^Entity) -> b
 
 // Checks if the player is inputting a move action.
 @(private="file")
-query_player_move :: proc(self: ^Entity) -> Event {
+query_player_move :: proc(self: ^Entity) -> Maybe(Event) {
 	free_directions := get_free_directions(self.position)
 	handle := new_entity_handle(&game.current_world, self^)
 
 	if is_action_pressed(.Move_Down) && .Down in free_directions {
-		return event_entity_move(handle, .Down)
+		return event_entity_move(handle, .Down, MOVE_TIME, handle)
 	} else if is_action_pressed(.Move_Up) && .Up in free_directions {
-		return event_entity_move(handle, .Up)
+		return event_entity_move(handle, .Up, MOVE_TIME, handle)
 	} else if is_action_pressed(.Move_Right) && .Right in free_directions {
-		return event_entity_move(handle, .Right)
+		return event_entity_move(handle, .Right, MOVE_TIME, handle)
 	} else if is_action_pressed(.Move_Left) && .Left in free_directions {
-		return event_entity_move(handle, .Left)
+		return event_entity_move(handle, .Left, MOVE_TIME, handle)
 	}
 
-	return INVALID_EVENT
+	return nil
 }
 
 

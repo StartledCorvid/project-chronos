@@ -160,7 +160,7 @@ tick_fight_turn :: proc(fight: ^Fight) {
 // Does a processing tick, playing out the results of an turn choice.
 tick_fight_processing :: proc(fight: ^Fight, delta_time: f32) {
     tick_timeline(&fight.timeline, delta_time)
-    if len(fight.timeline.events) <= 0 {
+    if len(fight.timeline.sequence) <= 0 {
         fight_next_turn(fight)
         fight_change_phase(fight, .Turn)
 

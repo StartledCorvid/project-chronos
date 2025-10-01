@@ -270,13 +270,11 @@ draw_entity :: proc(handle: Entity_Handle) {
 
 // Moves the Entity in the given direction. Distance sets how far the movement is.
 // Stops once it reaches a Solid.
-entity_move :: proc(handle: Entity_Handle, direction: Direction, distance: u32 = 1, loc := #caller_location) {
-    entity := get_entity(handle, loc)
-
+entity_move :: proc(entity: ^Entity, direction: Direction, distance: u32 = 1, loc := #caller_location) {
     final_point := entity.position
     for i in 1..=distance {
         point := entity.position + (DIRECTIONS[direction] * i32(i))
-        if world_space_empty(handle.world, point) {
+        if world_space_empty(&game.current_world, point) {
             final_point = point
         } else {
             break
@@ -284,8 +282,8 @@ entity_move :: proc(handle: Entity_Handle, direction: Direction, distance: u32 =
     }
 
     entity.position = final_point
-    entity.position.x = clamp(entity.position.x, 0, i32(handle.world.world_size) - 1)
-    entity.position.y = clamp(entity.position.y, 0, i32(handle.world.world_size) - 1)
+    entity.position.x = clamp(entity.position.x, 0, i32(game.current_world.world_size) - 1)
+    entity.position.y = clamp(entity.position.y, 0, i32(game.current_world.world_size) - 1)
 }
 
 // ----------------------------------- !END OPERATIONS! ----------------------------------

@@ -1,7 +1,10 @@
 package game
+
+
 /*
 # Overiew
-Handling for Timelines and Event system.
+A Timeline is a sequence of Events that take place in order, waiting for one to finish
+before moving on to the next one in the sequence.
 
 # Creating a New Event Type
 See event_types.odin to see how to create new Event types.
@@ -13,39 +16,13 @@ See event_types.odin to see how to create new Event types.
 // +-------------------------------------------------------------------------------------+
 
 
-// Keeps track of Events as they play out. Keeps a queue of them.
+// A sequence of Events. Executes the current Event before moving on to the next one.
 Timeline :: struct {
-    // TODO: Use Handle (int) and clear array at end instead of
-    //       multiple pops throughout.
-    current_event: ^Event, 
-    events: [dynamic]Event,
+    // The index of the Event that is currently being excuted.
+    current_event: int,
 
-    sequences: [dynamic]Event_Sequence,
-}
-
-
-Event_Sequence :: [dynamic]Event
-
-
-// Flags for configuring the state of an Event.
-Event_Flag :: enum {
-    Playing, // Is the Event currently playing out?
-}
-
-
-// An Event that can be added to the Timeline.
-Event :: struct {
-    owner: Entity_Handle,
-    timeline: ^Timeline,
-
-    type: Event_Type,
-
-    flags: bit_set[Event_Flag],
-    duration: f32,
-
-    on_start: proc(^Event),
-    on_end: proc(^Event),
-    on_tick: proc(^Event, f32),
+    // The sequence of Events to execute.
+    sequence: [dynamic]Event, 
 }
 
 
@@ -57,102 +34,98 @@ Event :: struct {
 // +-------------------------------------------------------------------------------------+
 
 
+// Returns true if the given Timeline is still running, or
+// false if it is not.
+timeline_running :: proc(timeline: Timeline) -> bool {
+    return len(timeline.sequence) > 0
+}
+
+
+// Gets a pointer to the current Event in the given Timeline, or nil if there
+// is not one present.
+timeline_current_event :: proc(timeline: ^Timeline, loc := #caller_location) -> ^Event {
+    assert(timeline != nil, "Nil Timeline pointer.", loc)
+
+    sequence_length := len(timeline.sequence)
+
+    if sequence_length <= 0 || timeline.current_event >= sequence_length {
+        return nil
+    }
+    return &timeline.sequence[timeline.current_event]
+}
+
+
 // Updates the Timeline forward a frame, if it has an Event queued up.
 tick_timeline :: proc(timeline: ^Timeline, delta_time: f32) {
-    if len(timeline.events) <= 0 {
+    // If the Timeline is not running, skip.
+    if !timeline_running(timeline^) {
         return
     }
 
-    current_event := &timeline.events[0]
-    if !valid_event(current_event^) {
-        pop_front(&timeline.events)
+    // If there is no current event in the Timeline, skip.
+    current_event := timeline_current_event(timeline)
+    if current_event == nil {
         return
     }
 
-    // on_start
-    if timeline.current_event == nil {
-        timeline.current_event = current_event
-        current_event.flags += { .Playing }
+    // Check if the owner Entity of the Event is still valid.
+    if current_event.owner != nil && !entity_handle_valid(current_event.owner.?) {
+        event_finish(current_event)
+    }
 
-        if current_event.on_start != nil {
-            current_event.on_start(current_event)
+    // Check if the current Event is finished.
+    if .Finished in current_event._flags {
+        timeline.current_event += 1
+
+        // Reached the end of the timeline.
+        if timeline.current_event >= len(timeline.sequence) {
+            timeline_reset(timeline)
         }
+
+        return
     }
 
-    // on_tick
-    current_event.duration += delta_time
-    if current_event.on_tick != nil {
-        current_event.on_tick(current_event, delta_time)
-    }
-
-    // on_end
-    if .Playing not_in current_event.flags {
-        timeline.current_event = nil
-        event := pop_front(&timeline.events)
-        if event.on_end != nil do event.on_end(&event)
-    }
+    // Call on_tick for the current Event.
+    assert(current_event.on_tick != nil, "Nil `on_tick` procedure in Event.")
+    current_event.on_tick(timeline, current_event, delta_time)
 }
 
 
-// Checks if the given Event is a valid, executable Event.
-valid_event :: proc(event: Event) -> bool {
-    return entity_handle_valid(event.owner)
-}
-
-
-// Creates a new event owned by the Entity passed. Adds the event to the given timeline.
-create_event :: proc(owner: Entity_Handle, loc := #caller_location) -> Event {
-    assert(entity_handle_valid(owner), "Invalid Entity_Handle.", loc)
-
-    return {
-        owner = owner,
-    }
-}
-
-
-// Adds the given Event to the end Timeline.
-add_event :: proc(timeline: ^Timeline, event: Event, loc := #caller_location) {
+// Resets the Event sequence on the given Timeline.
+timeline_reset :: proc(timeline: ^Timeline, loc := #caller_location) {
     assert(timeline != nil, "Nil Timeline pointer.", loc)
-    mut_event := event
-    mut_event.timeline = timeline
-    append(&timeline.events, mut_event)
+
+    timeline.current_event = 0
+    clear(&timeline.sequence)
+}
+
+
+// Adds the given Event to the end of the Timeline.
+timeline_add :: proc(timeline: ^Timeline, event: Event, loc := #caller_location) {
+    assert(timeline != nil, "Nil Timeline pointer.", loc)
+    append(&timeline.sequence, event)
 }
 
 
 // Adds the given Event to the Timeline, inserting it right after the
 // current one. If there are no Events in the Timeline, inserts it at the
 // beginning.
-event_add_next :: proc(timeline: ^Timeline, event: Event, loc := #caller_location) {
+timeline_add_next :: proc(timeline: ^Timeline, event: Event, loc := #caller_location) {
     assert(timeline != nil, "Nil Timeline pointer.", loc)
-    
-    mut_event := event
-    mut_event.timeline = timeline
 
     // If no current Event, just add one.
-    if len(timeline.events) <= 0 {
-        append(&timeline.events, mut_event)
+    if len(timeline.sequence) <= 0 {
+        append(&timeline.sequence, event)
     } else {
-       inject_at(&timeline.events, 1, mut_event) 
+       inject_at(&timeline.sequence, 1, event) 
     }
 }
 
 
 // Tells the given Event to stop playing.
-stop_event :: proc(event: ^Event, loc := #caller_location) {
+event_finish :: proc(event: ^Event, loc := #caller_location) {
     assert(event != nil, "Nil Event pointer.", loc)
-    event.flags -= { .Playing }
-}
-
-
-// Gets the Event that is currently playing if one exists. If no Timeline is passed,
-// looks at the current Fight's.
-get_current_event :: proc(timeline: ^Timeline = nil) -> ^Event {
-    actual_timeline := timeline
-    if actual_timeline == nil {
-        actual_timeline = &game.current_fight.timeline
-    }
-
-    return actual_timeline.current_event
+    event._flags += { .Finished }
 }
 
 

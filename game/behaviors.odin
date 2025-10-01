@@ -14,10 +14,10 @@ turn_random_move :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 
 	if move_direction, not_empty := rand.choice_bit_set(free_directions); not_empty {
 		handle := new_entity_handle(&game.current_world, self^)
-		add_event(timeline, event_entity_move(handle, move_direction))
+		timeline_add(timeline, event_entity_move(handle, move_direction, MOVE_TIME, handle))
 	} else if !not_empty {
 		handle := new_entity_handle(&game.current_world, self^)
-		add_event(timeline, event_lunge(handle, move_direction, 0.1, 0.1))
+		sequence_lunge(timeline, handle, move_direction, LUNGE_TIME)
 	}
 
 	return true
@@ -39,8 +39,8 @@ turn_aggressive :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 	// Attack if Player is in adjacent.
 	player := get_entity(game.player)
 	if dir, adjacent := is_adjacent(self.position, player.position); adjacent {
-		add_event(timeline, event_lunge(self_handle, dir, 0.5, 0.15))
-		add_event(timeline, event_basic_attack(self_handle, dir, get_melee_damage(character.base.stats))) // TODO: Calculate damage better.
+		damage := get_melee_damage(character.base.stats)
+		sequence_melee(timeline, self_handle, dir, damage, LUNGE_TIME)
 		return true
 	}
 
@@ -48,10 +48,10 @@ turn_aggressive :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 	free_directions := get_free_directions(self.position)
 	if free_directions != {} {
 		move_direction := get_closest_direction_to_target(self.position, player.position, free_directions)
-		add_event(timeline, event_entity_move(self_handle, move_direction))
+		timeline_add(timeline, event_entity_move(self_handle, move_direction, MOVE_TIME, self_handle))
 		return true
 	} else { // Cannot move. Do a little stuck animation.
-		add_event(timeline, event_lunge(self_handle, rand.choice_enum(Direction), 0.1, 0.1))
+		sequence_lunge(timeline, self_handle, rand.choice_enum(Direction), LUNGE_TIME)
 		return true
 	}
 

@@ -349,7 +349,7 @@ ability_bash :: proc(self: Ability_Bash, confirmation: Ability_Confirmation, use
         new_pos := end_pos + DIRECTIONS[direction]
 
         if outside_of_world(game.current_world, new_pos) {
-            add_event(timeline, event_lunge(user_handle, direction, 0.5, OVERSTEP_TIME))
+            sequence_lunge(timeline, user_handle, direction, OVERSTEP_TIME)
             break
         }
 
@@ -358,12 +358,12 @@ ability_bash :: proc(self: Ability_Bash, confirmation: Ability_Confirmation, use
         }
 
         end_pos = new_pos
-        add_event(timeline, event_entity_move(user_handle, direction, self.move_speed))
+        timeline_add(timeline, event_entity_move(user_handle, direction, self.move_speed, user_handle))
     }
 
     if target := world_get_entity_at(&game.current_world, end_pos + DIRECTIONS[direction]); entity_handle_valid(target) {
-        add_event(timeline, event_lunge(user_handle, direction, 0.5, OVERSTEP_TIME))
-        add_event(timeline, event_deal_damage(user_handle, actual_damage, target))
+        sequence_lunge(timeline, user_handle, direction, OVERSTEP_TIME)
+        timeline_add(timeline, event_deal_damage(actual_damage, user_handle, target, user_handle))
     }
 }
 
@@ -407,31 +407,36 @@ ability_projectile :: proc(self: Ability_Projectile, confirmation: Ability_Confi
 
     projectile_handle := new_particle(user.position, self.projectile_particle)
 
+    // Trigger use sound.
     if self.use_sound != nil {
-        add_event(timeline, event_play_sound(user_handle, self.use_sound.?))
+        timeline_add(timeline, event_play_sound(self.use_sound.?))
     }
 
+    // Simulate the lifetime of the projectile.
     current_pos := user.position
     for _ in 0..<projectile_distance {
         new_pos := current_pos + DIRECTIONS[direction]
 
+        // Hit the edge of the world.
         if outside_of_world(game.current_world, new_pos) {
-            add_event(timeline, event_destroy_entity(user_handle, projectile_handle))
+            timeline_add(timeline, event_destroy_entity(projectile_handle))
             if self.hit_particle != nil {
-                add_event(timeline, event_create_particle(user_handle, self.hit_particle.?, current_pos))
+                timeline_add(timeline, event_create_particle(self.hit_particle.?, current_pos))
             }
             break
         }
 
-        add_event(timeline, event_entity_move(projectile_handle, direction, self.projectile_speed))
+        // Move to next cell.
+        timeline_add(timeline, event_entity_move(projectile_handle, direction, self.projectile_speed, projectile_handle))
 
+        // Hit an Entity.
         if target := world_get_entity_at(&game.current_world, new_pos); entity_handle_valid(target) {
-            add_event(timeline, event_deal_damage(user_handle, actual_damage, target))
+            timeline_add(timeline, event_deal_damage(actual_damage, user_handle, target))
 
             if !self.pass_through {
-                add_event(timeline, event_destroy_entity(user_handle, projectile_handle))
+                timeline_add(timeline, event_destroy_entity(user_handle, projectile_handle))
                 if self.hit_particle != nil {
-                    add_event(timeline, event_create_particle(user_handle, self.hit_particle.?, new_pos))
+                    timeline_add(timeline, event_create_particle(self.hit_particle.?, new_pos))
                 }
                 break
             }
@@ -485,7 +490,7 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
 
     // Do little shove animation, if configured.
     if self.push_animation {
-        add_event(timeline, event_lunge(user_handle, direction, 0.5, lunge_time))
+        sequence_lunge(timeline, user_handle, direction, lunge_time)
     }
 
     // Get Entity to push. If there is not one present, end the ability.
@@ -496,9 +501,9 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
     pushed_entity := get_entity(pushed_handle)
 
     // Deal damage to pushed Entity.
-    add_event(timeline, event_deal_damage(user_handle, actual_damage, pushed_handle))
+    timeline_add(timeline, event_deal_damage(actual_damage, user_handle, pushed_handle))
     if self.push_particle != nil {
-        add_event(timeline, event_create_particle(user_handle, self.push_particle.?, pushed_entity.position))
+        timeline_add(timeline, event_create_particle(self.push_particle.?, pushed_entity.position, false, user_handle))
     }
 
     push_pos := pushed_entity.position
@@ -509,32 +514,34 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
 
         // Hit world edge.
         if outside_of_world(game.current_world, new_pos) {
-            add_event(timeline, event_lunge(pushed_handle, direction, 0.5, lunge_time))
+            sequence_lunge(timeline, pushed_handle, direction, lunge_time)
 
             if self.collide_particle != nil {
-                add_event(timeline, event_create_particle(user_handle, self.collide_particle.?, push_pos))
+                timeline_add(timeline, event_create_particle(self.collide_particle.?, push_pos, false, user_handle))
             }
 
-            add_event(timeline, event_deal_damage(user_handle, self.damage_on_collide, pushed_handle))
+            timeline_add(timeline, event_deal_damage(self.damage_on_collide, user_handle, pushed_handle, user_handle))
             break
         }
 
         // Hit an Entity.
         if !world_space_empty(&game.current_world, new_pos) {
             hit_entity := world_get_entity_at(&game.current_world, new_pos)
-            add_event(timeline, event_lunge(pushed_handle, direction, 0.5, lunge_time))
+
+            sequence_lunge(timeline, pushed_handle, direction, lunge_time)
 
             if self.collide_particle != nil {
-                add_event(timeline, event_create_particle(user_handle, self.collide_particle.?, push_pos))
+                timeline_add(timeline, event_create_particle(self.collide_particle.?, push_pos, false, user_handle))
             }
 
-            add_event(timeline, event_deal_damage(user_handle, self.damage_on_collide, pushed_handle))
-            add_event(timeline, event_lunge(hit_entity, direction, 0.5, lunge_time))
+            timeline_add(timeline, event_deal_damage(self.damage_on_collide, user_handle, pushed_handle))
+
+            sequence_lunge(timeline, hit_entity, direction, lunge_time)
             break
         }
 
         push_pos = new_pos
-        add_event(timeline, event_entity_move(pushed_handle, direction, self.move_speed))
+        timeline_add(timeline, event_entity_move(pushed_handle, direction, self.move_speed))
     }
 }
 
@@ -580,7 +587,7 @@ ability_push_burst :: proc(self: Ability_Push_Burst, _: Ability_Confirmation, us
     }
 
     // Push each adjacent enemy away.
-    event := event_branch(user_handle, 4)
+    event := event_branch(4, user_handle)
     branch := &event.type.(Event_Branch)
 
     for direction in Direction {
@@ -606,7 +613,7 @@ ability_push_burst :: proc(self: Ability_Push_Burst, _: Ability_Confirmation, us
         ability_push(push, direction, user, &branch.timelines[direction])
     }
 
-    add_event(timeline, event)
+    timeline_add(timeline, event)
 }
 
 

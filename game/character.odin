@@ -29,7 +29,12 @@ Handling of a participant in combat. This includes different prefabs for enemies
 
 
 // A list of the different stats and their values.
-Stat_Block :: [Stat]i32
+Stat_Block :: [Stat]int
+
+
+MOVE_TIME  :: 0.25
+LUNGE_TIME :: 0.25
+LUNGE_DISTANCE :: 0.5
 
 
 // ---------------------------------- !END DEFINITIONS! ----------------------------------
@@ -98,7 +103,7 @@ Character_Data :: struct {
 
 // Represents an Entity that can move around and can participate in Combat.
 Character :: struct {
-	hit_points: i32,
+	hit_points: int,
 	base: ^Character_Data,
 
 	ability_slots: [2]Ability_Slot,
@@ -106,7 +111,7 @@ Character :: struct {
 	// TODO: Modifiers.
 	// TODO: Conditions.
 
-	inventory: Inventory,
+	inventory: Inventory, 
 }
 
 
@@ -419,26 +424,28 @@ draw_character :: proc(self: ^Entity) {
 
 
 // Gets the maximum amount of HP that a Stat_Block allows for.
-get_max_hp :: proc(stats: Stat_Block) -> i32 {
+get_max_hp :: proc(stats: Stat_Block) -> int {
 	return max(1, stats[.Toughness])
 }
 
 
-get_melee_damage :: proc(stats: Stat_Block) -> i32 {
+get_melee_damage :: proc(stats: Stat_Block) -> int {
 	return max(1, stats[.Strength])
 }
 
 
 // Damages the given Character, killing it if its health reaches 0.
-damage_character :: proc(attacker: Entity_Handle, target: Entity_Handle, damage: i32, loc := #caller_location) {
+damage_character :: proc(attacker: Maybe(Entity_Handle), target: Entity_Handle, damage: int, loc := #caller_location) {
 	entity    := get_entity(target, loc)
 	character := to_character(entity)
 
-	if attacker_entity, attacker_ok := get_entity(attacker); attacker_ok {
+	attacker_handle := attacker != nil ? attacker.? : Entity_Handle{}
+
+	if attacker_entity, attacker_ok := get_entity(attacker_handle); attacker_ok {
 		trigger(&attacker_entity.trigger_hub, {
 			trigger	= .On_Hit,
-			target = attacker,
-			catalyst = attacker,
+			target = attacker_handle,
+			catalyst = attacker_handle,
 			timeline = &game.current_fight.timeline,		
 		})
 	}
@@ -446,7 +453,7 @@ damage_character :: proc(attacker: Entity_Handle, target: Entity_Handle, damage:
 	trigger(&entity.trigger_hub, {
 		trigger	= .When_Hit,
 		target = target,
-		catalyst = attacker,
+		catalyst = attacker_handle,
 		timeline = &game.current_fight.timeline,
 	})
 

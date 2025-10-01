@@ -99,8 +99,8 @@ new_template_particle :: proc(location: World_Coords, particle: Particle_Name, l
 
 
 tick_particle :: proc(self: ^Entity) {
-    particle := self.type.(Particle)
-    self.offset = lerp(self.offset, particle.end_offset, self.animator._t / particle._total_lifespan)
+    // particle := self.type.(Particle)
+    // self.offset = lerp(self.offset, particle.end_offset, self.animator._t / particle._total_lifespan)
     handle := new_entity_handle(&game.current_world, self^)
     if !self.animator.play {
         free_entity(handle)
