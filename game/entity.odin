@@ -186,6 +186,31 @@ new_entity :: proc(world: ^World, loc := #caller_location) -> Entity_Handle {
 }
 
 
+// Creates a copy of the given Entity in the given World.
+clone_entity :: proc(world: ^World, source: Entity, loc := #caller_location) -> Entity_Handle {
+    assert(world != nil, "Nil World pointer.", loc)
+
+    if sa.len(world._inactive_entities) <= 0 {
+        log.error("Could not find a free Entity slot.", loc)
+        return Entity_Handle{}
+    }
+
+    new_id := sa.pop_front(&world._inactive_entities)
+    new_entity := &world.entities[new_id]
+    new_entity^ = source
+
+    new_entity.id = new_id
+    new_entity.flags += { .Valid }
+
+    handle := new_entity_handle(world, new_entity^, loc)
+
+    new_entity._active_id = sa.len(world._active_entities)
+    sa.append(&world._active_entities, new_id)
+
+    return handle
+}
+
+
 // Removes the given Entity from the world.
 free_entity :: proc(handle: Entity_Handle, loc := #caller_location) {
     freed_entity := get_entity(handle, loc)

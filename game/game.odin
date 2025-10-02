@@ -83,6 +83,9 @@ start_new_game :: proc(player_type: Character_Type) {
     game.won_games = 0
     game.player_type = player_type
 
+    deinit_world(&game.current_world)
+    deinit_fight(&game.current_fight)
+
     start_fight()
 }
 
@@ -95,6 +98,11 @@ start_fight :: proc() {
         world_size = u32(fight_data.arena_size),
     }
 
+    player_clone: Maybe(Entity)
+    if player, ok := get_entity(game.player); ok {
+        player_clone = player^
+    }
+
     load_world(world_data)
 
     deinit_fight(&game.current_fight)
@@ -103,20 +111,17 @@ start_fight :: proc() {
     if entity_handle_valid(game.player) {
         free_entity(game.player)
     }
-    game.player = new_character(&game.current_world, game.player_type)
 
-    game_change_screen(Screen_Gameplay{})
-}
+    if player_clone == nil {
+        game.player = new_character(&game.current_world, game.player_type)
+    } else {
+        game.player = clone_entity(&game.current_world, player_clone.?)
+    }
 
+    player_entity := get_entity(game.player)
+    player_entity.offset = { 0, 0 }
+    player_entity.position = { 0, 0 }
 
-// Resets an existing Game struct to start a new run.
-reset_game :: proc(player_type: Character_Type) {
-    game.won_games = 0
-
-    deinit_world(&game.current_world)
-    deinit_fight(&game.current_fight)
-
-    // game.player = new_character(&game.current_world, player_type)
     game_change_screen(Screen_Gameplay{})
 }
 

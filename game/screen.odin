@@ -154,11 +154,6 @@ on_exit_screen_win :: proc(screen: ^Screen_Win) {
 
 // Processing tick for the Win Screen state of the game.
 tick_screen_win :: proc(delta_time: f32, screen: ^Screen_Win) {
-    // if rl.IsMouseButtonPressed(.LEFT) {
-    //     if game.won_games < len(FIGHTS) {
-    //         start_fight()
-    //     }
-    // }
 }
 
 
@@ -170,9 +165,11 @@ draw_screen_win :: proc(screen: ^Screen_Win) {
 
 // UI rendering tick for the Win Screen state of the game.
 ui_screen_win :: proc(screen: ^Screen_Win) {
-    HEADING_SIZE :: 8
-    PROMPT_SIZE :: 4
     CENTER_OF_SCREEN :: Vector2i{ RENDER_WIDTH / 2, RENDER_HEIGHT / 2 }
+    HEADING_PADDING  :: 2
+    HEADING_SIZE     :: 8
+    PROMPT_SIZE      :: 4
+    REWARD_PADDING   :: 2
 
     rl.DrawRectangleV({ 0, 0 }, { RENDER_WIDTH, RENDER_HEIGHT }, { 0, 0, 0, 200 })
 
@@ -187,13 +184,20 @@ ui_screen_win :: proc(screen: ^Screen_Win) {
     {
         text: cstring = "Choose a Reward"
         width := rl.MeasureText(text, PROMPT_SIZE)
-        rl.DrawText(text, CENTER_OF_SCREEN.x - (width / 2), 2 + HEADING_SIZE + 2, PROMPT_SIZE, rl.WHITE)
+        rl.DrawText(text, CENTER_OF_SCREEN.x - (width / 2), HEADING_PADDING + HEADING_SIZE + HEADING_PADDING, PROMPT_SIZE, rl.WHITE)
     }
 
+    // Rewards
     item_pos := CENTER_OF_SCREEN
     for reward in screen.rewards {
-        icon_size := ui_item(reward, to_vector2(item_pos))
-        item_pos += to_vector2i(icon_size)
+        pressed, button_size := ui_item_button(ITEMS[reward], to_vector2(item_pos))
+        item_pos.y += i32(button_size.y + UI_PADDING.y)
+
+        if pressed {
+            player := get_entity(game.player)
+            equip_item(player, reward) // TODO: Need to preserve the player Entity between fights.
+            start_fight()
+        }
     }
 }
 

@@ -119,6 +119,16 @@ deinit_world :: proc(world: ^World, loc := #caller_location) {
 }
 
 
+// Creates a copy of the given Entity.
+extract_from_world :: proc(world: ^World, handle: Entity_Handle, loc := #caller_location) -> Entity {
+	assert(world != nil, "Nil World pointer.", loc)
+	assert(entity_handle_valid(handle), "Invalid Entity_Handle.", loc)
+
+	entity_ptr := get_entity(handle)
+	return entity_ptr^
+}
+
+
 // Gets a random point in the World.
 random_world_point :: proc(world: World) -> World_Coords {
 	return {

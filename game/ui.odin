@@ -1,5 +1,6 @@
 package game
 
+import "core:fmt"
 import "core:strings"
 import rl "vendor:raylib"
 
@@ -119,6 +120,109 @@ ui_button :: proc(text: string, dimensions: Vector2, position: Vector2, rect_col
 }
 
 
-ui_item_tooltip :: proc(item: Item, position: Vector2, icon_size: Vector2) {
-    rl.DrawRectangleV(position, icon_size, rl.GRAY)
+UI_COLOR_BACKGROUND :: rl.Color{ 75, 75, 75, 255 }
+UI_COLOR_MAIN_TEXT  :: rl.WHITE
+
+UI_PADDING :: Vector2{ 2, 2 }
+
+UI_TEXT_HEADING_SIZE :: 8
+UI_TEXT_DETAIL_SIZE  :: 2
+
+
+// Draws a button that gives the player the displayed Item when clicked.
+ui_item_button :: proc(item: Item, position: Vector2) -> (bool, Vector2) {
+    item_icon    := get_texture(item.icon)
+    rarity_color := RARITY_COLORS[item.rarity]
+
+    name_text        := fmt.ctprintf("%v", item.name)
+    description_text := fmt.ctprintf("%v", item.description)
+
+    name_width        := f32(rl.MeasureText(name_text, UI_TEXT_HEADING_SIZE))
+    description_width := f32(rl.MeasureText(description_text, UI_TEXT_DETAIL_SIZE))
+
+    rarity_rect := rl.Rectangle{
+        width = f32(item_icon.width) + (5 * UI_PADDING.x) + max(name_width, description_width),
+        height = f32(item_icon.height) + (4 * UI_PADDING.y),
+
+        x = position.x,
+        y = position.y,
+    }
+
+    background_rect := rl.Rectangle{
+        width = rarity_rect.width - (2 * UI_PADDING.x),
+        height = rarity_rect.height - (2 * UI_PADDING.y),
+
+        x = position.x + UI_PADDING.x,
+        y = position.y + UI_PADDING.y,
+    }
+
+    mouse_pos := screen_to_render_point(rl.GetMousePosition())
+    pressed := rl.IsMouseButtonReleased(.LEFT) && rl.CheckCollisionPointRec(to_vector2(mouse_pos), rarity_rect)
+
+    rl.DrawRectangleRec(rarity_rect, rarity_color)
+    rl.DrawRectangleRec(background_rect, UI_COLOR_BACKGROUND)
+
+    icon_pos := Vector2{ background_rect.x, background_rect.y } + UI_PADDING
+    rl.DrawTextureV(item_icon, icon_pos, rl.WHITE)
+
+    heading_pos := icon_pos + { f32(item_icon.width) + UI_PADDING.x, 0 }
+    rl.DrawText(name_text, i32(heading_pos.x), i32(heading_pos.y), UI_TEXT_HEADING_SIZE, UI_COLOR_MAIN_TEXT)
+
+    return pressed, {
+        rarity_rect.width,
+        rarity_rect.height,
+    }
+}
+
+
+// Draws a tooltip for the given Item, with an anchor point on position.
+ui_item_tooltip :: proc(item: Item, position: Vector2) {
+    TOOLTIP_WIDTH :: 24
+    HALF_WIDTH    :: RENDER_WIDTH / 2
+    HALF_HEIGHT   :: RENDER_HEIGHT / 2
+
+    HEADING_SIZE :: 8
+    DETAIL_SIZE  :: 2
+
+    tooltip_height := f32(UI_PADDING.y * 2)
+
+    // == Gather information for displaying the Item.
+    rarity_color := RARITY_COLORS[item.rarity]
+
+    heading_text     := fmt.ctprintf("%v", item.name)
+    // description_text := fmt.ctprintf("%v", item.description)
+    // type_text        := fmt.ctprintf("%v", item.type)
+
+    // == Determine dimensions.
+    name_background_size := Vector2{
+        TOOLTIP_WIDTH - (2 * UI_PADDING.x),
+        (2 * UI_PADDING.y) + HEADING_SIZE,
+    }
+
+    tooltip_height += name_background_size.y
+
+
+    // == Set the anchor point depending on where on the screen the target pos is.
+    anchor_point := position
+    if anchor_point.x < HALF_WIDTH {
+        anchor_point.x -= TOOLTIP_WIDTH
+    }
+
+    if anchor_point.y > HALF_HEIGHT {
+        anchor_point.y -= tooltip_height
+    }
+
+    tooltip_size := Vector2{ TOOLTIP_WIDTH, tooltip_height }
+
+    // == Draw
+
+    // -- Background
+    rl.DrawRectangleV(anchor_point, tooltip_size, rarity_color)
+
+    // -- Item Name
+    rl.DrawRectangleV(anchor_point + UI_PADDING, name_background_size, UI_COLOR_BACKGROUND)
+    name_text_pos := to_vector2i(anchor_point + (UI_PADDING * 2))
+    rl.DrawText(heading_text, name_text_pos.x, name_text_pos.y, HEADING_SIZE, UI_COLOR_MAIN_TEXT)
+
+    // -- Item Description
 }

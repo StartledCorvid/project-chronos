@@ -133,24 +133,59 @@ inventory_deinit :: proc(inventory: ^Inventory, loc := #caller_location) {
 }
 
 
+// Equips the given Item. Directs it to the correct proc to use.
+equip_item :: proc(entity: ^Entity, item_name: Item_Name, loc := #caller_location) {
+	assert(entity != nil, "Nil Entity pointer.", loc)
+
+	item := ITEMS[item_name]
+	switch item.type {
+	case .Relic: add_relic(entity, item_name, loc)
+	case .Gear: equip_gear(entity, item_name, loc)
+	}
+}
+
+activate_item_triggers :: proc(trigger_hub: ^Trigger_Hub, item: Item, loc := #caller_location) {
+	assert(trigger_hub != nil, "Nil Trigger_Hub pointer.", loc)
+	for source in item.trigger_sources {
+		register_watcher(trigger_hub, source, loc)
+	}
+}
+
+
+deactivate_item_triggers :: proc(trigger_hub: ^Trigger_Hub, item: Item, loc := #caller_location) {
+	assert(trigger_hub != nil, "Nil Trigger_Hub pointer.", loc)
+	for source in item.trigger_sources {
+		unregister_watcher(trigger_hub, source, loc)
+	}
+}
+
+
 // Adds a Relic to the given Inventory.
-add_relic :: proc(inventory: ^Inventory, item_name: Item_Name, loc := #caller_location) {
-	assert(inventory != nil, "Nil inventory pointer.", loc)
+add_relic :: proc(entity: ^Entity, item_name: Item_Name, loc := #caller_location) {
+	assert(entity != nil, "Nil Entity pointer.", loc)
 	assert(ITEMS[item_name].type == .Relic, "Trying to add a Relic that is not of type Relic.", loc)
 
-	append(&inventory.relics, item_name)
+	character := to_character(entity, loc)
+	append(&character.inventory.relics, item_name)
+
+	item := ITEMS[item_name]
+	activate_item_triggers(&entity.trigger_hub, item, loc)
 }
 
 
 // Removes a Relic from an inventory.
-remove_relic :: proc(inventory: ^Inventory, item_name: Item_Name, loc := #caller_location) {
-	assert(inventory != nil, "Nil inventory pointer.", loc)
+remove_relic :: proc(entity: ^Entity, item_name: Item_Name, loc := #caller_location) {
+	assert(entity != nil, "Nil Entity pointer.", loc)
 	assert(ITEMS[item_name].type == .Relic, "Trying to remove a Relic that is not of type Relic.", loc)
 
-	index := len(inventory.relics) - 1
+	character := to_character(entity, loc)
+
+	index := len(character.inventory.relics) - 1
 	for index > 0 {
-		if inventory.relics[index] == item_name {
-			ordered_remove(&inventory.relics, index, loc)
+		if character.inventory.relics[index] == item_name {
+			ordered_remove(&character.inventory.relics, index, loc)
+			item := ITEMS[item_name]
+			deactivate_item_triggers(&entity.trigger_hub, item, loc)
 			break
 		}
 		index -= 1
@@ -171,10 +206,7 @@ equip_gear :: proc(entity: ^Entity, item_name: Item_Name, loc := #caller_locatio
 	character.inventory.gear = item_name
 
 	item := ITEMS[item_name]
-
-	for source in item.trigger_sources {
-		register_watcher(&entity.trigger_hub, source, loc)
-	}
+	activate_item_triggers(&entity.trigger_hub, item, loc)
 }
 
 
@@ -186,9 +218,7 @@ unequip_gear :: proc(entity: ^Entity, loc := #caller_location) {
 
 	if character.inventory.gear != nil {
 		equipped_item := ITEMS[character.inventory.gear.?]
-		for source in equipped_item.trigger_sources {
-			unregister_watcher(&entity.trigger_hub, source, loc)
-		}
+		deactivate_item_triggers(&entity.trigger_hub, equipped_item, loc)
 	}
 
 	character.inventory.gear = nil
@@ -222,7 +252,7 @@ ui_item :: proc(item_name: Item_Name, screen_pos: Vector2) -> Vector2 {
 	}
 
 	if rl.CheckCollisionPointRec(to_vector2(mouse_pos), hit_rect) {
-		ui_item_tooltip(item, screen_pos, icon_size)
+		ui_item_tooltip(item, to_vector2(mouse_pos))
 	}
 
 	return icon_size
