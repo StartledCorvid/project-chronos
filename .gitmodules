@@ -1,0 +1,3 @@
+[submodule "game/vfiles"]
+	path = game/vfiles
+	url = https://github.com/StartledCorvid/vfiles
