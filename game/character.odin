@@ -108,7 +108,7 @@ Character :: struct {
 	// TODO: Modifiers.
 	// TODO: Conditions.
 
-	inventory: Inventory, 
+	inventory: Inventory,
 }
 
 
@@ -437,24 +437,28 @@ damage_character :: proc(attacker: Maybe(Entity_Handle), target: Entity_Handle, 
 	entity    := get_entity(target, loc)
 	character := to_character(entity)
 
-	attacker_handle := attacker != nil ? attacker.? : Entity_Handle{}
+	attacker_handle := attacker != nil ? attacker.? : INVALID_ENTITY_HANDLE
 
-	if attacker_entity, attacker_ok := get_entity(attacker_handle); attacker_ok {
-		trigger(&attacker_entity.trigger_hub, {
+	// Cause triggers if player.
+	if is_player(attacker_handle) {
+		trigger(&game.player_data.inventory.trigger_hub, {
 			trigger	= .On_Hit,
 			target = attacker_handle,
 			catalyst = attacker_handle,
 			timeline = &game.current_fight.timeline,		
 		})
+	} 
+
+	if is_player(target) {
+		trigger(&game.player_data.inventory.trigger_hub, {
+			trigger	= .When_Hit,
+			target = target,
+			catalyst = attacker_handle,
+			timeline = &game.current_fight.timeline,
+		})
 	}
 
-	trigger(&entity.trigger_hub, {
-		trigger	= .When_Hit,
-		target = target,
-		catalyst = attacker_handle,
-		timeline = &game.current_fight.timeline,
-	})
-
+	// Do damage.
 	character.hit_points = max(0, character.hit_points - damage)
 
 	if character.hit_points <= 0 {

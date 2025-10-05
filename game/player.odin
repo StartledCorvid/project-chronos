@@ -105,6 +105,25 @@ turn_tick_player :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 }
 
 
+// Checks if an Entity is the current player Entity.
+is_player :: proc{
+	is_player_handle,
+	is_player_entity,
+}
+
+
+// Checks if the given Entity_Handle points to the player.
+is_player_handle :: proc(entity_handle: Entity_Handle) -> bool {
+	return entity_handle_valid(entity_handle) && entity_handle.id == game.player_data.entity.id && entity_handle.generation == game.player_data.entity.generation
+}
+
+
+// Checks if the given Entity is the player.
+is_player_entity :: proc(entity: Entity) -> bool {
+	return .Valid in entity.flags && entity.id == game.player_data.entity.id && entity._generation == game.player_data.entity.generation
+}
+
+
 @(private="file")
 query_confirm_ability :: proc(ability_slot: ^Ability_Slot, entity: ^Entity) -> bool {
 	character := to_character(entity)

@@ -194,8 +194,7 @@ ui_screen_win :: proc(screen: ^Screen_Win) {
         item_pos.y += i32(button_size.y + UI_PADDING.y)
 
         if pressed {
-            player := get_entity(game.player_data.entity)
-            add_item(player, reward)
+            add_item(&game.player_data.inventory, reward)
             start_fight()
         }
     }

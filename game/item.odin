@@ -37,11 +37,17 @@ Item_Name :: enum {
 }
 
 
+Item_Instance :: struct {
+	base: Item_Name,
+	level: int,
+}
+
+
 @(rodata)
 ITEMS := [Item_Name]Item {
     .Fire_Sprite = {
     	name        = "Fire Sprite",
-    	description = "???",
+    	description = "Doing Fire damage restores {amount} HP.",
     	icon        = .Icon_Fire_Sprite,
 
     	rarity      = .Uncommon,
@@ -49,6 +55,13 @@ ITEMS := [Item_Name]Item {
 
     	// TODO: Triggers
     	// TODO: Upgrade path.
+
+    	trigger_sources = {
+    		{
+    			trigger = .On_Hit,
+    			on_trigger = trigger_heal,
+    		},
+    	},
     },
 
     .Lightning_Sprite = {},
@@ -109,13 +122,17 @@ Item :: struct {
 
 // Holds a list of items and manages caching them by type.
 Inventory :: struct {
-	items: [dynamic]Item_Name, // TODO: Enum Array, with int (count) as the value?
+	items: [Item_Name]Item_Instance, // TODO: Enum Array, with int (count) as the value?
+    trigger_hub: Trigger_Hub,
 }
 
 
 inventory_deinit :: proc(inventory: ^Inventory, loc := #caller_location) {
 	assert(inventory != nil, "Nil inventory pointer.", loc)
-	clear(&inventory.items)
+
+	for &item in inventory.items {
+		item.level = 0
+	}
 }
 
 
@@ -136,33 +153,24 @@ deactivate_item_triggers :: proc(trigger_hub: ^Trigger_Hub, item: Item, loc := #
 
 
 // Adds an Item to the Entity's Inventory.
-add_item :: proc(entity: ^Entity, item_name: Item_Name, loc := #caller_location) {
-	assert(entity != nil, "Nil Entity pointer.", loc)
+add_item :: proc(inventory: ^Inventory, item_name: Item_Name, loc := #caller_location) {
+	assert(inventory != nil, "Nil Inventory pointer.", loc)
 
-	character := to_character(entity, loc)
-	append(&character.inventory.items, item_name)
+	inventory.items[item_name].base = item_name
+	inventory.items[item_name].level += 1
 
 	item := ITEMS[item_name]
-	activate_item_triggers(&entity.trigger_hub, item, loc)
+	activate_item_triggers(&inventory.trigger_hub, item, loc)
 }
 
 
 // Removes an Item from the Entity's inventory.
-remove_item :: proc(entity: ^Entity, item_name: Item_Name, loc := #caller_location) {
-	assert(entity != nil, "Nil Entity pointer.", loc)
+remove_item :: proc(inventory: ^Inventory, item_name: Item_Name, loc := #caller_location) {
+	assert(inventory != nil, "Nil Inventory pointer.", loc)
+	inventory.items[item_name].level = 0
 
-	character := to_character(entity, loc)
-
-	index := len(character.inventory.items) - 1
-	for index > 0 {
-		if character.inventory.items[index] == item_name {
-			ordered_remove(&character.inventory.items, index, loc)
-			item := ITEMS[item_name]
-			deactivate_item_triggers(&entity.trigger_hub, item, loc)
-			break
-		}
-		index -= 1
-	}
+	item := ITEMS[item_name]
+	deactivate_item_triggers(&inventory.trigger_hub, item, loc)
 }
 
 
@@ -209,8 +217,12 @@ ui_item_list :: proc(inventory: Inventory, top_left_corner: Vector2, max_row: in
 	next_corner := top_left_corner
 	row_count   := 0
 
-	for relic_name in inventory.items {
-		icon_size := ui_item(relic_name, next_corner)
+	for instance in inventory.items {
+		if instance.level == 0 {
+			continue
+		}
+
+		icon_size := ui_item(instance.base, next_corner)
 
 		if icon_size.y > max_height {
 			max_height = icon_size.y
