@@ -11,6 +11,64 @@ Mainly handles the management of the Player's turn.
 */
 
 
+
+// Data for the player Character.
+Player_Data :: struct {
+	entity: Entity_Handle,
+	character_type: Character_Type,
+	inventory: Inventory,
+}
+
+
+// Initializes the given Player_Data object. Note that for a clean init, call
+// `reset_player_data` first.
+init_player_data :: proc(player_data: ^Player_Data, character_type: Character_Type, loc := #caller_location) {
+	assert(player_data != nil, "Nil Player_Data pointer.", loc)
+	player_data.character_type = character_type
+}
+
+
+// Resets the player data.
+reset_player_data :: proc(player_data: ^Player_Data, loc := #caller_location) {
+	assert(player_data != nil, "Nil Player_Data pointer.", loc)
+
+	player_data.entity = INVALID_ENTITY_HANDLE
+
+	inventory_deinit(&player_data.inventory, loc)
+}
+
+
+// Spawns an Entity in the game world using the Player_Data passed. If an existing
+// player Character exists, gets rid of it first.
+spawn_player :: proc(player_data: ^Player_Data, position: World_Coords = { 0, 0 }, loc := #caller_location) -> Entity_Handle {
+	assert(player_data != nil, "Nil Player_Data pointer.", loc)
+
+	existing_health := -1
+
+	// Destroy existing player Character.
+	if existing_entity, exists := get_entity(player_data.entity); exists {
+		character := get_character_from_entity(existing_entity, loc)
+		existing_health = character.hit_points
+
+		free_entity(player_data.entity)
+	}
+
+	player_data.entity = new_character(&game.current_world, player_data.character_type)
+
+	player_entity    := get_entity(player_data.entity)
+	player_character := get_character_from_entity(player_entity)
+
+	// Existing health should carry over.
+	if existing_health <= 0 {
+		player_character.hit_points = existing_health
+	}
+
+	player_entity.position = position
+
+	return player_data.entity
+}
+
+
 // +-------------------------------------------------------------------------------------+
 // |                                     !PLAYER!                                        |
 // +-------------------------------------------------------------------------------------+
@@ -171,13 +229,6 @@ ui_player :: proc(handle: Entity_Handle, loc := #caller_location) {
 
 	gear_offset: Vector2
 
-	// Draw equipped gear.
-	if character.inventory.gear != nil {
-		gear_offset = ui_item(character.inventory.gear.?, { 2, 2 })
-	} else {
-		gear_offset = { 8, 8 }
-	}
-
 	// Health bar.
 	health_bar_pos := Vector2{ gear_offset.x + 4, 2 }
 	health_bar_dim := Vector2{ 16, 8 }
@@ -190,7 +241,7 @@ ui_player :: proc(handle: Entity_Handle, loc := #caller_location) {
 	rl.DrawText(health_text, i32(health_bar_dim.x + health_bar_pos.x + 2), 2, 8, rl.RED)
 
 	// Relics
-	ui_relic_list(character.inventory, { 2, 10 }, 5)
+	ui_item_list(character.inventory, { 2, 10 }, 5)
 
 	// Ability slots.
 	if character.ability_slots[0].ability != .None {

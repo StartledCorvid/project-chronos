@@ -41,6 +41,16 @@ Texture_Name :: enum {
 
     Icon_Totem_Of_Speed,
     Icon_Adventurers_Gear,
+
+    Icon_Fire_Sprite,
+    Icon_Lightning_Sprite,
+    Icon_Might_Shield,
+    Icon_Poison_Vial,
+    Icon_Potion_Of_Healing,
+    Icon_Ruby_Amulet,
+    Icon_Serrated_Edge,
+    Icon_Skull_Ring,
+    Icon_Wizards_Orb,
 }
 
 
@@ -72,6 +82,16 @@ load_textures :: proc() -> [Texture_Name]rl.Texture {
 
         .Icon_Totem_Of_Speed   = rl.LoadTexture("res/images/icon_totem_of_speed.png"),
         .Icon_Adventurers_Gear = rl.LoadTexture("res/images/icon_adventurers_gear.png"),
+
+        .Icon_Fire_Sprite       = rl.LoadTexture("res/images/items/item_fire_sprite.png"),
+        .Icon_Lightning_Sprite  = rl.LoadTexture("res/images/items/item_lightning_sprite.png"),
+        .Icon_Might_Shield      = rl.LoadTexture("res/images/items/item_mighty_shield.png"),
+        .Icon_Poison_Vial       = rl.LoadTexture("res/images/items/item_poison_vial.png"),
+        .Icon_Potion_Of_Healing = rl.LoadTexture("res/images/items/item_potion_of_healing.png"),
+        .Icon_Ruby_Amulet       = rl.LoadTexture("res/images/items/item_ruby_amulet.png"),
+        .Icon_Serrated_Edge     = rl.LoadTexture("res/images/items/item_serrated_edge.png"),
+        .Icon_Skull_Ring        = rl.LoadTexture("res/images/items/item_skull_ring.png"),
+        .Icon_Wizards_Orb       = rl.LoadTexture("res/images/items/item_wizards_orb.png"),
     }
 }
 

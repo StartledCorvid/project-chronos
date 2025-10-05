@@ -25,62 +25,47 @@ where you would just need to add a new entry to the Item_Type enum below.
 
 // The names of each Item in the game.
 Item_Name :: enum {
-	// Relics
-	Relic_Totem_Of_Speed,
-
-	// Gear
-	Gear_Adventurers_Gear,
+    Fire_Sprite,
+    Lightning_Sprite,
+    Mighty_Shield,
+    Poison_Vial,
+    Potion_Of_Healing,
+    Ruby_Amulet,
+    Serrated_Edge,
+    Skull_Ring,
+    Wizards_Orb,
 }
 
 
 @(rodata)
 ITEMS := [Item_Name]Item {
-	// Relics
-	.Relic_Totem_Of_Speed = {
-		name = "Totem of Speed",
-		description = "Speed. I am speed.",
-		icon = .Icon_Totem_Of_Speed,
+    .Fire_Sprite = {
+    	name        = "Fire Sprite",
+    	description = "???",
+    	icon        = .Icon_Fire_Sprite,
 
-		type = .Relic,
-		rarity = .Common,
-		drop_weight = 10,
+    	rarity      = .Uncommon,
+    	drop_weight = 100,
 
-		cost = 5,
+    	// TODO: Triggers
+    	// TODO: Upgrade path.
+    },
 
-		trigger_sources = {
-			{
-				trigger = .On_Hit,
-				on_trigger = trigger_heal,
-			},
-		},
-	},	
+    .Lightning_Sprite = {},
 
-	// Gear
-	.Gear_Adventurers_Gear = {
-		name = "Adventurer's Gear",
-		description = "Gear for an adevnturer.",
-		icon = .Icon_Adventurers_Gear,
+    .Mighty_Shield = {},
 
-		type = .Gear,
-		rarity = .Common,
-		drop_weight = 10,
+    .Poison_Vial = {},
 
-		cost = 5,
+    .Potion_Of_Healing = {},
 
-		trigger_sources = {
-			{
-				trigger = .When_Hit,
-				on_trigger = trigger_heal,
-			},
-		},
-	},
-}
+    .Ruby_Amulet = {},
 
+    .Serrated_Edge = {},
 
-// The different types of items in the game.
-Item_Type :: enum {
-	Gear,
-	Relic,
+    .Skull_Ring = {},
+
+    .Wizards_Orb = {},
 }
 
 
@@ -109,40 +94,30 @@ Item :: struct {
 	description: string,
 	icon: Texture_Name,
 
-	type: Item_Type,
 	rarity: Rarity,
-	drop_weight: int, // Higher weight means more likely to drop.
+	// Higher weight means more likely to drop.
+	drop_weight: int,
+	// The drop weight of the item when the player already has it.
+	// A duplicate drop means that an upgrade opportunity will be given.
+	upgrade_weight: int, 
 
 	cost: u32,
 
-	ability: Maybe(Ability_Name),
 	trigger_sources: []Trigger_Source,
 }
 
 
 // Holds a list of items and manages caching them by type.
 Inventory :: struct {
-	gear: Maybe(Item_Name),
-	relics: [dynamic]Item_Name, // TODO: Enum Array, with int (count) as the value?
+	items: [dynamic]Item_Name, // TODO: Enum Array, with int (count) as the value?
 }
 
 
 inventory_deinit :: proc(inventory: ^Inventory, loc := #caller_location) {
 	assert(inventory != nil, "Nil inventory pointer.", loc)
-	clear(&inventory.relics)
+	clear(&inventory.items)
 }
 
-
-// Equips the given Item. Directs it to the correct proc to use.
-equip_item :: proc(entity: ^Entity, item_name: Item_Name, loc := #caller_location) {
-	assert(entity != nil, "Nil Entity pointer.", loc)
-
-	item := ITEMS[item_name]
-	switch item.type {
-	case .Relic: add_relic(entity, item_name, loc)
-	case .Gear: equip_gear(entity, item_name, loc)
-	}
-}
 
 activate_item_triggers :: proc(trigger_hub: ^Trigger_Hub, item: Item, loc := #caller_location) {
 	assert(trigger_hub != nil, "Nil Trigger_Hub pointer.", loc)
@@ -160,68 +135,34 @@ deactivate_item_triggers :: proc(trigger_hub: ^Trigger_Hub, item: Item, loc := #
 }
 
 
-// Adds a Relic to the given Inventory.
-add_relic :: proc(entity: ^Entity, item_name: Item_Name, loc := #caller_location) {
+// Adds an Item to the Entity's Inventory.
+add_item :: proc(entity: ^Entity, item_name: Item_Name, loc := #caller_location) {
 	assert(entity != nil, "Nil Entity pointer.", loc)
-	assert(ITEMS[item_name].type == .Relic, "Trying to add a Relic that is not of type Relic.", loc)
 
 	character := to_character(entity, loc)
-	append(&character.inventory.relics, item_name)
+	append(&character.inventory.items, item_name)
 
 	item := ITEMS[item_name]
 	activate_item_triggers(&entity.trigger_hub, item, loc)
 }
 
 
-// Removes a Relic from an inventory.
-remove_relic :: proc(entity: ^Entity, item_name: Item_Name, loc := #caller_location) {
+// Removes an Item from the Entity's inventory.
+remove_item :: proc(entity: ^Entity, item_name: Item_Name, loc := #caller_location) {
 	assert(entity != nil, "Nil Entity pointer.", loc)
-	assert(ITEMS[item_name].type == .Relic, "Trying to remove a Relic that is not of type Relic.", loc)
 
 	character := to_character(entity, loc)
 
-	index := len(character.inventory.relics) - 1
+	index := len(character.inventory.items) - 1
 	for index > 0 {
-		if character.inventory.relics[index] == item_name {
-			ordered_remove(&character.inventory.relics, index, loc)
+		if character.inventory.items[index] == item_name {
+			ordered_remove(&character.inventory.items, index, loc)
 			item := ITEMS[item_name]
 			deactivate_item_triggers(&entity.trigger_hub, item, loc)
 			break
 		}
 		index -= 1
 	}
-}
-
-
-// Equips a piece of gear to the given Entity. This unequips the existing gear. Will
-// panic if the Entity is not a Character with an Inventory. This overload is needed
-// for Trigger management.
-equip_gear :: proc(entity: ^Entity, item_name: Item_Name, loc := #caller_location) {
-	assert(entity != nil, "Nil Entity pointer.", loc)
-	assert(ITEMS[item_name].type == .Gear, "Trying to equip gear that is not of type Gear.", loc)
-
-	unequip_gear(entity, loc)
-
-	character := to_character(entity)
-	character.inventory.gear = item_name
-
-	item := ITEMS[item_name]
-	activate_item_triggers(&entity.trigger_hub, item, loc)
-}
-
-
-// Unequips the currently equipped peice of gear from the given Entity, if any is
-// equipped. Panics if the Entity is not a Character. This overload is needed for Trigger
-// management.
-unequip_gear :: proc(entity: ^Entity, loc := #caller_location) {
-	character := to_character(entity)
-
-	if character.inventory.gear != nil {
-		equipped_item := ITEMS[character.inventory.gear.?]
-		deactivate_item_triggers(&entity.trigger_hub, equipped_item, loc)
-	}
-
-	character.inventory.gear = nil
 }
 
 
@@ -263,12 +204,12 @@ ui_item :: proc(item_name: Item_Name, screen_pos: Vector2) -> Vector2 {
 // corner in `top_left_corner` on the screen. `max_row` is the maximum amount of
 // relics that can appear in a single row before it starts a new one under it.
 // Padding is optional, and is the amount of space between Relic icons.
-ui_relic_list :: proc(inventory: Inventory, top_left_corner: Vector2, max_row: int, padding := Vector2{ 2, 2 }) {
+ui_item_list :: proc(inventory: Inventory, top_left_corner: Vector2, max_row: int, padding := Vector2{ 2, 2 }) {
 	max_height  := f32(0)
 	next_corner := top_left_corner
 	row_count   := 0
 
-	for relic_name in inventory.relics {
+	for relic_name in inventory.items {
 		icon_size := ui_item(relic_name, next_corner)
 
 		if icon_size.y > max_height {

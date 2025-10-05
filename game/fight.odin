@@ -170,7 +170,7 @@ tick_fight_processing :: proc(fight: ^Fight, delta_time: f32) {
         }
     }
 
-    if !entity_handle_valid(game.player) {
+    if !entity_handle_valid(game.player_data.entity) {
         fight_change_phase(fight, .Player_Lose)
     } else if !fight_has_enemy(fight) {
         fight_change_phase(fight, .Player_Win)
@@ -180,7 +180,7 @@ tick_fight_processing :: proc(fight: ^Fight, delta_time: f32) {
 
 fight_has_enemy :: proc(fight: ^Fight) -> bool {
     for handle in fight.turn_order {
-        if handle.id == game.player.id do continue
+        if handle.id == game.player_data.entity.id do continue
         if entity_handle_valid(handle) {
             return true
         }
@@ -191,7 +191,7 @@ fight_has_enemy :: proc(fight: ^Fight) -> bool {
 
 
 get_next_phase :: proc(fight: ^Fight) -> Fight_Phase {
-    if !entity_handle_valid(game.player) {
+    if !entity_handle_valid(game.player_data.entity) {
         return .Player_Lose
     } else if !fight_has_enemy(fight) {
         return .Player_Win

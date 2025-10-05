@@ -3,6 +3,7 @@ package game
 import "core:math/rand"
 import "core:log"
 import rl "vendor:raylib"
+import "vfiles"
 
 /*
 # Overview
@@ -27,13 +28,13 @@ Game_State :: enum {
 // Holds the global values of the game.
 Game :: struct {
     screen: Screen,
+    fs: vfiles.Context,
 
     current_world: World,
     current_fight: Fight,
     camera: rl.Camera2D,
 
-    player_type: Character_Type,
-    player: Entity_Handle,
+    player_data: Player_Data,
     won_games: i32,
 
     character_types: [Character_Type]Character_Data,
@@ -52,6 +53,8 @@ init_game :: proc(allocator := context.allocator, loc := #caller_location) {
     }
 
     game = Game{}
+
+    vfiles.init_context(&game.fs, { "res" })
 
     game.screen = Screen_Main_Menu{}
     game.textures = load_textures()
@@ -74,6 +77,7 @@ init_game :: proc(allocator := context.allocator, loc := #caller_location) {
 // Deinitializes the Game, clearing all state and data.
 deinit_game :: proc(allocator := context.allocator, loc := #caller_location) {
     assert(game.screen != nil, "Game not initialized.", loc)
+    vfiles.deinit_context(&game.fs)
     game_change_screen(nil)
 }
 
@@ -81,7 +85,9 @@ deinit_game :: proc(allocator := context.allocator, loc := #caller_location) {
 // Starts a brand new game with the given player Character_Type.
 start_new_game :: proc(player_type: Character_Type) {
     game.won_games = 0
-    game.player_type = player_type
+
+    reset_player_data(&game.player_data)
+    init_player_data(&game.player_data, player_type)
 
     deinit_world(&game.current_world)
     deinit_fight(&game.current_fight)
@@ -99,7 +105,7 @@ start_fight :: proc() {
     }
 
     player_clone: Maybe(Entity)
-    if player, ok := get_entity(game.player); ok {
+    if player, ok := get_entity(game.player_data.entity); ok {
         player_clone = player^
     }
 
@@ -108,17 +114,17 @@ start_fight :: proc() {
     deinit_fight(&game.current_fight)
     init_fight(&game.current_fight, game.won_games)
 
-    if entity_handle_valid(game.player) {
-        free_entity(game.player)
+    if entity_handle_valid(game.player_data.entity) {
+        free_entity(game.player_data.entity)
     }
 
     if player_clone == nil {
-        game.player = new_character(&game.current_world, game.player_type)
+        game.player_data.entity = new_character(&game.current_world, game.player_data.character_type)
     } else {
-        game.player = clone_entity(&game.current_world, player_clone.?)
+        game.player_data.entity = clone_entity(&game.current_world, player_clone.?)
     }
 
-    player_entity := get_entity(game.player)
+    player_entity := get_entity(game.player_data.entity)
     player_entity.offset = { 0, 0 }
     player_entity.position = { 0, 0 }
 

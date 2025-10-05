@@ -108,8 +108,8 @@ draw_screen_gameplay :: proc(screen: ^Screen_Gameplay) {
 ui_screen_gameplay :: proc(screen: ^Screen_Gameplay) {
     ui_fight_draw_turn_timeline(game.current_fight)
 
-    if entity_handle_valid(game.player) {
-        ui_player(game.player)
+    if entity_handle_valid(game.player_data.entity) {
+        ui_player(game.player_data.entity)
     }
 }
 
@@ -194,8 +194,8 @@ ui_screen_win :: proc(screen: ^Screen_Win) {
         item_pos.y += i32(button_size.y + UI_PADDING.y)
 
         if pressed {
-            player := get_entity(game.player)
-            equip_item(player, reward) // TODO: Need to preserve the player Entity between fights.
+            player := get_entity(game.player_data.entity)
+            add_item(player, reward)
             start_fight()
         }
     }

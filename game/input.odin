@@ -5,7 +5,6 @@ import "core:fmt"
 import rl "vendor:raylib"
 import "core:encoding/json"
 import "core:log"
-import "core:os"
 import "vfiles"
 
 /*
@@ -118,12 +117,9 @@ default_input_map :: proc() {
 
 // Loads keymap data from a JSON file.
 load_input_map :: proc(file: string) {
-	res_path := vfiles.get_path(file)
-	defer delete(res_path)
-
-	data, ok := os.read_entire_file_from_filename(res_path)
-	if !ok {
-		log.errorf("Could not load Input Map file '%v'.", file)
+	data, read_err := vfiles.read_file_bytes(&game.fs, file)
+	if read_err != .None {
+		log.errorf("Could not load Input Map file '%v': %v", file, read_err)
 		return
 	}
 	defer delete(data)
@@ -143,9 +139,6 @@ load_input_map :: proc(file: string) {
 
 // Saves the given keymap to a JSON file.
 save_input_map :: proc(file: string) -> bool {
-	res_path := vfiles.get_path(file)
-	defer delete(res_path)
-
 	data, marshal_err := json.marshal(input_map, { pretty = true, use_enum_names = true } )
 	if marshal_err != nil {
 		log.errorf("Problem marshalling Input Map to file '%v'.", file)
@@ -153,9 +146,9 @@ save_input_map :: proc(file: string) -> bool {
 	}
 	defer delete(data)
 
-	ok := os.write_entire_file(res_path, data)
-	if !ok {
-		log.errorf("Problem writing Input Map to file '%v'.", file)
+	write_err := vfiles.write_file_bytes(&game.fs, file, data)
+	if write_err != nil {
+		log.errorf("Problem writing Input Map to file '%v': %v", file, write_err)
 		return false
 	}
 

@@ -30,14 +30,14 @@ turn_aggressive :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 	assert(ok, "Not a Character.")
 
 	// If no player, do mothing.
-	if !entity_handle_valid(game.player) {
+	if !entity_handle_valid(game.player_data.entity) {
 		return true
 	}
 
 	self_handle := new_entity_handle(&game.current_world, self^)
 
 	// Attack if Player is in adjacent.
-	player := get_entity(game.player)
+	player := get_entity(game.player_data.entity)
 	if dir, adjacent := is_adjacent(self.position, player.position); adjacent {
 		damage := get_melee_damage(character.base.stats)
 		sequence_melee(timeline, self_handle, dir, damage, LUNGE_TIME)
@@ -98,7 +98,7 @@ ai_only_use_if_no_melee :: proc(self: Ability_Slot, user: Entity) -> bool {
     }
 
     // Don't use if a melee is available.
-    player :=  get_entity(game.player)
+    player :=  get_entity(game.player_data.entity)
     for direction in DIRECTIONS {
         test_position := user.position + direction
         if player.position == test_position {

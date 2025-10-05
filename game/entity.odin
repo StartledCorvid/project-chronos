@@ -31,6 +31,14 @@ MAX_ENTITIES :: 120
 Entity_Handle :: distinct Handle
 
 
+// An Entity_Handle that is invalid. Meaning that it points to nothing.
+INVALID_ENTITY_HANDLE :: Entity_Handle{
+    id         = -1,
+    generation = -1,
+    world      = nil,
+}
+
+
 // ---------------------------------- !END DEFINITIONS! ----------------------------------
 
 
@@ -78,12 +86,67 @@ Entity :: struct {
 // Variations of an Entity.
 Entity_Type :: union {
     Character, // character.odin
-    Object,    // ???
     Particle,  // particle.odin
 }
 
 
+// // Manages a collection of Entities.
+// Entity_List :: struct {
+//     entities: [MAX_ENTITIES]Entity,
+//     _active_entities: sa.Small_Array(MAX_ENTITIES, int),
+//     _inactive_entities: sa.Small_Array(MAX_ENTITIES, int),
+// }
+
+
 // ------------------------------------- !END TYPES! -------------------------------------
+
+
+// +-------------------------------------------------------------------------------------+
+// |                                    !ENTITY LIST!                                    |
+// +-------------------------------------------------------------------------------------+
+
+
+// // Initializes the given Entity_List.
+// init_entity_list :: proc(entity_list: ^Entity_List, loc := #caller_location) {
+//     assert(entity_list != nil, "Nil Entity_List pointer.", loc)
+
+//     for id in 0..<MAX_ENTITIES {
+//         sa.append(&entity_list._inactive_entities, id)
+//     }
+// }
+
+
+// // Deinitializes the given Entity_List.
+// deinit_entity_list :: proc(entity_list: ^Entity_List, loc := #caller_location) {
+//     assert(entity_list != nil, "Nil Entity_List pointer.", loc)
+//     clear_entity_list(entity_list, loc = loc)
+// }
+
+
+// // Clears all of the Entities in the given Entity_List. `filter` is a list of
+// // Entity ids to not clear.
+// clear_entity_list :: proc(entity_list: ^Entity_List, filter: []int = {}, loc := #caller_location) {
+//     assert(entity_list != nil, "Nil Entity_List pointer.", loc)
+
+//     active_entities := sa.slice(&entity_list._active_entities)
+//     outer: for len(active_entities) > 0 {
+//         entity_id := active_entities[0]
+        
+//         // Check if id is in filter.
+//         for id in filter {
+//             if entity_id == id {
+//                 continue outer
+//             }
+//         }
+
+//         handle := new_entity_handle(entity_list, entity_id)
+//         assert(entity_handle_valid(handle), "Invalid Entity ID in active Entitites.", loc)
+//         free_entity(handle)
+//     }
+// }
+
+
+// ---------------------------------- !END ENTITY LIST! ----------------------------------
 
 
 // +-------------------------------------------------------------------------------------+
@@ -252,7 +315,6 @@ tick_entity :: proc(handle: Entity_Handle, delta_time: f32) {
     
     switch &type in entity.type {
     case Character: tick_character(entity, &type)
-    case Object:
     case Particle:  tick_particle(entity)
     case:
     }
@@ -279,7 +341,6 @@ draw_entity :: proc(handle: Entity_Handle) {
 
     switch type in entity.type {
     case Character: draw_character(entity)
-    case Object:
     case Particle:
     }
 }
