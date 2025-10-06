@@ -59,7 +59,14 @@ ITEMS := [Item_Name]Item {
     	trigger_sources = {
     		{
     			trigger = .On_Hit,
-    			on_trigger = trigger_heal,
+    			on_trigger = proc(self_name: Item_Name, payload: Trigger_Payload) {
+    				if !entity_handle_valid(payload.target) {
+    					return
+    				}
+
+    				instance := game.player_data.inventory.items[self_name]
+    				damage_character(nil, payload.target, instance.level)
+    			},
     		},
     	},
     },
@@ -136,10 +143,12 @@ inventory_deinit :: proc(inventory: ^Inventory, loc := #caller_location) {
 }
 
 
-activate_item_triggers :: proc(trigger_hub: ^Trigger_Hub, item: Item, loc := #caller_location) {
+activate_item_triggers :: proc(trigger_hub: ^Trigger_Hub, item_name: Item_Name, loc := #caller_location) {
 	assert(trigger_hub != nil, "Nil Trigger_Hub pointer.", loc)
+
+	item := ITEMS[item_name]
 	for source in item.trigger_sources {
-		register_watcher(trigger_hub, source, loc)
+		register_watcher(trigger_hub, source, item_name, loc)
 	}
 }
 
@@ -159,8 +168,7 @@ add_item :: proc(inventory: ^Inventory, item_name: Item_Name, loc := #caller_loc
 	inventory.items[item_name].base = item_name
 	inventory.items[item_name].level += 1
 
-	item := ITEMS[item_name]
-	activate_item_triggers(&inventory.trigger_hub, item, loc)
+	activate_item_triggers(&inventory.trigger_hub, item_name, loc)
 }
 
 
@@ -176,6 +184,9 @@ remove_item :: proc(inventory: ^Inventory, item_name: Item_Name, loc := #caller_
 
 // TODO: Move to a dedicated file?
 trigger_heal :: proc(payload: Trigger_Payload) {
+
+	
+	
 	log.infof("Triggered heal. Event: %v", payload.trigger)
 	// TODO: Actual logic. This is just for testing.
 }

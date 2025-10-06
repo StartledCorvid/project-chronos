@@ -434,6 +434,10 @@ get_melee_damage :: proc(stats: Stat_Block) -> int {
 
 // Damages the given Character, killing it if its health reaches 0.
 damage_character :: proc(attacker: Maybe(Entity_Handle), target: Entity_Handle, damage: int, loc := #caller_location) {
+	if !entity_handle_valid(target) {
+		return
+	}
+
 	entity    := get_entity(target, loc)
 	character := to_character(entity)
 
@@ -442,17 +446,17 @@ damage_character :: proc(attacker: Maybe(Entity_Handle), target: Entity_Handle, 
 	// Cause triggers if player.
 	if is_player(attacker_handle) {
 		trigger(&game.player_data.inventory.trigger_hub, {
-			trigger	= .On_Hit,
-			target = attacker_handle,
+			trigger	 = .On_Hit,
+			target   = target,
 			catalyst = attacker_handle,
 			timeline = &game.current_fight.timeline,		
 		})
-	} 
+	}
 
 	if is_player(target) {
 		trigger(&game.player_data.inventory.trigger_hub, {
-			trigger	= .When_Hit,
-			target = target,
+			trigger	 = .When_Hit,
+			target   = target,
 			catalyst = attacker_handle,
 			timeline = &game.current_fight.timeline,
 		})
@@ -462,12 +466,50 @@ damage_character :: proc(attacker: Maybe(Entity_Handle), target: Entity_Handle, 
 	character.hit_points = max(0, character.hit_points - damage)
 
 	if character.hit_points <= 0 {
+		if is_player(attacker_handle) {
+			trigger(&game.player_data.inventory.trigger_hub, {
+				trigger	 = .On_Kill,
+				target   = target,
+				catalyst = attacker_handle,
+				timeline = &game.current_fight.timeline,
+			})
+		}
+
 		kill_combatant(target)
 	}
 }
 
 
+// Heals the given Character, capped at its max health.
+heal_character :: proc(target: Entity_Handle, health: int, healer: Maybe(Entity_Handle) = nil, loc := #caller_location) {
+	assert(entity_handle_valid(target), "Invalid target.", loc)
+
+	healer_handle := healer != nil ? healer.? : INVALID_ENTITY_HANDLE
+
+	// Cause triggers if player.
+	if is_player(target) {
+		trigger(&game.player_data.inventory.trigger_hub, {
+			trigger	 = .When_Healed,
+			target   = target,
+			catalyst = healer_handle,
+			timeline = &game.current_fight.timeline,
+		})
+	}
+
+	character, ok := get_character_from_handle(target, loc)
+	assert(ok, "Could not convert target to Character.", loc)
+
+	max_hp := get_max_hp(character.base.stats)
+	character.hit_points = min(max_hp, character.hit_points + health)
+}
+
+
+// Kills the given Entity.
 kill_combatant :: proc(handle: Entity_Handle, loc := #caller_location) {
+	if !entity_handle_valid(handle) {
+		return
+	}
+
 	free_entity(handle, loc)
 }
 

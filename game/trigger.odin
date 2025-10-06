@@ -13,8 +13,41 @@ of the interface.
 */
 
 Trigger :: enum {
-    On_Hit,   // The Entity has hit something.
-    When_Hit, // The Entity has been hit by something.
+    On_Hit,      // The catalyst has hit the target.   
+    When_Hit,    // The target has been hit by the catalyst.
+    On_Kill,     // The target has been killed by the catalyst.
+    When_Healed, // The target has been healed by the catalyst.
+}
+
+Trigger_Type :: union #no_nil {
+    Trigger_On_Hit,
+    Trigger_When_Hit,
+    Trigger_On_Kill,
+    Trigger_When_Healed,
+}
+
+
+// The catalyst has hit the target.
+Trigger_On_Hit :: struct {
+
+}
+
+
+// The target has been hit by the catalyst.
+Trigger_When_Hit :: struct {
+
+}
+
+
+// The target has been killed by the catalyst.
+Trigger_On_Kill :: struct {
+
+}
+
+
+// The target has been healed by the catalyst.
+Trigger_When_Healed :: struct {
+
 }
 
 
@@ -28,8 +61,9 @@ Trigger_Hub :: struct {
 // Watches a type of Trigger_Reason on a specific Trigger_Hub. When that reason is
 // called, activates the Trigger.
 Trigger_Watcher :: struct {
+    source: Item_Name,
     trigger: Trigger,
-    on_trigger: proc(payload: Trigger_Payload),
+    on_trigger: proc(self_name: Item_Name, payload: Trigger_Payload),
 
     _id: int,
 }
@@ -37,7 +71,7 @@ Trigger_Watcher :: struct {
 
 Trigger_Source :: struct {
     trigger: Trigger,
-    on_trigger: proc(payload: Trigger_Payload),
+    on_trigger: proc(self_name: Item_Name, payload: Trigger_Payload),
 }
 
 
@@ -48,6 +82,8 @@ Trigger_Payload :: struct {
     target: Entity_Handle,
     catalyst: Entity_Handle,
     timeline: ^Timeline,
+
+    data: Trigger_Payload_Data,
 }
 
 
@@ -57,7 +93,7 @@ trigger :: proc(hub: ^Trigger_Hub, payload: Trigger_Payload, loc := #caller_loca
 
     for watcher in hub.watchers[payload.trigger] {
         assert(watcher.on_trigger != nil, "Empty interface found on Trigger_Watcher.", loc)
-        watcher.on_trigger(payload)
+        watcher.on_trigger(watcher.source, payload)
     }
 }
 
@@ -65,11 +101,12 @@ trigger :: proc(hub: ^Trigger_Hub, payload: Trigger_Payload, loc := #caller_loca
 // Registers a Trigger_Watcher on a Trigger_Hub using a Trigger_Source.
 // The Trigger_Watcher will be set up to watch for the given Trigger.
 // Returns the ID of the Trigger_Watcher.
-register_watcher :: proc(hub: ^Trigger_Hub, source: Trigger_Source, loc := #caller_location) -> int {
+register_watcher :: proc(hub: ^Trigger_Hub, source: Trigger_Source, item_source: Item_Name, loc := #caller_location) -> int {
     assert(hub != nil, "Nil Trigger_Hub pointer.", loc)
     assert(source.on_trigger != nil, "Nil on_trigger proc.", loc)
 
     new_watcher := Trigger_Watcher{
+        source = item_source,
         trigger = source.trigger,
         on_trigger = source.on_trigger,
 
