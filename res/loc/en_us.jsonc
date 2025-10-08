@@ -1,0 +1,11 @@
+{
+    "name": "English (US)",
+    "mappings": {
+        // General
+        "game.title": "Chronos",
+
+        // Main Menu
+        "main_menu.new_game": "New Game",
+        "main_menu.quit":     "Quit",
+    }
+}
