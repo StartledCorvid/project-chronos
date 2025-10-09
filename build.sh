@@ -16,7 +16,7 @@ if [ "$1" == "debug" ]; then
         mkdir $BUILD_DIR
     fi
 
-    odin build game -out:$BUILD_DIR/$APP_NAME -build-mode:exe -subsystem:console $BUILD_FLAGS -debug
+    odin build game -out:$BUILD_DIR/$APP_NAME -build-mode:exe $BUILD_FLAGS -debug
 
 elif [ "$1" == "release" ]; then
 
@@ -24,7 +24,7 @@ elif [ "$1" == "release" ]; then
         mkdir $BUILD_DIR
     fi
 
-    odin build game -out:$BUILD_DIR/$APP_NAME -build-mode:exe-subsystem:console  $BUILD_FLAGS
+    odin build game -out:$BUILD_DIR/$APP_NAME -build-mode:exe $BUILD_FLAGS
 
 else
     echo "Error: Unknown build mode '$1'. Use 'debug' or 'release'."
