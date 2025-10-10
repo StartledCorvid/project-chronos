@@ -1,6 +1,5 @@
 package game
 
-import "core:fmt"
 import "core:log"
 import "core:os"
 import "core:mem"

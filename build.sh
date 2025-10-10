@@ -16,6 +16,8 @@ if [ "$1" == "debug" ]; then
         mkdir $BUILD_DIR
     fi
 
+    $BASE_DIR/gen.sh debug
+
     odin build game -out:$BUILD_DIR/$APP_NAME -build-mode:exe $BUILD_FLAGS -debug
 
 elif [ "$1" == "release" ]; then
@@ -24,6 +26,8 @@ elif [ "$1" == "release" ]; then
         mkdir $BUILD_DIR
     fi
 
+    $BASE_DIR/gen.sh release
+
     odin build game -out:$BUILD_DIR/$APP_NAME -build-mode:exe $BUILD_FLAGS
 
 else
@@ -31,10 +35,10 @@ else
     exit -1
 fi
 
-if [ "$?" -ne 0]; then
+if [ $? -ne 0 ]; then
     echo 
     echo "Odin build failed."
-    exit -1 $?
+    exit -1
 fi
 
 echo

@@ -284,7 +284,7 @@ DROP_TABLE := generate_drop_table()
 
 
 @(private="file")
-generate_drop_table :: proc() -> Drop_Table {
+generate_drop_table :: proc "contextless" () -> Drop_Table {
 	table: Drop_Table
 
 	cumulative_weight := 0

@@ -13,7 +13,7 @@ if [ "$1" == "debug" ]; then
         exit -1
     fi
 
-    ./$BUILD_DIR/%APP_NAME
+    ./$BUILD_DIR/$APP_NAME
 
 elif [ "$1" == "release" ]; then
 
@@ -22,7 +22,7 @@ elif [ "$1" == "release" ]; then
         exit -1
     fi
 
-    ./$BUILD_DIR/%APP_NAME
+    ./$BUILD_DIR/$APP_NAME
 
 else
     echo "Error: Unknown build mode '$1'. Use 'debug' or 'release'."
