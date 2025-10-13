@@ -1,51 +1,81 @@
 #!/bin/bash
 
-. ./config.sh
+<<<<<<< Updated upstream
+basedir=$(dirname $0)
 
-BASE_DIR=$(dirname $0)
-
-if [ ! -d "$BASE_DIR/$BUILD_DIR" ]; then
-    mkdir $BASE_DIR/$BUILD_DIR
+if [ ! -d "$basedir/builds" ]; then
+    mkdir $basedir/builds
 fi
 
-BUILD_DIR=$BASE_DIR/$BUILD_DIR/$1
+outdir=$basedir/builds/$1
 
-if [ "$1" == "debug" ]; then
+if [ $1 == "debug" ]; then
 
-    if [ ! -d $BUILD_DIR ]; then
-        mkdir $BUILD_DIR
+    if [ ! -d $outdir ]; then
+        mkdir $outdir
     fi
 
-    $BASE_DIR/gen.sh debug
+    exec $basedir/gen.sh debug
+    exec odin build game -debug -out:$outdir/Chronos -build-mode:exe -show-timings -subsystem:console -strict-style -vet-unused -vet-style -vet-semicolon
 
-    odin build game -out:$BUILD_DIR/$APP_NAME -build-mode:exe $BUILD_FLAGS -debug
+elif [ $1 == "release" ]; then
 
-elif [ "$1" == "release" ]; then
-
-    if [ ! -d $BUILD_DIR ]; then
-        mkdir $BUILD_DIR
+    if [ ! -d $outdir ]; then
+        mkdir $outdir
     fi
 
-    $BASE_DIR/gen.sh release
-
-    odin build game -out:$BUILD_DIR/$APP_NAME -build-mode:exe $BUILD_FLAGS
+    exec $basedir/gen.sh release
+    exec odin build game -out:$outdir/Chronos -build-mode:exe -show-timings -subsystem:console -strict-style -vet-unused -vet-style -vet-semicolon
 
 else
     echo "Error: Unknown build mode '$1'. Use 'debug' or 'release'."
     exit -1
 fi
 
-if [ $? -ne 0 ]; then
+if [ $? != 0]; then
     echo 
     echo "Odin build failed."
+    exit -1 $?
+fi
+
+exec cp -r $basedir/res $outdir/
+=======
+BUILD_MODE=$1
+if [ "$BUILD_MODE" != "debug" ] && [ "$BUILD_MODE" != "release" ]; then
+    echo Error: Unknown run mode: "$BUILD_MODE". Use "debug" or "release".
+    exit 1
+fi
+
+. ./config.sh
+
+CURRENT_DIR=$(cd -- "$(dirname -- "$0")" &> /dev/null && pwd)
+
+BUILD_ROOT=$CURRENT_DIR/$BUILD_DIR_NAME
+mkdir -p "$BUILD_ROOT"
+
+BUILD_DIR=$BUILD_ROOT/$BUILD_MODE
+mkdir -p "$BUILD_DIR"
+
+DEBUG_FLAG=""
+if [[ "$BUILD_MODE" == "debug" ]]; then
+    DEBUG_FLAG="-debug"
+fi
+
+"$CURRENT_DIR/$GEN_SCRIPT" $BUILD_MODE
+odin build "$CURRENT_DIR/$SRC_DIR" -out:"$BUILD_DIR/$APP_NAME" -build-mode:exe $BUILD_FLAGS $DEBUG_FLAG
+
+if [ $? -ne 0 ]; then
+    echo Odin build failed.
     exit -1
 fi
 
 echo
-echo "Build successful!"
-echo "Copying resource files to '$BUILD_DIR/$RES_DIR'..."
+echo Build successful!
+echo Copying resource files to $BUILD_DIR/$RES_DIR...
 
-cp -r $BASE_DIR/$RES_DIR $BUILD_DIR/
+mkdir -p "$BUILD_DIR/$RES_DIR"
+cp -r "$CURRENT_DIR/$RES_DIR" "$BUILD_DIR"
 
 echo
-echo "Done."
+echo Done.
+>>>>>>> Stashed changes

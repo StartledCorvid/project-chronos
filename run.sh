@@ -1,30 +1,16 @@
 #!/bin/bash
 
+BUILD_MODE=$1
+if [ "$BUILD_MODE" != "debug" ] && [ "$BUILD_MODE" != "release" ]; then
+    echo Error: Unknown run mode: "$BUILD_MODE". Use "debug" or "release".
+    exit 1
+fi
+
 . ./config.sh
 
+CURRENT_DIR=$(cd -- "$(dirname -- "$0")" &> /dev/null && pwd)
+BUILD_DIR=$CURRENT_DIR/$BUILD_DIR_NAME/$BUILD_MODE
 
-BASE_DIR=$(dirname $0)
-BUILD_DIR=$BASE_DIR/$BUILD_DIR/$1
-
-if [ "$1" == "debug" ]; then
-
-    if [ ! -d $BUILD_DIR ]; then
-        echo "Error: No build found for '$1'."
-        exit -1
-    fi
-
-    ./$BUILD_DIR/$APP_NAME
-
-elif [ "$1" == "release" ]; then
-
-    if [ ! -d $BUILD_DIR ]; then
-        echo "Error: No build found for '$1'."
-        exit -1
-    fi
-
-    ./$BUILD_DIR/$APP_NAME
-
-else
-    echo "Error: Unknown build mode '$1'. Use 'debug' or 'release'."
-    exit -1
-fi
+echo Starting application from: $BUILD_DIR
+cd "$BUILD_DIR"
+"$BUILD_DIR/$APP_NAME"
