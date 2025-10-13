@@ -6,13 +6,6 @@ if [ "$BUILD_MODE" != "debug" ] && [ "$BUILD_MODE" != "release"]; then
     exit 1
 fi
 
-<<<<<<< Updated upstream
-if [ $? != 0 ]; then
-    echo 
-    echo "Odin build failed for gen."
-    exit -1 $?
-fi
-=======
 . ./config.sh
 
 CURRENT_DIR=$(cd -- "$(dirname -- "$0")" &> /dev/null && pwd)
@@ -42,4 +35,3 @@ if [ $? -ne 0 ]; then
 fi
 
 echo . . . Done generating code.
->>>>>>> Stashed changes
