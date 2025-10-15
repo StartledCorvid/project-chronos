@@ -441,37 +441,38 @@ damage_character :: proc(attacker: Maybe(Entity_Handle), target: Entity_Handle, 
 	entity    := get_entity(target, loc)
 	character := to_character(entity)
 
-	attacker_handle := attacker != nil ? attacker.? : INVALID_ENTITY_HANDLE
-
-	// Cause triggers if player.
-	if is_player(attacker_handle) {
-		trigger(&game.player_data.inventory.trigger_hub, {
-			trigger	 = .On_Hit,
-			target   = target,
-			catalyst = attacker_handle,
-			timeline = &game.current_fight.timeline,		
-		})
-	}
-
-	if is_player(target) {
-		trigger(&game.player_data.inventory.trigger_hub, {
-			trigger	 = .When_Hit,
-			target   = target,
-			catalyst = attacker_handle,
-			timeline = &game.current_fight.timeline,
-		})
+	// Don't deal damage to already dead Character. Could cause infinite loop.
+	if character.hit_points <= 0 {
+		return
 	}
 
 	// Do damage.
 	character.hit_points = max(0, character.hit_points - damage)
+	attacker_handle := attacker != nil ? attacker.? : INVALID_ENTITY_HANDLE
+
+	// Trigger On_Hit if attacker is player.
+	if is_player(attacker_handle) {
+		trigger(Trigger_On_Hit{
+			target   = target,
+			attacker = attacker_handle,
+			total_damage = damage,
+		})
+	}
+
+	// Trigger When_Hit if target is player.
+	if is_player(target) {
+		trigger(Trigger_When_Hit{
+			target   = target,
+			attacker = attacker_handle,
+			total_damage = damage,
+		})
+	}
 
 	if character.hit_points <= 0 {
 		if is_player(attacker_handle) {
-			trigger(&game.player_data.inventory.trigger_hub, {
-				trigger	 = .On_Kill,
+			trigger(Trigger_On_Kill{
 				target   = target,
-				catalyst = attacker_handle,
-				timeline = &game.current_fight.timeline,
+				attacker = attacker_handle,
 			})
 		}
 
@@ -488,11 +489,10 @@ heal_character :: proc(target: Entity_Handle, health: int, healer: Maybe(Entity_
 
 	// Cause triggers if player.
 	if is_player(target) {
-		trigger(&game.player_data.inventory.trigger_hub, {
-			trigger	 = .When_Healed,
-			target   = target,
-			catalyst = healer_handle,
-			timeline = &game.current_fight.timeline,
+		trigger(Trigger_When_Healed{
+			target = target,
+			healer = healer_handle,
+			heal_amount = health,
 		})
 	}
 

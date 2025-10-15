@@ -30,6 +30,7 @@ Game :: struct {
     screen: Screen,
     fs: vfiles.Context,
 
+    triggers: Trigger_Hub,
     current_world: World,
     current_fight: Fight,
     camera: rl.Camera2D,
@@ -79,6 +80,10 @@ deinit_game :: proc(allocator := context.allocator, loc := #caller_location) {
     assert(game.screen != nil, "Game not initialized.", loc)
     vfiles.deinit_context(&game.fs)
     game_change_screen(nil)
+
+    for &trigger_list in game.triggers {
+        clear(&trigger_list)
+    }
 }
 
 

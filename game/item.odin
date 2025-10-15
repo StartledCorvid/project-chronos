@@ -1,7 +1,7 @@
 package game
 
-import "core:math/rand"
 import "core:log"
+import "core:math/rand"
 import rl "vendor:raylib"
 
 
@@ -53,19 +53,15 @@ ITEMS := [Item_Name]Item {
     	rarity      = .Uncommon,
     	drop_weight = 100,
 
-    	// TODO: Triggers
     	// TODO: Upgrade path.
 
     	trigger_sources = {
     		{
-    			trigger = .On_Hit,
-    			on_trigger = proc(self_name: Item_Name, payload: Trigger_Payload) {
-    				if !entity_handle_valid(payload.target) {
-    					return
-    				}
-
-    				instance := game.player_data.inventory.items[self_name]
-    				damage_character(nil, payload.target, instance.level)
+    			type = .On_Hit,
+    			on_trigger = proc(self: Trigger_Listener, payload: Trigger_Payload) {
+    				data := payload.(Trigger_On_Hit)
+    				damage_character(data.attacker, data.target, self.source.level)
+    				log.debug("Damaged with Fire Sprite active!")
     			},
     		},
     	},
@@ -138,25 +134,39 @@ inventory_deinit :: proc(inventory: ^Inventory, loc := #caller_location) {
 	assert(inventory != nil, "Nil inventory pointer.", loc)
 
 	for &item in inventory.items {
-		item.level = 0
+		if item.level > 0 {
+			remove_item(inventory, item.base)
+		}
 	}
 }
 
 
-activate_item_triggers :: proc(trigger_hub: ^Trigger_Hub, item_name: Item_Name, loc := #caller_location) {
-	assert(trigger_hub != nil, "Nil Trigger_Hub pointer.", loc)
+activate_item_triggers :: proc(item_instance: ^Item_Instance, loc := #caller_location) {
+	assert(item_instance != nil, "Nil Item_Instance pointer.", loc)
 
-	item := ITEMS[item_name]
+	item := ITEMS[item_instance.base]
 	for source in item.trigger_sources {
-		register_watcher(trigger_hub, source, item_name, loc)
+		listener := Trigger_Listener{
+			on_trigger = source.on_trigger,
+			source = item_instance,
+			type = source.type,
+		}
+		register_trigger(listener, loc)
 	}
 }
 
 
-deactivate_item_triggers :: proc(trigger_hub: ^Trigger_Hub, item: Item, loc := #caller_location) {
-	assert(trigger_hub != nil, "Nil Trigger_Hub pointer.", loc)
+deactivate_item_triggers :: proc(item_instance: ^Item_Instance, loc := #caller_location) {
+	assert(item_instance != nil, "Nil Item_Instance pointer.", loc)
+
+	item := ITEMS[item_instance.base]
 	for source in item.trigger_sources {
-		unregister_watcher(trigger_hub, source, loc)
+		listener := Trigger_Listener{
+			on_trigger = source.on_trigger,
+			source = item_instance,
+			type = source.type,
+		}
+		unregister_trigger(listener, loc)
 	}
 }
 
@@ -166,9 +176,12 @@ add_item :: proc(inventory: ^Inventory, item_name: Item_Name, loc := #caller_loc
 	assert(inventory != nil, "Nil Inventory pointer.", loc)
 
 	inventory.items[item_name].base = item_name
-	inventory.items[item_name].level += 1
 
-	activate_item_triggers(&inventory.trigger_hub, item_name, loc)
+	if inventory.items[item_name].level <= 0 {
+		activate_item_triggers(&inventory.items[item_name], loc)
+	}
+
+	inventory.items[item_name].level += 1
 }
 
 
@@ -177,18 +190,7 @@ remove_item :: proc(inventory: ^Inventory, item_name: Item_Name, loc := #caller_
 	assert(inventory != nil, "Nil Inventory pointer.", loc)
 	inventory.items[item_name].level = 0
 
-	item := ITEMS[item_name]
-	deactivate_item_triggers(&inventory.trigger_hub, item, loc)
-}
-
-
-// TODO: Move to a dedicated file?
-trigger_heal :: proc(payload: Trigger_Payload) {
-
-	
-	
-	log.infof("Triggered heal. Event: %v", payload.trigger)
-	// TODO: Actual logic. This is just for testing.
+	deactivate_item_triggers(&inventory.items[item_name], loc)
 }
 
 
