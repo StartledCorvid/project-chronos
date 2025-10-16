@@ -26,6 +26,7 @@ Damage_Type :: enum {
 	Piercing,
 	Slicing,
 	Fire,
+	Lightning,
 }
 
 
@@ -74,13 +75,63 @@ ITEMS := [Item_Name]Item {
 
     				heal_amount := BASE_HEAL * self.source.level
     				heal_character(data.attacker, heal_amount)
-    				log.debugf("Triggered Fire Sprite and healed %v", heal_amount)
     			},
     		},
     	},
     },
 
-    .Lightning_Sprite = {},
+    .Lightning_Sprite = {
+    	name        = "Lightning Sprite",
+    	description = "Chance to spread half damage to nearby enemies.",
+    	icon        = .Icon_Lightning_Sprite,
+
+    	rarity      = .Rare,
+    	drop_weight = 10000,
+
+    	// TODO: Upgrade path.
+
+    	trigger_sources = {
+    		{
+    			type = .On_Hit,
+    			on_trigger = proc(self: Trigger_Listener, payload: Trigger_Payload) {
+    				BASE_CHANCE :: 1//0.1
+    				BASE_DAMAGE_AMOUNT :: 0.5
+    				data := payload.(Trigger_On_Hit)
+
+    				chance := BASE_CHANCE + (f32(self.source.level) * 0.05)
+    				damage := int(f32(data.total_damage) * (BASE_DAMAGE_AMOUNT))
+    				if damage <= 0 {
+    					log.debug("Skipped")
+    					return
+    				}
+
+    				branch_event := event_branch(len(DIRECTIONS), data.attacker)
+    				branch_data := &branch_event.type.(Event_Branch)
+
+    				hit_entity := get_entity(data.target)
+
+    				for direction, index in DIRECTIONS {
+	    				if rand.float32() > chance {
+	    					continue
+	    				}
+
+    					position := hit_entity.position + direction
+    					split_handle := world_get_entity_at(&game.current_world, position)
+    					if !entity_handle_valid(split_handle) || handles_equal(split_handle, data.attacker) {
+    						continue
+    					}
+
+    					damage_event := event_deal_damage(damage, .Lightning, data.attacker, split_handle, data.attacker)
+    					timeline_add(&branch_data.timelines[index], damage_event)
+    					timeline_add(&branch_data.timelines[index], event_create_particle(.Puff, position))
+    					log.debug("Spread damage.")
+    				}
+
+    				timeline_add_next(&game.current_fight.timeline, branch_event)
+    			},
+    		},
+    	},
+    },
 
     .Mighty_Shield = {},
 

@@ -160,6 +160,14 @@ new_entity_handle_from_id :: proc(world: ^World, id: int, loc := #caller_locatio
 }
 
 
+// Returns true if both handles point to the same Entity.
+handles_equal :: proc(a, b: Entity_Handle) -> bool {
+    return a.id == b.id &&
+           a.world == b.world &&
+           a.generation == b.generation
+}
+
+
 // ------------------------------------- !END HANDLE! ------------------------------------
 
 
