@@ -190,6 +190,7 @@ event_wait :: proc(wait_time: f32, owner: Maybe(Entity_Handle) = nil) -> Event {
 // An Event that deals damage to a target.
 Event_Deal_Damage :: struct {
     damage: int,
+    damage_type: Damage_Type,
     attacker: Maybe(Entity_Handle),
     target: Entity_Handle,
 }
@@ -198,19 +199,20 @@ Event_Deal_Damage :: struct {
 // Creates an Event_Deal_Damage instance. `damage` is the amount of damage to deal.
 // `attacker` is an optional Entity_Handle that points to the Entity that is dealing the
 // damage. `target` is the Entity to deal the damage to.
-event_deal_damage :: proc(damage: int, attacker: Maybe(Entity_Handle), target: Entity_Handle, owner: Maybe(Entity_Handle) = nil) -> Event {
+event_deal_damage :: proc(damage: int, damage_type: Damage_Type, attacker: Maybe(Entity_Handle), target: Entity_Handle, owner: Maybe(Entity_Handle) = nil) -> Event {
     return {
         owner = owner,
         type = Event_Deal_Damage{
             damage   = damage,
             attacker = attacker,
             target   = target,
+            damage_type = damage_type,
         },
 
         on_tick = proc(_: ^Timeline, e: ^Event, _: f32) {
             data := e.type.(Event_Deal_Damage)
             if entity_handle_valid(data.target) {
-                damage_character(data.attacker, data.target, data.damage)
+                damage_character(data.attacker, data.target, data.damage, data.damage_type)
             }
             event_finish(e)
         }, // <-- on_tick

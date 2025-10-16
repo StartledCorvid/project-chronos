@@ -88,6 +88,7 @@ Character_Data :: struct {
 	icon: Texture_Name,
 
 	stats: Stat_Block,
+	base_damage_type: Damage_Type,
 
 	animator: Animator,
 
@@ -141,6 +142,7 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 				.Agility   = 8,
 				.Toughness = 12,
 			},
+			base_damage_type = .Slicing,
 			animator = basic_character_animator({
 				atlas = new_texture_atlas(.Fighter, { 1, 1 }),
 				starting_frame = 0,
@@ -166,6 +168,7 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 				.Agility   = 5,
 				.Toughness = 4,
 			},
+			base_damage_type = .Fire,
 			animator = basic_character_animator({
 				atlas = new_texture_atlas(.Wizard, { 1, 1 }),
 				starting_frame = 0,
@@ -190,6 +193,7 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 				.Agility   = 6,
 				.Toughness = 1,
 			},
+			base_damage_type = .Impact,
 			animator = basic_character_animator({
 				atlas = new_texture_atlas(.Goblin, { 1, 1 }),
 				starting_frame = 0,
@@ -211,6 +215,7 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 				.Agility   = 8,
 				.Toughness = 2,
 			},
+			base_damage_type = .Piercing,
 			animator = basic_character_animator({
 				atlas = new_texture_atlas(.Spider, { 1, 1 }),
 				starting_frame = 0,
@@ -232,6 +237,7 @@ load_character_types :: proc() -> [Character_Type]Character_Data {
 				.Agility   = 4,
 				.Toughness = 8,
 			},
+			base_damage_type = .Impact,
 			animator = basic_character_animator({
 				atlas = new_texture_atlas(.Minotaur, { 1, 1 }),
 				starting_frame = 0,
@@ -433,7 +439,7 @@ get_melee_damage :: proc(stats: Stat_Block) -> int {
 
 
 // Damages the given Character, killing it if its health reaches 0.
-damage_character :: proc(attacker: Maybe(Entity_Handle), target: Entity_Handle, damage: int, loc := #caller_location) {
+damage_character :: proc(attacker: Maybe(Entity_Handle), target: Entity_Handle, damage: int, damage_type: Damage_Type, loc := #caller_location) {
 	if !entity_handle_valid(target) {
 		return
 	}
@@ -456,6 +462,7 @@ damage_character :: proc(attacker: Maybe(Entity_Handle), target: Entity_Handle, 
 			target   = target,
 			attacker = attacker_handle,
 			total_damage = damage,
+			damage_type = damage_type,
 		})
 	}
 
@@ -465,6 +472,7 @@ damage_character :: proc(attacker: Maybe(Entity_Handle), target: Entity_Handle, 
 			target   = target,
 			attacker = attacker_handle,
 			total_damage = damage,
+			damage_type = damage_type,
 		})
 	}
 

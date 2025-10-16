@@ -94,7 +94,7 @@ turn_tick_player :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 	// Attacks.
 	if direction, pressed := query_player_attack(); pressed {
 		damage := get_melee_damage(character.base.stats)
-		sequence_melee(timeline, handle, direction, damage, LUNGE_TIME)
+		sequence_melee(timeline, handle, direction, damage, character.base.base_damage_type, LUNGE_TIME)
 		return true
 	}
 

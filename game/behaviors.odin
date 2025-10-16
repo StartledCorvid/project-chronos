@@ -40,7 +40,7 @@ turn_aggressive :: proc(self: ^Entity, timeline: ^Timeline) -> bool {
 	player := get_entity(game.player_data.entity)
 	if dir, adjacent := is_adjacent(self.position, player.position); adjacent {
 		damage := get_melee_damage(character.base.stats)
-		sequence_melee(timeline, self_handle, dir, damage, LUNGE_TIME)
+		sequence_melee(timeline, self_handle, dir, damage, character.base.base_damage_type, LUNGE_TIME)
 		return true
 	}
 

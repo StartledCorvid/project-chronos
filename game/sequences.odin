@@ -28,7 +28,7 @@ sequence_lunge :: proc(timeline: ^Timeline, entity_handle: Entity_Handle, direct
 // `direction` is the Direction to do the melee attack in.
 // `damage` is the amount of damage that the attack should do.
 // `total_time` is the total amount of time that the entire animation should take.
-sequence_melee :: proc(timeline: ^Timeline, entity_handle: Entity_Handle, direction: Direction, damage: int, total_time: f32, lunge_distance: f32 = LUNGE_DISTANCE, loc := #caller_location) {
+sequence_melee :: proc(timeline: ^Timeline, entity_handle: Entity_Handle, direction: Direction, damage: int, damage_type: Damage_Type, total_time: f32, lunge_distance: f32 = LUNGE_DISTANCE, loc := #caller_location) {
     assert(timeline != nil, "Nil Timeline pointer.", loc)
 
     half_time := total_time / 2
@@ -42,7 +42,7 @@ sequence_melee :: proc(timeline: ^Timeline, entity_handle: Entity_Handle, direct
 
     attack_pos := entity.position + DIRECTIONS[direction]
     if target_handle := world_get_entity_at(&game.current_world, attack_pos); entity_handle_valid(target_handle) {
-        timeline_add(timeline, event_deal_damage(damage, entity_handle, target_handle, entity_handle))
+        timeline_add(timeline, event_deal_damage(damage, damage_type, entity_handle, target_handle, entity_handle))
     }
 
     // Lunge back.

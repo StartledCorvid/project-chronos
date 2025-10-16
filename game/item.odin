@@ -20,7 +20,13 @@ where you would just need to add a new entry to the Item_Type enum below.
 */
 
 
-
+Damage_Type :: enum {
+	None,
+	Impact,
+	Piercing,
+	Slicing,
+	Fire,
+}
 
 
 // The names of each Item in the game.
@@ -47,7 +53,7 @@ Item_Instance :: struct {
 ITEMS := [Item_Name]Item {
     .Fire_Sprite = {
     	name        = "Fire Sprite",
-    	description = "Doing Fire damage restores {amount} HP.",
+    	description = "Doing Fire damage restores (2 * LVL) HP.",
     	icon        = .Icon_Fire_Sprite,
 
     	rarity      = .Uncommon,
@@ -59,9 +65,16 @@ ITEMS := [Item_Name]Item {
     		{
     			type = .On_Hit,
     			on_trigger = proc(self: Trigger_Listener, payload: Trigger_Payload) {
+    				BASE_HEAL :: 1
     				data := payload.(Trigger_On_Hit)
-    				damage_character(data.attacker, data.target, self.source.level)
-    				log.debug("Damaged with Fire Sprite active!")
+
+    				if data.damage_type != .Fire {
+    					return
+    				}
+
+    				heal_amount := BASE_HEAL * self.source.level
+    				heal_character(data.attacker, heal_amount)
+    				log.debugf("Triggered Fire Sprite and healed %v", heal_amount)
     			},
     		},
     	},

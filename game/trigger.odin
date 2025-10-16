@@ -49,6 +49,7 @@ Trigger_On_Hit :: struct {
     target: Entity_Handle,
     attacker: Entity_Handle,
     total_damage: int,
+    damage_type: Damage_Type,
 }
 
 
@@ -57,6 +58,7 @@ Trigger_When_Hit :: struct {
     target: Entity_Handle,
     attacker: Entity_Handle,
     total_damage: int,
+    damage_type: Damage_Type,
 }
 
 

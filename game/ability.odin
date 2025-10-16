@@ -45,6 +45,7 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
             confirmation_type = Direction,
             type = Ability_Bash{
                 damage = 1,
+                damage_type = .Impact,
                 damage_modifier = {
                     stat = .Strength,
                     multiplier = 0.5,
@@ -69,9 +70,11 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
             type = Ability_Push_Burst{
                 push_distance = 2,
                 damage_on_collide = 1,
+                collide_damage_type = .Impact,
                 collide_particle = .Puff,
 
                 damage = 0,
+                damage_type = .Impact,
 
                 move_speed = 0.2,
             },
@@ -89,6 +92,7 @@ load_abilities :: proc() -> [Ability_Name]Ability_Info {
             type = Ability_Projectile{
                 use_sound = .Hit_0,
                 damage = 1,
+                damage_type = .Fire,
                 damage_modifier = {
                     stat = .Magic,
                     multiplier = 0.5,
@@ -319,6 +323,7 @@ draw_preview_push :: proc(user: Entity, distance: int, collide_texture := Textur
 // doing damage to enemies.
 Ability_Bash :: struct {
     damage: int,        // The damage done when it hits an Entity.
+    damage_type: Damage_Type,
     damage_modifier: Modifier,
 
     distance: int,      // -1 is as far as possible.
@@ -363,7 +368,7 @@ ability_bash :: proc(self: Ability_Bash, confirmation: Ability_Confirmation, use
 
     if target := world_get_entity_at(&game.current_world, end_pos + DIRECTIONS[direction]); entity_handle_valid(target) {
         sequence_lunge(timeline, user_handle, direction, OVERSTEP_TIME)
-        timeline_add(timeline, event_deal_damage(actual_damage, user_handle, target, user_handle))
+        timeline_add(timeline, event_deal_damage(actual_damage, self.damage_type, user_handle, target, user_handle))
     }
 }
 
@@ -381,6 +386,7 @@ Ability_Projectile :: struct {
     use_sound: Maybe(Sound_Name),
     
     damage: int,
+    damage_type: Damage_Type,
     damage_modifier: Modifier,
 
     range: int,
@@ -431,7 +437,7 @@ ability_projectile :: proc(self: Ability_Projectile, confirmation: Ability_Confi
 
         // Hit an Entity.
         if target := world_get_entity_at(&game.current_world, new_pos); entity_handle_valid(target) {
-            timeline_add(timeline, event_deal_damage(actual_damage, user_handle, target))
+            timeline_add(timeline, event_deal_damage(actual_damage, self.damage_type, user_handle, target))
 
             if !self.pass_through {
                 timeline_add(timeline, event_destroy_entity(user_handle, projectile_handle))
@@ -460,9 +466,11 @@ ability_projectile :: proc(self: Ability_Projectile, confirmation: Ability_Confi
 Ability_Push :: struct {
     push_distance: int,
     damage_on_collide: int,
+    collide_damage_type: Damage_Type,
     collide_particle: Maybe(Particle_Name),
 
     damage: int,
+    damage_type: Damage_Type,
     damage_modifier: Modifier,
 
     direction: Direction,
@@ -501,7 +509,7 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
     pushed_entity := get_entity(pushed_handle)
 
     // Deal damage to pushed Entity.
-    timeline_add(timeline, event_deal_damage(actual_damage, user_handle, pushed_handle))
+    timeline_add(timeline, event_deal_damage(actual_damage, self.damage_type, user_handle, pushed_handle))
     if self.push_particle != nil {
         timeline_add(timeline, event_create_particle(self.push_particle.?, pushed_entity.position, false, user_handle))
     }
@@ -520,7 +528,7 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
                 timeline_add(timeline, event_create_particle(self.collide_particle.?, push_pos, false, user_handle))
             }
 
-            timeline_add(timeline, event_deal_damage(self.damage_on_collide, user_handle, pushed_handle, user_handle))
+            timeline_add(timeline, event_deal_damage(self.damage_on_collide, self.collide_damage_type, user_handle, pushed_handle, user_handle))
             break
         }
 
@@ -534,7 +542,7 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
                 timeline_add(timeline, event_create_particle(self.collide_particle.?, push_pos, false, user_handle))
             }
 
-            timeline_add(timeline, event_deal_damage(self.damage_on_collide, user_handle, pushed_handle))
+            timeline_add(timeline, event_deal_damage(self.damage_on_collide, self.collide_damage_type, user_handle, pushed_handle))
 
             sequence_lunge(timeline, hit_entity, direction, lunge_time)
             break
@@ -558,9 +566,11 @@ ability_push :: proc(self: Ability_Push, confirmation: Ability_Confirmation, use
 Ability_Push_Burst :: struct {
     push_distance: int,
     damage_on_collide: int,
+    collide_damage_type: Damage_Type,
     collide_particle: Maybe(Particle_Name),
 
     damage: int,
+    damage_type: Damage_Type,
     damage_modifier: Modifier,
 
     move_speed: f32,
@@ -598,9 +608,11 @@ ability_push_burst :: proc(self: Ability_Push_Burst, _: Ability_Confirmation, us
         push := Ability_Push{
             push_distance = self.push_distance,
             damage_on_collide = self.damage_on_collide,
+            collide_damage_type = self.collide_damage_type,
             collide_particle = self.collide_particle,
 
             damage = self.damage,
+            damage_type = self.damage_type,
             damage_modifier = self.damage_modifier,
 
             direction = direction,
